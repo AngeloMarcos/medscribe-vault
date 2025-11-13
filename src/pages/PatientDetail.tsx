@@ -1,15 +1,22 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import AddProcedureDialog from "@/components/AddProcedureDialog";
+import AddExamRequestDialog from "@/components/AddExamRequestDialog";
+import AddReportDialog from "@/components/AddReportDialog";
 
 const PatientDetail = () => {
   const { id } = useParams();
+  const [isProcedureDialogOpen, setIsProcedureDialogOpen] = useState(false);
+  const [isExamRequestDialogOpen, setIsExamRequestDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
   const { data: patient } = useQuery({
     queryKey: ["patient", id],
@@ -50,7 +57,7 @@ const PatientDetail = () => {
     },
   });
 
-  const { data: evolutions } = useQuery({
+  const { data: evolutions, refetch: refetchEvolutions } = useQuery({
     queryKey: ["patient-evolutions", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -58,6 +65,45 @@ const PatientDetail = () => {
         .select("*")
         .eq("patient_id", id)
         .order("date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: procedures, refetch: refetchProcedures } = useQuery({
+    queryKey: ["patient-procedures", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("procedures")
+        .select("*")
+        .eq("patient_id", id)
+        .order("date_time", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: examRequests, refetch: refetchExamRequests } = useQuery({
+    queryKey: ["patient-exam-requests", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("exam_requests")
+        .select("*")
+        .eq("patient_id", id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: reports, refetch: refetchReports } = useQuery({
+    queryKey: ["patient-reports", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reports")
+        .select("*")
+        .eq("patient_id", id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -133,10 +179,13 @@ const PatientDetail = () => {
       </Card>
 
       <Tabs defaultValue="appointments" className="space-y-4">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="appointments">Consultas</TabsTrigger>
           <TabsTrigger value="vitals">Sinais Vitais</TabsTrigger>
           <TabsTrigger value="evolutions">Evoluções</TabsTrigger>
+          <TabsTrigger value="procedures">Procedimentos</TabsTrigger>
+          <TabsTrigger value="exams">Exames</TabsTrigger>
+          <TabsTrigger value="reports">Relatórios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="appointments" className="space-y-4">
@@ -281,7 +330,158 @@ const PatientDetail = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="procedures" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Procedimentos</CardTitle>
+              <Button onClick={() => setIsProcedureDialogOpen(true)} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Procedimento
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {procedures && procedures.length > 0 ? (
+                  procedures.map((procedure) => (
+                    <div
+                      key={procedure.id}
+                      className="rounded-lg border border-border p-4 space-y-2"
+                    >
+                      <div className="flex justify-between">
+                        <p className="font-medium">{procedure.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(procedure.date_time).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
+                      {procedure.professional && (
+                        <p className="text-sm text-muted-foreground">
+                          Profissional: {procedure.professional}
+                        </p>
+                      )}
+                      {procedure.notes && (
+                        <div className="mt-2 pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground">Observações:</p>
+                          <p className="text-sm">{procedure.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    Nenhum procedimento registrado
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="exams" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Solicitações de Exames</CardTitle>
+              <Button onClick={() => setIsExamRequestDialogOpen(true)} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nova Solicitação
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {examRequests && examRequests.length > 0 ? (
+                  examRequests.map((examRequest) => (
+                    <div
+                      key={examRequest.id}
+                      className="rounded-lg border border-border p-4 space-y-2"
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(examRequest.created_at).toLocaleString("pt-BR")}
+                      </p>
+                      <div>
+                        <p className="text-xs text-muted-foreground font-semibold">Exames:</p>
+                        <p className="text-sm whitespace-pre-wrap">{examRequest.exams_list}</p>
+                      </div>
+                      {examRequest.justification && (
+                        <div className="mt-2 pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground font-semibold">
+                            Justificativa:
+                          </p>
+                          <p className="text-sm">{examRequest.justification}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    Nenhuma solicitação de exames
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Relatórios e Documentos</CardTitle>
+              <Button onClick={() => setIsReportDialogOpen(true)} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Relatório
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {reports && reports.length > 0 ? (
+                  reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="rounded-lg border border-border p-4 space-y-2"
+                    >
+                      <div className="flex justify-between items-start">
+                        <Badge variant="secondary">
+                          {report.type === "atestado"
+                            ? "Atestado"
+                            : report.type === "relatorio"
+                            ? "Relatório"
+                            : "Prescrição"}
+                        </Badge>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(report.created_at).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{report.text}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    Nenhum relatório gerado
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      <AddProcedureDialog
+        open={isProcedureDialogOpen}
+        onOpenChange={setIsProcedureDialogOpen}
+        onSuccess={refetchProcedures}
+        patientId={id!}
+      />
+      <AddExamRequestDialog
+        open={isExamRequestDialogOpen}
+        onOpenChange={setIsExamRequestDialogOpen}
+        onSuccess={refetchExamRequests}
+        patientId={id!}
+      />
+      <AddReportDialog
+        open={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
+        onSuccess={refetchReports}
+        patientId={id!}
+      />
     </div>
   );
 };
