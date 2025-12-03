@@ -87,6 +87,352 @@ export type Database = {
           },
         ]
       }
+      atendimentos: {
+        Row: {
+          anamnese: string | null
+          assinado: boolean | null
+          atestado: string | null
+          atestado_dias: number | null
+          cid_principal: string | null
+          cids_secundarios: string[] | null
+          consulta_id: string
+          created_at: string | null
+          data_assinatura: string | null
+          encaminhamentos: string | null
+          evolucao: string | null
+          id: string
+          observacoes: string | null
+          paciente_id: string
+          prescricao: string | null
+          procedimentos_realizados: Json | null
+          profissional_id: string | null
+          relatorio: string | null
+          retorno_previsto: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          anamnese?: string | null
+          assinado?: boolean | null
+          atestado?: string | null
+          atestado_dias?: number | null
+          cid_principal?: string | null
+          cids_secundarios?: string[] | null
+          consulta_id: string
+          created_at?: string | null
+          data_assinatura?: string | null
+          encaminhamentos?: string | null
+          evolucao?: string | null
+          id?: string
+          observacoes?: string | null
+          paciente_id: string
+          prescricao?: string | null
+          procedimentos_realizados?: Json | null
+          profissional_id?: string | null
+          relatorio?: string | null
+          retorno_previsto?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          anamnese?: string | null
+          assinado?: boolean | null
+          atestado?: string | null
+          atestado_dias?: number | null
+          cid_principal?: string | null
+          cids_secundarios?: string[] | null
+          consulta_id?: string
+          created_at?: string | null
+          data_assinatura?: string | null
+          encaminhamentos?: string | null
+          evolucao?: string | null
+          id?: string
+          observacoes?: string | null
+          paciente_id?: string
+          prescricao?: string | null
+          procedimentos_realizados?: Json | null
+          profissional_id?: string | null
+          relatorio?: string | null
+          retorno_previsto?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atendimentos_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atendimentos_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atendimentos_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cids: {
+        Row: {
+          ativo: boolean | null
+          categoria: string | null
+          codigo: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      consultas: {
+        Row: {
+          created_at: string | null
+          data_consulta: string
+          equipe_id: string | null
+          especialidade_id: string | null
+          faltou_paciente: boolean | null
+          faltou_profissional: boolean | null
+          grade_id: string | null
+          hora_chegada: string | null
+          hora_fim: string | null
+          hora_fim_atendimento: string | null
+          hora_inicio: string
+          hora_inicio_atendimento: string | null
+          id: string
+          motivo_consulta: string | null
+          numero_consulta: string
+          observacoes: string | null
+          paciente_id: string
+          profissional_id: string | null
+          sala_id: string | null
+          status: string | null
+          tipo_consulta: string | null
+          updated_at: string | null
+          zona_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_consulta: string
+          equipe_id?: string | null
+          especialidade_id?: string | null
+          faltou_paciente?: boolean | null
+          faltou_profissional?: boolean | null
+          grade_id?: string | null
+          hora_chegada?: string | null
+          hora_fim?: string | null
+          hora_fim_atendimento?: string | null
+          hora_inicio: string
+          hora_inicio_atendimento?: string | null
+          id?: string
+          motivo_consulta?: string | null
+          numero_consulta: string
+          observacoes?: string | null
+          paciente_id: string
+          profissional_id?: string | null
+          sala_id?: string | null
+          status?: string | null
+          tipo_consulta?: string | null
+          updated_at?: string | null
+          zona_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_consulta?: string
+          equipe_id?: string | null
+          especialidade_id?: string | null
+          faltou_paciente?: boolean | null
+          faltou_profissional?: boolean | null
+          grade_id?: string | null
+          hora_chegada?: string | null
+          hora_fim?: string | null
+          hora_fim_atendimento?: string | null
+          hora_inicio?: string
+          hora_inicio_atendimento?: string | null
+          id?: string
+          motivo_consulta?: string | null
+          numero_consulta?: string
+          observacoes?: string | null
+          paciente_id?: string
+          profissional_id?: string | null
+          sala_id?: string | null
+          status?: string | null
+          tipo_consulta?: string | null
+          updated_at?: string | null
+          zona_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultas_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_grade_id_fkey"
+            columns: ["grade_id"]
+            isOneToOne: false
+            referencedRelation: "grades_horarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_sala_id_fkey"
+            columns: ["sala_id"]
+            isOneToOne: false
+            referencedRelation: "salas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_zona_id_fkey"
+            columns: ["zona_id"]
+            isOneToOne: false
+            referencedRelation: "zonas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipes: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          descricao: string | null
+          especialidade_id: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          especialidade_id?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          especialidade_id?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipes_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      especialidades: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          cor_hex: string | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          cor_hex?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          cor_hex?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      estornos_consultas: {
+        Row: {
+          consulta_id: string
+          created_at: string | null
+          data_estorno: string | null
+          id: string
+          motivo: string
+          status_anterior: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          consulta_id: string
+          created_at?: string | null
+          data_estorno?: string | null
+          id?: string
+          motivo: string
+          status_anterior?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          consulta_id?: string
+          created_at?: string | null
+          data_estorno?: string | null
+          id?: string
+          motivo?: string
+          status_anterior?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estornos_consultas_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evolutions: {
         Row: {
           date: string
@@ -150,6 +496,99 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grades_horarios: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          data_fim: string | null
+          data_inicio: string
+          dia_semana: number | null
+          duracao_consulta: number | null
+          equipe_id: string | null
+          especialidade_id: string
+          hora_fim: string
+          hora_inicio: string
+          id: string
+          profissional_id: string
+          sala_id: string | null
+          turno: string | null
+          vagas_totais: number | null
+          zona_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio: string
+          dia_semana?: number | null
+          duracao_consulta?: number | null
+          equipe_id?: string | null
+          especialidade_id: string
+          hora_fim: string
+          hora_inicio: string
+          id?: string
+          profissional_id: string
+          sala_id?: string | null
+          turno?: string | null
+          vagas_totais?: number | null
+          zona_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          dia_semana?: number | null
+          duracao_consulta?: number | null
+          equipe_id?: string | null
+          especialidade_id?: string
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          profissional_id?: string
+          sala_id?: string | null
+          turno?: string | null
+          vagas_totais?: number | null
+          zona_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_horarios_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_horarios_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_horarios_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_horarios_sala_id_fkey"
+            columns: ["sala_id"]
+            isOneToOne: false
+            referencedRelation: "salas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_horarios_zona_id_fkey"
+            columns: ["zona_id"]
+            isOneToOne: false
+            referencedRelation: "zonas"
             referencedColumns: ["id"]
           },
         ]
@@ -225,6 +664,72 @@ export type Database = {
           },
         ]
       }
+      profissionais: {
+        Row: {
+          assinatura_digital: string | null
+          ativo: boolean | null
+          cpf: string
+          created_at: string | null
+          email: string | null
+          equipe_id: string | null
+          especialidade_id: string | null
+          id: string
+          nome: string
+          registro_profissional: string
+          telefone: string | null
+          tipo_registro: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assinatura_digital?: string | null
+          ativo?: boolean | null
+          cpf: string
+          created_at?: string | null
+          email?: string | null
+          equipe_id?: string | null
+          especialidade_id?: string | null
+          id?: string
+          nome: string
+          registro_profissional: string
+          telefone?: string | null
+          tipo_registro: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assinatura_digital?: string | null
+          ativo?: boolean | null
+          cpf?: string
+          created_at?: string | null
+          email?: string | null
+          equipe_id?: string | null
+          especialidade_id?: string | null
+          id?: string
+          nome?: string
+          registro_profissional?: string
+          telefone?: string | null
+          tipo_registro?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissionais_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profissionais_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -256,6 +761,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      salas: {
+        Row: {
+          andar: string | null
+          ativo: boolean | null
+          capacidade: number | null
+          created_at: string | null
+          equipamentos: string[] | null
+          id: string
+          nome: string | null
+          numero: string
+          tipo: string | null
+        }
+        Insert: {
+          andar?: string | null
+          ativo?: boolean | null
+          capacidade?: number | null
+          created_at?: string | null
+          equipamentos?: string[] | null
+          id?: string
+          nome?: string | null
+          numero: string
+          tipo?: string | null
+        }
+        Update: {
+          andar?: string | null
+          ativo?: boolean | null
+          capacidade?: number | null
+          created_at?: string | null
+          equipamentos?: string[] | null
+          id?: string
+          nome?: string | null
+          numero?: string
+          tipo?: string | null
+        }
+        Relationships: []
       }
       vitals: {
         Row: {
@@ -297,6 +838,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      zonas: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
       }
     }
     Views: {
