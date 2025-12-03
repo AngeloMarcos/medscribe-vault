@@ -11,6 +11,7 @@ import Patients from "./pages/Patients";
 import PatientDetail from "./pages/PatientDetail";
 import ListaPacientes from "./pages/ListaPacientes";
 import MarcarConsulta from "./pages/MarcarConsulta";
+import EstornarConsulta from "./pages/EstornarConsulta";
 import Appointments from "./pages/Appointments";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -65,7 +66,7 @@ const App = () => {
                 <Route path="prescricao" element={<div className="p-8 text-center text-muted-foreground">Prescrição - Em desenvolvimento</div>} />
                 <Route path="enfermagem" element={<div className="p-8 text-center text-muted-foreground">Enfermagem - Em desenvolvimento</div>} />
                 <Route path="importar-sisreg" element={<div className="p-8 text-center text-muted-foreground">Importar SISREG - Em desenvolvimento</div>} />
-                <Route path="estornar" element={<div className="p-8 text-center text-muted-foreground">Estornar Consulta - Em desenvolvimento</div>} />
+                <Route path="estornar" element={<EstornarConsulta />} />
                 <Route path="atualizar" element={<div className="p-8 text-center text-muted-foreground">Atualizar Consulta - Em desenvolvimento</div>} />
                 <Route path="cadastros" element={<div className="p-8 text-center text-muted-foreground">Cadastros - Em desenvolvimento</div>} />
                 <Route path="pesquisas" element={<div className="p-8 text-center text-muted-foreground">Pesquisas - Em desenvolvimento</div>} />
