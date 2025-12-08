@@ -21,6 +21,7 @@ import {
   X,
   LogOut,
   Bell,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ const menuItems: MenuItem[] = [
   { name: "Pesquisas", href: "/pesquisas", icon: Search },
   { name: "Diária", href: "/diaria", icon: BarChart3 },
   { name: "Relatórios", href: "/relatorios", icon: FileBarChart },
+  { name: "Usuários", href: "/usuarios", icon: UserCog },
 ];
 
 export function AppSidebar() {
