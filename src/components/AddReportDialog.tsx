@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { reportSchema } from "@/lib/validationSchemas";
+import { getUserFriendlyError } from "@/lib/errorHandler";
 
 interface AddReportDialogProps {
   open: boolean;
@@ -39,9 +41,24 @@ const AddReportDialog = ({
     type: "atestado",
     text: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = reportSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -66,7 +83,7 @@ const AddReportDialog = ({
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -116,8 +133,10 @@ const AddReportDialog = ({
                 onChange={(e) => setFormData({ ...formData, text: e.target.value })}
                 placeholder={`Escreva o conteúdo do ${getTypeLabel(formData.type).toLowerCase()}`}
                 rows={8}
+                maxLength={10000}
                 required
               />
+              {errors.text && <p className="text-sm text-destructive">{errors.text}</p>}
             </div>
           </div>
           <DialogFooter>

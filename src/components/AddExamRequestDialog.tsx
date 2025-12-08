@@ -12,6 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { examRequestSchema } from "@/lib/validationSchemas";
+import { getUserFriendlyError } from "@/lib/errorHandler";
 
 interface AddExamRequestDialogProps {
   open: boolean;
@@ -32,9 +34,24 @@ const AddExamRequestDialog = ({
     exams_list: "",
     justification: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = examRequestSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -59,7 +76,7 @@ const AddExamRequestDialog = ({
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -84,8 +101,10 @@ const AddExamRequestDialog = ({
                 onChange={(e) => setFormData({ ...formData, exams_list: e.target.value })}
                 placeholder="Liste os exames solicitados"
                 rows={4}
+                maxLength={2000}
                 required
               />
+              {errors.exams_list && <p className="text-sm text-destructive">{errors.exams_list}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="justification">Justificativa clínica</Label>
@@ -95,7 +114,9 @@ const AddExamRequestDialog = ({
                 onChange={(e) => setFormData({ ...formData, justification: e.target.value })}
                 placeholder="Justificativa para a solicitação"
                 rows={3}
+                maxLength={1000}
               />
+              {errors.justification && <p className="text-sm text-destructive">{errors.justification}</p>}
             </div>
           </div>
           <DialogFooter>

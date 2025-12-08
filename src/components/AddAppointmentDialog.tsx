@@ -21,6 +21,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
+import { appointmentSchema } from "@/lib/validationSchemas";
+import { getUserFriendlyError } from "@/lib/errorHandler";
 
 interface AddAppointmentDialogProps {
   open: boolean;
@@ -42,6 +44,7 @@ const AddAppointmentDialog = ({
     description: "",
     status: "agendado",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data: patients } = useQuery({
     queryKey: ["patients"],
@@ -54,6 +57,20 @@ const AddAppointmentDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = appointmentSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -76,7 +93,7 @@ const AddAppointmentDialog = ({
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -98,7 +115,6 @@ const AddAppointmentDialog = ({
               <Select
                 value={formData.patient_id}
                 onValueChange={(value) => setFormData({ ...formData, patient_id: value })}
-                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o paciente" />
@@ -111,6 +127,7 @@ const AddAppointmentDialog = ({
                   ))}
                 </SelectContent>
               </Select>
+              {errors.patient_id && <p className="text-sm text-destructive">{errors.patient_id}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="date_time">Data e Hora *</Label>
@@ -121,6 +138,7 @@ const AddAppointmentDialog = ({
                 onChange={(e) => setFormData({ ...formData, date_time: e.target.value })}
                 required
               />
+              {errors.date_time && <p className="text-sm text-destructive">{errors.date_time}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="type">Tipo *</Label>
@@ -160,7 +178,9 @@ const AddAppointmentDialog = ({
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
+                maxLength={1000}
               />
+              {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
             </div>
           </div>
           <DialogFooter>

@@ -13,6 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { procedureSchema } from "@/lib/validationSchemas";
+import { getUserFriendlyError } from "@/lib/errorHandler";
 
 interface AddProcedureDialogProps {
   open: boolean;
@@ -35,9 +37,24 @@ const AddProcedureDialog = ({
     professional: "",
     notes: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = procedureSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -64,7 +81,7 @@ const AddProcedureDialog = ({
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -90,6 +107,7 @@ const AddProcedureDialog = ({
                 onChange={(e) => setFormData({ ...formData, date_time: e.target.value })}
                 required
               />
+              {errors.date_time && <p className="text-sm text-destructive">{errors.date_time}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Descrição do procedimento *</Label>
@@ -97,8 +115,10 @@ const AddProcedureDialog = ({
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                maxLength={500}
                 required
               />
+              {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="professional">Profissional responsável</Label>
@@ -106,7 +126,9 @@ const AddProcedureDialog = ({
                 id="professional"
                 value={formData.professional}
                 onChange={(e) => setFormData({ ...formData, professional: e.target.value })}
+                maxLength={255}
               />
+              {errors.professional && <p className="text-sm text-destructive">{errors.professional}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="notes">Observações/intercorrências</Label>
@@ -115,7 +137,9 @@ const AddProcedureDialog = ({
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
+                maxLength={2000}
               />
+              {errors.notes && <p className="text-sm text-destructive">{errors.notes}</p>}
             </div>
           </div>
           <DialogFooter>

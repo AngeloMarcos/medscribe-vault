@@ -12,6 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { patientSchema } from "@/lib/validationSchemas";
+import { getUserFriendlyError } from "@/lib/errorHandler";
 
 interface AddPatientDialogProps {
   open: boolean;
@@ -30,9 +32,24 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
     insurance: "",
     medical_record_number: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = patientSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -56,7 +73,7 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -79,8 +96,10 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                maxLength={255}
                 required
               />
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="cpf">CPF *</Label>
@@ -88,8 +107,11 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
                 id="cpf"
                 value={formData.cpf}
                 onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                placeholder="000.000.000-00"
+                maxLength={14}
                 required
               />
+              {errors.cpf && <p className="text-sm text-destructive">{errors.cpf}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="birth_date">Data de Nascimento</Label>
@@ -106,7 +128,9 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                maxLength={20}
               />
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="insurance">Convênio</Label>
@@ -114,6 +138,7 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
                 id="insurance"
                 value={formData.insurance}
                 onChange={(e) => setFormData({ ...formData, insurance: e.target.value })}
+                maxLength={100}
               />
             </div>
             <div className="grid gap-2">
@@ -124,6 +149,7 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
                 onChange={(e) =>
                   setFormData({ ...formData, medical_record_number: e.target.value })
                 }
+                maxLength={50}
               />
             </div>
           </div>
