@@ -246,7 +246,7 @@ export default function ListaPacientes() {
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 py-2 rounded-lg"
+              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground px-4 py-2 rounded-lg"
             >
               {tab.label} ({counts[tab.value]})
             </TabsTrigger>
