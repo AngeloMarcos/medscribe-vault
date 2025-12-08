@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 interface MenuItem {
   name: string;
@@ -35,7 +36,7 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-const menuItems: MenuItem[] = [
+const baseMenuItems: MenuItem[] = [
   { name: "Painel Geral", href: "/", icon: LayoutDashboard },
   {
     name: "Ambulatório",
@@ -56,14 +57,21 @@ const menuItems: MenuItem[] = [
   { name: "Pesquisas", href: "/pesquisas", icon: Search },
   { name: "Diária", href: "/diaria", icon: BarChart3 },
   { name: "Relatórios", href: "/relatorios", icon: FileBarChart },
-  { name: "Usuários", href: "/usuarios", icon: UserCog },
 ];
+
+const adminMenuItem: MenuItem = { name: "Usuários", href: "/usuarios", icon: UserCog };
 
 export function AppSidebar() {
   const location = useLocation();
   const { toast } = useToast();
+  const { isAdmin } = useAdminAccess();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>(["Ambulatório"]);
+
+  // Build menu items based on admin status
+  const menuItems = isAdmin 
+    ? [...baseMenuItems, adminMenuItem] 
+    : baseMenuItems;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
