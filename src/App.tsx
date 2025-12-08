@@ -15,6 +15,7 @@ import MarcarConsulta from "./pages/MarcarConsulta";
 import EstornarConsulta from "./pages/EstornarConsulta";
 import Appointments from "./pages/Appointments";
 import UserManagement from "./pages/UserManagement";
+import Atendimento from "./pages/Atendimento";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -73,6 +74,7 @@ const App = () => {
                 <Route path="importar-sisreg" element={<div className="p-8 text-center text-muted-foreground">Importar SISREG - Em desenvolvimento</div>} />
                 <Route path="estornar" element={<EstornarConsulta />} />
                 <Route path="atualizar" element={<div className="p-8 text-center text-muted-foreground">Atualizar Consulta - Em desenvolvimento</div>} />
+                <Route path="atendimento/:id" element={<Atendimento />} />
                 <Route path="cadastros" element={<div className="p-8 text-center text-muted-foreground">Cadastros - Em desenvolvimento</div>} />
                 <Route path="pesquisas" element={<div className="p-8 text-center text-muted-foreground">Pesquisas - Em desenvolvimento</div>} />
                 <Route path="diaria" element={<div className="p-8 text-center text-muted-foreground">Diária - Em desenvolvimento</div>} />
