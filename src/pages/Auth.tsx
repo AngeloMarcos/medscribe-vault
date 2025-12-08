@@ -5,21 +5,41 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Activity } from "lucide-react";
+import { authSchema } from "@/lib/validationSchemas";
+import { getUserFriendlyError } from "@/lib/errorHandler";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = authSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ 
+          email: result.data.email, 
+          password: result.data.password 
+        });
         if (error) throw error;
         toast({
           title: "Conta criada!",
@@ -27,13 +47,16 @@ const Auth = () => {
         });
         setIsSignUp(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ 
+          email: result.data.email, 
+          password: result.data.password 
+        });
         if (error) throw error;
       }
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -61,8 +84,10 @@ const Auth = () => {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                maxLength={255}
                 required
               />
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Input
@@ -70,8 +95,10 @@ const Auth = () => {
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                maxLength={128}
                 required
               />
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Aguarde..." : isSignUp ? "Criar conta" : "Entrar"}
