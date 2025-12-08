@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -36,8 +37,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { getUserFriendlyError } from "@/lib/errorHandler";
-import { UserPlus, Shield, Trash2 } from "lucide-react";
+import { UserPlus, Shield, Trash2, Loader2 } from "lucide-react";
 import { z } from "zod";
 
 const createUserSchema = z.object({
@@ -63,6 +65,8 @@ const roleBadgeVariants: Record<AppRole, "default" | "secondary" | "outline" | "
 };
 
 const UserManagement = () => {
+  const navigate = useNavigate();
+  const { isAdmin, isLoading: isCheckingAdmin } = useAdminAccess();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -73,6 +77,18 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (!isCheckingAdmin && isAdmin === false) {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar esta página.",
+        variant: "destructive",
+      });
+      navigate("/");
+    }
+  }, [isAdmin, isCheckingAdmin, navigate, toast]);
 
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ["user-roles"],
@@ -164,6 +180,20 @@ const UserManagement = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while checking admin access
+  if (isCheckingAdmin || isAdmin === null) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Don't render if not admin (will redirect)
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
