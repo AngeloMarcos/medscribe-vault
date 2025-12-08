@@ -178,8 +178,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-premium">
         <CardHeader className="space-y-3 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
             <Activity className="h-9 w-9 text-primary-foreground" />

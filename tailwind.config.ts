@@ -82,10 +82,11 @@ export default {
         "2xl": "1.5rem",
       },
       boxShadow: {
-        soft: "0 2px 8px rgba(0, 0, 0, 0.06)",
-        hover: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        card: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)",
-        neumorphic: "0 2px 8px rgba(0, 0, 0, 0.06)",
+        soft: "0 2px 8px rgba(1, 93, 103, 0.06)",
+        hover: "0 4px 16px rgba(1, 93, 103, 0.12)",
+        card: "0 1px 3px rgba(1, 93, 103, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)",
+        neumorphic: "0 2px 8px rgba(1, 93, 103, 0.06)",
+        premium: "0 8px 24px rgba(1, 93, 103, 0.15)",
       },
       keyframes: {
         "accordion-down": {
@@ -104,12 +105,17 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(0)" },
         },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in-left": "slide-in-left 0.3s ease-out",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
     },
   },

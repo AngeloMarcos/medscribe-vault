@@ -146,7 +146,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "h-screen bg-gradient-to-b from-primary to-primary/90 flex flex-col transition-all duration-300 sticky top-0",
+        "h-screen bg-primary flex flex-col transition-all duration-300 sticky top-0",
         collapsed ? "w-20" : "w-72"
       )}
     >
