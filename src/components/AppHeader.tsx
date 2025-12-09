@@ -17,7 +17,7 @@ export function AppHeader() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <header className="h-[72px] bg-card border-b border-border shadow-soft sticky top-0 z-40">
+    <header className="h-[72px] bg-card border-b border-border shadow-sm sticky top-0 z-40 hidden lg:block">
       <div className="h-full px-6 flex items-center justify-between gap-4">
         {/* Search */}
         <div className="flex-1 max-w-md">
@@ -27,7 +27,7 @@ export function AppHeader() {
               placeholder="Buscar paciente, prontuário, consulta..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+              className="pl-10 h-10 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary transition-all duration-200"
             />
           </div>
         </div>
@@ -37,7 +37,7 @@ export function AppHeader() {
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-muted/50 transition-colors">
                 <Bell className="h-5 w-5 text-muted-foreground" />
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
                   3
@@ -47,9 +47,9 @@ export function AppHeader() {
             <DropdownMenuContent align="end" className="w-80">
               <DropdownMenuLabel>Notificações (3)</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
+              <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-success" />
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span className="font-medium text-sm">Paciente chegou para consulta</span>
                 </div>
                 <p className="text-xs text-muted-foreground ml-4">
@@ -57,9 +57,9 @@ export function AppHeader() {
                 </p>
                 <span className="text-xs text-muted-foreground ml-4">há 2 minutos</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
+              <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-info" />
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
                   <span className="font-medium text-sm">Nova consulta agendada</span>
                 </div>
                 <p className="text-xs text-muted-foreground ml-4">
@@ -67,9 +67,9 @@ export function AppHeader() {
                 </p>
                 <span className="text-xs text-muted-foreground ml-4">há 15 minutos</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
+              <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-warning" />
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
                   <span className="font-medium text-sm">Exame pendente de análise</span>
                 </div>
                 <p className="text-xs text-muted-foreground ml-4">
@@ -78,7 +78,7 @@ export function AppHeader() {
                 <span className="text-xs text-muted-foreground ml-4">há 1 hora</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-primary font-medium">
+              <DropdownMenuItem className="justify-center text-primary font-medium cursor-pointer">
                 Ver todas
               </DropdownMenuItem>
             </DropdownMenuContent>
