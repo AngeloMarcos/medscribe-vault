@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +18,8 @@ const forgotPasswordSchema = z.object({
 });
 
 const Auth = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,6 +27,22 @@ const Auth = () => {
   const [mode, setMode] = useState<AuthMode>("login");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Mostrar loading enquanto verifica autenticação inicial
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[hsl(186,98%,20%)] via-[hsl(180,95%,28%)] to-[hsl(180,96%,38%)]">
+        <Loader2 className="h-10 w-10 animate-spin text-white" />
+      </div>
+    );
+  }
 
   const handleLogin = async () => {
     setErrors({});
@@ -45,6 +65,13 @@ const Auth = () => {
         password: result.data.password,
       });
       if (error) throw error;
+      
+      toast({
+        title: "Bem-vindo!",
+        description: "Login realizado com sucesso.",
+      });
+      
+      // O useEffect irá redirecionar automaticamente quando isAuthenticated mudar
     } catch (error: any) {
       toast({
         title: "Erro",
