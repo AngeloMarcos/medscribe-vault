@@ -173,10 +173,14 @@ const PrescriptionList = () => {
     <TableHead
       className="cursor-pointer hover:bg-muted/50 transition-colors"
       onClick={() => handleSort(field)}
+      onKeyDown={(e) => e.key === 'Enter' && handleSort(field)}
+      tabIndex={0}
+      role="columnheader"
+      aria-sort={sortField === field ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
     >
       <div className="flex items-center gap-1">
         {children}
-        <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+        <ArrowUpDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       </div>
     </TableHead>
   );
@@ -217,9 +221,9 @@ const PrescriptionList = () => {
             </Select>
           </div>
 
-          {/* Tabela */}
-          <div className="rounded-md border">
-            <Table>
+          {/* Tabela - Scrollable horizontalmente em mobile */}
+          <div className="rounded-md border overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <SortableHeader field="local">Local</SortableHeader>

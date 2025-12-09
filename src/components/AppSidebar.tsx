@@ -72,6 +72,7 @@ export function AppSidebar() {
   const { toast } = useToast();
   const { isAdmin } = useAdminAccess();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>(["Ambulatório"]);
 
   // Build menu items based on admin status
@@ -158,64 +159,109 @@ export function AppSidebar() {
   };
 
   return (
-    <aside
-      className={cn(
-        "h-screen bg-primary flex flex-col transition-all duration-300 sticky top-0",
-        collapsed ? "w-20" : "w-72"
-      )}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <Stethoscope className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">MedFlow</h1>
-              <p className="text-xs text-white/70">Sistema de Gestão</p>
-            </div>
-          </div>
-        )}
+    <>
+      {/* Mobile Sidebar - Hidden on desktop */}
+      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b w-full flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setCollapsed(!collapsed)}
-          className="text-white hover:bg-white/10"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="text-foreground"
+          aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={mobileOpen}
         >
-          {collapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
+        <div className="flex items-center gap-2">
+          <Stethoscope className="h-5 w-5 text-primary" />
+          <span className="font-semibold text-foreground">MedFlow</span>
+        </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 space-y-1 overflow-y-auto custom-scrollbar">
-        {menuItems.map((item) => renderMenuItem(item))}
-      </nav>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border space-y-2">
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start gap-3 text-white/90 hover:bg-white/10 hover:text-white",
-            collapsed && "justify-center px-2"
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "h-screen bg-primary flex flex-col transition-all duration-300",
+          // Mobile: fixed, slide in/out
+          "fixed lg:sticky top-0 z-50",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          // Width
+          collapsed ? "w-20" : "w-72"
+        )}
+        role="navigation"
+        aria-label="Menu principal"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+          {!collapsed && (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">MedFlow</h1>
+                <p className="text-xs text-white/70">Sistema de Gestão</p>
+              </div>
+            </div>
           )}
-        >
-          <Bell className="h-5 w-5" />
-          {!collapsed && <span>Notificações</span>}
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className={cn(
-            "w-full justify-start gap-3 text-white/90 hover:bg-white/10 hover:text-white",
-            collapsed && "justify-center px-2"
-          )}
-        >
-          <LogOut className="h-5 w-5" />
-          {!collapsed && <span>Sair</span>}
-        </Button>
-      </div>
-    </aside>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (window.innerWidth < 1024) {
+                setMobileOpen(false);
+              } else {
+                setCollapsed(!collapsed);
+              }
+            }}
+            className="text-white hover:bg-white/10"
+            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+          >
+            {collapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          </Button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 py-4 space-y-1 overflow-y-auto custom-scrollbar" role="menu">
+          {menuItems.map((item) => renderMenuItem(item))}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-sidebar-border space-y-2">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start gap-3 text-white/90 hover:bg-white/10 hover:text-white",
+              collapsed && "justify-center px-2"
+            )}
+            aria-label="Notificações"
+          >
+            <Bell className="h-5 w-5" aria-hidden="true" />
+            {!collapsed && <span>Notificações</span>}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className={cn(
+              "w-full justify-start gap-3 text-white/90 hover:bg-white/10 hover:text-white",
+              collapsed && "justify-center px-2"
+            )}
+            aria-label="Sair do sistema"
+          >
+            <LogOut className="h-5 w-5" aria-hidden="true" />
+            {!collapsed && <span>Sair</span>}
+          </Button>
+        </div>
+      </aside>
+    </>
   );
 }
