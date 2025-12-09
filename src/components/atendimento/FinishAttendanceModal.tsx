@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
-
+import { finishAttendanceSchema } from "@/lib/validationSchemas";
 interface FinishAttendanceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -61,13 +61,15 @@ export function FinishAttendanceModal({
   const handleFinish = async () => {
     setError("");
 
-    if (!conduta.trim()) {
-      setError("A conduta é obrigatória");
-      return;
-    }
+    const validation = finishAttendanceSchema.safeParse({
+      conduta,
+      destino,
+      setorEncaminhamento: destino !== "alta" ? setorEncaminhamento : undefined,
+      observacoes: observacoes || undefined,
+    });
 
-    if (!destino) {
-      setError("Selecione o destino do paciente");
+    if (!validation.success) {
+      setError(validation.error.errors[0]?.message || "Dados inválidos");
       return;
     }
 
