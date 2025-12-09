@@ -11,6 +11,7 @@ import { Session } from "@supabase/supabase-js";
 import { MainLayout } from "./components/MainLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import NewDashboard from "./pages/NewDashboard";
+import MyProfile from "./pages/MyProfile";
 import Patients from "./pages/Patients";
 import PatientDetail from "./pages/PatientDetail";
 import ListaPacientes from "./pages/ListaPacientes";
@@ -93,6 +94,7 @@ const App = () => {
                 <Route path="diaria" element={<div className="p-8 text-center text-muted-foreground">Diária - Em desenvolvimento</div>} />
                 <Route path="relatorios" element={<div className="p-8 text-center text-muted-foreground">Relatórios - Em desenvolvimento</div>} />
                 <Route path="usuarios" element={<AdminUserManagement />} />
+                <Route path="perfil" element={<MyProfile />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
