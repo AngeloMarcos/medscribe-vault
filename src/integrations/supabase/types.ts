@@ -774,6 +774,42 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean | null
+          phone: string | null
+          professional_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          is_active?: boolean | null
+          phone?: string | null
+          professional_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          phone?: string | null
+          professional_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profissionais: {
         Row: {
           assinatura_digital: string | null
@@ -908,6 +944,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource: string | null
+          resource_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource?: string | null
+          resource_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource?: string | null
+          resource_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1004,6 +1076,10 @@ export type Database = {
     Functions: {
       has_admin_access: { Args: { _user_id: string }; Returns: boolean }
       has_medical_role: { Args: { _user_id: string }; Returns: boolean }
+      has_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1013,7 +1089,13 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "medico" | "enfermeiro" | "recepcao"
+      app_role:
+        | "admin"
+        | "medico"
+        | "enfermeiro"
+        | "recepcao"
+        | "farmaceutico"
+        | "tecnico_enfermagem"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1141,7 +1223,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "medico", "enfermeiro", "recepcao"],
+      app_role: [
+        "admin",
+        "medico",
+        "enfermeiro",
+        "recepcao",
+        "farmaceutico",
+        "tecnico_enfermagem",
+      ],
     },
   },
 } as const
