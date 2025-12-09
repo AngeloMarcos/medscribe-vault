@@ -629,6 +629,116 @@ export type Database = {
         }
         Relationships: []
       }
+      prescription_items: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          is_high_risk: boolean | null
+          item_details: Json | null
+          item_type: string
+          observation: string | null
+          prescription_id: string
+          sequence_order: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          is_high_risk?: boolean | null
+          item_details?: Json | null
+          item_type: string
+          observation?: string | null
+          prescription_id: string
+          sequence_order?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          is_high_risk?: boolean | null
+          item_details?: Json | null
+          item_type?: string
+          observation?: string | null
+          prescription_id?: string
+          sequence_order?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_items_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          consulta_id: string | null
+          created_at: string | null
+          created_by: string | null
+          expected_discharge_date: string | null
+          id: string
+          is_pediatric: boolean | null
+          patient_id: string
+          prescription_date: string
+          status: string | null
+          updated_at: string | null
+          validity_end: string
+          validity_start: string
+        }
+        Insert: {
+          consulta_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expected_discharge_date?: string | null
+          id?: string
+          is_pediatric?: boolean | null
+          patient_id: string
+          prescription_date?: string
+          status?: string | null
+          updated_at?: string | null
+          validity_end?: string
+          validity_start?: string
+        }
+        Update: {
+          consulta_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expected_discharge_date?: string | null
+          id?: string
+          is_pediatric?: boolean | null
+          patient_id?: string
+          prescription_date?: string
+          status?: string | null
+          updated_at?: string | null
+          validity_end?: string
+          validity_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       procedures: {
         Row: {
           date_time: string
