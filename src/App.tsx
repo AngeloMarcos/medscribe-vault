@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import CreatePrescription from "./pages/CreatePrescription";
 import MaintainPrescription from "./pages/MaintainPrescription";
@@ -6,10 +5,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout } from "./components/MainLayout";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import NewDashboard from "./pages/NewDashboard";
 import MyProfile from "./pages/MyProfile";
 import Patients from "./pages/Patients";
@@ -27,46 +25,26 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          {!session ? (
-            <Auth />
-          ) : (
+        <AuthProvider>
+          <BrowserRouter>
             <Routes>
-              <Route path="/" element={<MainLayout />}>
+              {/* Public routes */}
+              <Route path="/auth" element={<Auth />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }
+              >
                 <Route index element={<NewDashboard />} />
                 <Route path="patients" element={<Patients />} />
                 <Route path="patients/:id" element={<PatientDetail />} />
@@ -74,16 +52,44 @@ const App = () => {
                 <Route path="marcar-consulta" element={<MarcarConsulta />} />
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="grades" element={<div className="p-8 text-center text-muted-foreground">Grades de Agendamento - Em desenvolvimento</div>} />
-                
+
                 {/* Prescription Routes - Protected for medical staff */}
-                <Route path="prescription" element={<ProtectedRoute requireMedical><PrescriptionList /></ProtectedRoute>} />
+                <Route
+                  path="prescription"
+                  element={
+                    <ProtectedRoute requireMedical>
+                      <PrescriptionList />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="prescription/list" element={<Navigate to="/prescription" replace />} />
-                <Route path="prescription/create/:patientId" element={<ProtectedRoute requireMedical><CreatePrescription /></ProtectedRoute>} />
-                <Route path="prescription/maintain/:patientId" element={<ProtectedRoute requireMedical><MaintainPrescription /></ProtectedRoute>} />
-                <Route path="prescription/maintain/:patientId/:prescriptionId" element={<ProtectedRoute requireMedical><MaintainPrescription /></ProtectedRoute>} />
+                <Route
+                  path="prescription/create/:patientId"
+                  element={
+                    <ProtectedRoute requireMedical>
+                      <CreatePrescription />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="prescription/maintain/:patientId"
+                  element={
+                    <ProtectedRoute requireMedical>
+                      <MaintainPrescription />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="prescription/maintain/:patientId/:prescriptionId"
+                  element={
+                    <ProtectedRoute requireMedical>
+                      <MaintainPrescription />
+                    </ProtectedRoute>
+                  }
+                />
                 {/* Legacy route redirect */}
                 <Route path="prescricao" element={<Navigate to="/prescription" replace />} />
-                
+
                 <Route path="enfermagem" element={<div className="p-8 text-center text-muted-foreground">Enfermagem - Em desenvolvimento</div>} />
                 <Route path="importar-sisreg" element={<div className="p-8 text-center text-muted-foreground">Importar SISREG - Em desenvolvimento</div>} />
                 <Route path="estornar" element={<EstornarConsulta />} />
@@ -93,13 +99,25 @@ const App = () => {
                 <Route path="pesquisas" element={<div className="p-8 text-center text-muted-foreground">Pesquisas - Em desenvolvimento</div>} />
                 <Route path="diaria" element={<div className="p-8 text-center text-muted-foreground">Diária - Em desenvolvimento</div>} />
                 <Route path="relatorios" element={<div className="p-8 text-center text-muted-foreground">Relatórios - Em desenvolvimento</div>} />
-                <Route path="usuarios" element={<AdminUserManagement />} />
+
+                {/* Admin routes */}
+                <Route
+                  path="usuarios"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminUserManagement />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route path="perfil" element={<MyProfile />} />
               </Route>
+
+              {/* Catch-all redirect */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          )}
-        </BrowserRouter>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

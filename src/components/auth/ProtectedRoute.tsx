@@ -1,13 +1,10 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useMedicalAccess } from '@/hooks/useMedicalAccess';
-import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { ShieldX, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AppRole, Permission, rolesHavePermission, ROLE_LABELS } from '@/types/auth';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState } from 'react';
+import { AppRole, Permission, ROLE_LABELS } from '@/types/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -56,72 +53,21 @@ export function ProtectedRoute({
   requireMedical = false,
   requireAdmin = false,
 }: ProtectedRouteProps) {
-  const { hasMedicalRole, isLoading: loadingMedical } = useMedicalAccess();
-  const { isAdmin, isLoading: loadingAdmin } = useAdminAccess();
-  
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userRoles, setUserRoles] = useState<AppRole[]>([]);
-  const [loadingAuth, setLoadingAuth] = useState(true);
-
-  useEffect(() => {
-    // Setup auth listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session?.user);
-      
-      if (session?.user) {
-        // Defer role fetching to avoid deadlock
-        setTimeout(() => {
-          fetchUserRoles(session.user.id);
-        }, 0);
-      } else {
-        setUserRoles([]);
-        setLoadingAuth(false);
-      }
-    });
-
-    // Then check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session?.user);
-      
-      if (session?.user) {
-        fetchUserRoles(session.user.id);
-      } else {
-        setLoadingAuth(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchUserRoles = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      if (!error && data) {
-        setUserRoles(data.map(r => r.role as AppRole));
-      }
-    } catch (err) {
-      console.error('Error fetching user roles:', err);
-    } finally {
-      setLoadingAuth(false);
-    }
-  };
-
-  // Determine if still loading
-  const isLoading = 
-    loadingAuth || 
-    (requireMedical && loadingMedical) || 
-    (requireAdmin && loadingAdmin);
+  const {
+    isAuthenticated,
+    isLoading,
+    isAdmin,
+    hasMedicalRole,
+    hasRole,
+    hasPermission,
+  } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
   // Not authenticated - redirect to login
-  if (isAuthenticated === false) {
+  if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
   }
 
@@ -146,7 +92,7 @@ export function ProtectedRoute({
   }
 
   // Check specific role requirement
-  if (requiredRole && !userRoles.includes(requiredRole)) {
+  if (requiredRole && !hasRole(requiredRole)) {
     const roleLabel = ROLE_LABELS[requiredRole] || requiredRole;
     return (
       <AccessDenied
@@ -157,7 +103,7 @@ export function ProtectedRoute({
   }
 
   // Check specific permission requirement
-  if (requiredPermission && !rolesHavePermission(userRoles, requiredPermission)) {
+  if (requiredPermission && !hasPermission(requiredPermission)) {
     return (
       <AccessDenied
         title="Permissão Negada"
