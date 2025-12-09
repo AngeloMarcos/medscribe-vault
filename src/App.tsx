@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
+import CreatePrescription from "./pages/CreatePrescription";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -71,7 +72,8 @@ const App = () => {
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="grades" element={<div className="p-8 text-center text-muted-foreground">Grades de Agendamento - Em desenvolvimento</div>} />
                 <Route path="prescricao" element={<PrescriptionList />} />
-                <Route path="prescription/create/:patientId" element={<div className="p-8 text-center text-muted-foreground">Criar Prescrição - Em desenvolvimento</div>} />
+                <Route path="prescription/create/:patientId" element={<CreatePrescription />} />
+                <Route path="prescription/maintain/:patientId" element={<div className="p-8 text-center text-muted-foreground">Manter Prescrição - Em desenvolvimento</div>} />
                 <Route path="enfermagem" element={<div className="p-8 text-center text-muted-foreground">Enfermagem - Em desenvolvimento</div>} />
                 <Route path="importar-sisreg" element={<div className="p-8 text-center text-muted-foreground">Importar SISREG - Em desenvolvimento</div>} />
                 <Route path="estornar" element={<EstornarConsulta />} />
