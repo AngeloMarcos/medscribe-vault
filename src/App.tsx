@@ -17,7 +17,7 @@ import ListaPacientes from "./pages/ListaPacientes";
 import MarcarConsulta from "./pages/MarcarConsulta";
 import EstornarConsulta from "./pages/EstornarConsulta";
 import Appointments from "./pages/Appointments";
-import UserManagement from "./pages/UserManagement";
+import AdminUserManagement from "./pages/admin/UserManagement";
 import Atendimento from "./pages/Atendimento";
 import PrescriptionList from "./pages/PrescriptionList";
 import Auth from "./pages/Auth";
@@ -92,7 +92,7 @@ const App = () => {
                 <Route path="pesquisas" element={<div className="p-8 text-center text-muted-foreground">Pesquisas - Em desenvolvimento</div>} />
                 <Route path="diaria" element={<div className="p-8 text-center text-muted-foreground">Diária - Em desenvolvimento</div>} />
                 <Route path="relatorios" element={<div className="p-8 text-center text-muted-foreground">Relatórios - Em desenvolvimento</div>} />
-                <Route path="usuarios" element={<UserManagement />} />
+                <Route path="usuarios" element={<AdminUserManagement />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
