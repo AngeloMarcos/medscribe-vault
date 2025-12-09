@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, User, Settings, Users, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,18 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminAccess } from "@/hooks/useAdminAccess";
+import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/types/auth";
-
-interface Profile {
-  id: string;
-  email: string;
-  full_name: string;
-  avatar_url: string | null;
-  professional_id: string | null;
-}
 
 const ROLE_LABELS: Record<AppRole, string> = {
   admin: "Administrador",
@@ -43,69 +33,15 @@ const ROLE_BADGE_COLORS: Record<AppRole, string> = {
 };
 
 export function UserProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [userRole, setUserRole] = useState<AppRole | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { isAdmin } = useAdminAccess();
+  const { profile, roles, isAdmin, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setIsLoading(false);
-          return;
-        }
-
-        // Fetch profile and role in parallel
-        const [profileResult, roleResult] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("id, email, full_name, avatar_url, professional_id")
-            .eq("id", user.id)
-            .maybeSingle(),
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", user.id)
-            .maybeSingle(),
-        ]);
-
-        if (profileResult.data) {
-          setProfile(profileResult.data);
-        }
-
-        if (roleResult.data) {
-          setUserRole(roleResult.data.role as AppRole);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        setProfile(null);
-        setUserRole(null);
-      } else if (event === "SIGNED_IN") {
-        fetchUserData();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const userRole = roles[0] as AppRole | undefined;
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      await logout();
       toast({
         title: "Desconectado",
         description: "Você foi desconectado com sucesso.",
@@ -204,7 +140,7 @@ export function UserProfile() {
               Configurações
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => navigate("/admin/usuarios")}
+              onClick={() => navigate("/usuarios")}
               className="cursor-pointer py-2.5"
             >
               <Users className="mr-2 h-4 w-4" />
