@@ -48,7 +48,13 @@ const baseMenuItems: MenuItem[] = [
     ],
   },
   { name: "Pacientes", href: "/patients", icon: Users },
-  { name: "Prescrição", href: "/prescricao", icon: FileText },
+  {
+    name: "Prescrição Médica",
+    icon: FileText,
+    children: [
+      { name: "Lista de Pacientes", href: "/prescription", icon: Users },
+    ],
+  },
   { name: "Enfermagem", href: "/enfermagem", icon: Stethoscope },
   { name: "Importar SISREG", href: "/importar-sisreg", icon: Upload },
   { name: "Estornar Consulta", href: "/estornar", icon: RotateCcw },

@@ -5,10 +5,11 @@ import MaintainPrescription from "./pages/MaintainPrescription";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { MainLayout } from "./components/MainLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import NewDashboard from "./pages/NewDashboard";
 import Patients from "./pages/Patients";
 import PatientDetail from "./pages/PatientDetail";
@@ -72,9 +73,16 @@ const App = () => {
                 <Route path="marcar-consulta" element={<MarcarConsulta />} />
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="grades" element={<div className="p-8 text-center text-muted-foreground">Grades de Agendamento - Em desenvolvimento</div>} />
-                <Route path="prescricao" element={<PrescriptionList />} />
-                <Route path="prescription/create/:patientId" element={<CreatePrescription />} />
-                <Route path="prescription/maintain/:patientId" element={<MaintainPrescription />} />
+                
+                {/* Prescription Routes - Protected for medical staff */}
+                <Route path="prescription" element={<ProtectedRoute requireMedical><PrescriptionList /></ProtectedRoute>} />
+                <Route path="prescription/list" element={<Navigate to="/prescription" replace />} />
+                <Route path="prescription/create/:patientId" element={<ProtectedRoute requireMedical><CreatePrescription /></ProtectedRoute>} />
+                <Route path="prescription/maintain/:patientId" element={<ProtectedRoute requireMedical><MaintainPrescription /></ProtectedRoute>} />
+                <Route path="prescription/maintain/:patientId/:prescriptionId" element={<ProtectedRoute requireMedical><MaintainPrescription /></ProtectedRoute>} />
+                {/* Legacy route redirect */}
+                <Route path="prescricao" element={<Navigate to="/prescription" replace />} />
+                
                 <Route path="enfermagem" element={<div className="p-8 text-center text-muted-foreground">Enfermagem - Em desenvolvimento</div>} />
                 <Route path="importar-sisreg" element={<div className="p-8 text-center text-muted-foreground">Importar SISREG - Em desenvolvimento</div>} />
                 <Route path="estornar" element={<EstornarConsulta />} />

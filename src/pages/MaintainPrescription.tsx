@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { differenceInYears, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PrescriptionBreadcrumb } from "@/components/prescription/PrescriptionBreadcrumb";
 
 interface PrescriptionItem {
   id: string;
@@ -62,7 +63,7 @@ const categories = [
 ];
 
 export default function MaintainPrescription() {
-  const { patientId } = useParams<{ patientId: string }>();
+  const { patientId, prescriptionId } = useParams<{ patientId: string; prescriptionId?: string }>();
   const navigate = useNavigate();
 
   const [items, setItems] = useState<PrescriptionItem[]>([]);
@@ -198,6 +199,14 @@ export default function MaintainPrescription() {
 
       {/* Main Content */}
       <main className="flex-1 p-6 space-y-6">
+        {/* Breadcrumb */}
+        <PrescriptionBreadcrumb 
+          items={[
+            { label: patient?.name || "Paciente", href: `/prescription/create/${patientId}` },
+            { label: prescriptionId ? "Editar Prescrição" : "Manter Prescrição" }
+          ]} 
+        />
+
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -208,7 +217,7 @@ export default function MaintainPrescription() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold text-foreground">
-            Manter Prescrição Médica
+            {prescriptionId ? "Editar Prescrição Médica" : "Manter Prescrição Médica"}
           </h1>
         </div>
 
