@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { differenceInYears, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PrescriptionBreadcrumb } from "@/components/prescription/PrescriptionBreadcrumb";
 
 export default function CreatePrescription() {
   const { patientId } = useParams<{ patientId: string }>();
@@ -72,17 +73,24 @@ export default function CreatePrescription() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      {/* Breadcrumb */}
+      <PrescriptionBreadcrumb 
+        items={[
+          { label: patient?.name || "Elaborar Prescrição" }
+        ]} 
+      />
+
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/prescricao")}
+          onClick={() => navigate("/prescription")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-bold text-foreground">
-          Prescrição Médica - Protótipo
+          Prescrição Médica - Elaborar
         </h1>
       </div>
 
