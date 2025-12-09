@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Activity, ArrowLeft } from "lucide-react";
+import { Activity, ArrowLeft, Mail, Lock, Loader2 } from "lucide-react";
 import { authSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
 import { z } from "zod";
@@ -164,7 +164,6 @@ const Auth = () => {
   };
 
   const getButtonText = () => {
-    if (loading) return "Aguarde...";
     switch (mode) {
       case "login":
         return "Entrar";
@@ -178,65 +177,109 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-premium">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
-            <Activity className="h-9 w-9 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Gradiente de fundo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(186,98%,20%)] via-[hsl(180,95%,28%)] to-[hsl(180,96%,38%)]" />
+      
+      {/* Círculos decorativos com blur */}
+      <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-[hsl(180,96%,38%)]/30 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
+      <div className="absolute bottom-1/3 left-1/4 w-56 h-56 bg-[hsl(180,95%,28%)]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      
+      {/* Card com glassmorphism */}
+      <Card className="relative z-10 w-full max-w-md mx-4 backdrop-blur-xl bg-white/10 border-white/20 shadow-2xl">
+        <CardHeader className="space-y-4 text-center pb-2">
+          {/* Logo/Ícone */}
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
+            <Activity className="h-10 w-10 text-white" />
           </div>
-          <CardTitle className="text-2xl">MedFlow</CardTitle>
-          <CardDescription>{getTitle()}</CardDescription>
+          <div>
+            <CardTitle className="text-3xl font-bold text-white tracking-tight">
+              MedFlow
+            </CardTitle>
+            <CardDescription className="text-white/70 text-base mt-1">
+              {getTitle()}
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
+        
+        <CardContent className="pt-2">
           <form onSubmit={handleAuth} className="space-y-4">
+            {/* Campo Email */}
             <div className="space-y-2">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                maxLength={255}
-                required
-              />
-              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={255}
+                  required
+                  className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/20 h-12"
+                />
+              </div>
+              {errors.email && (
+                <p className="text-sm text-red-300 pl-1">{errors.email}</p>
+              )}
             </div>
 
+            {/* Campo Senha */}
             {mode !== "forgot-password" && (
               <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder="Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  maxLength={128}
-                  required
-                />
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-              </div>
-            )}
-
-            {mode === "signup" && (
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder="Confirmar senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  maxLength={128}
-                  required
-                />
-                {errors.confirmPassword && (
-                  <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                  <Input
+                    type="password"
+                    placeholder="Senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    maxLength={128}
+                    required
+                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/20 h-12"
+                  />
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-red-300 pl-1">{errors.password}</p>
                 )}
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            {/* Confirmar Senha (Signup) */}
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
+                  <Input
+                    type="password"
+                    placeholder="Confirmar senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    maxLength={128}
+                    required
+                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/20 h-12"
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-300 pl-1">{errors.confirmPassword}</p>
+                )}
+              </div>
+            )}
+
+            {/* Botão de ação */}
+            <Button 
+              type="submit" 
+              className="w-full h-12 bg-white/90 hover:bg-white text-[hsl(186,98%,20%)] font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200" 
+              disabled={loading}
+            >
+              {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               {getButtonText()}
             </Button>
           </form>
 
-          <div className="mt-4 space-y-2 text-center text-sm">
+          {/* Links de navegação */}
+          <div className="mt-6 space-y-3 text-center">
             {mode === "login" && (
               <>
                 <button
@@ -245,10 +288,11 @@ const Auth = () => {
                     setMode("forgot-password");
                     setErrors({});
                   }}
-                  className="block w-full text-muted-foreground hover:text-primary hover:underline"
+                  className="block w-full text-white/60 hover:text-white text-sm transition-colors"
                 >
                   Esqueceu a senha?
                 </button>
+                <div className="h-px bg-white/20 my-4" />
                 <button
                   type="button"
                   onClick={() => {
@@ -256,9 +300,9 @@ const Auth = () => {
                     setErrors({});
                     setPassword("");
                   }}
-                  className="block w-full text-primary hover:underline"
+                  className="block w-full text-white hover:text-white/80 font-medium transition-colors"
                 >
-                  Não tem conta? Criar
+                  Não tem conta? <span className="underline underline-offset-2">Criar agora</span>
                 </button>
               </>
             )}
@@ -272,7 +316,7 @@ const Auth = () => {
                   setPassword("");
                   setConfirmPassword("");
                 }}
-                className="flex items-center justify-center gap-1 w-full text-primary hover:underline"
+                className="flex items-center justify-center gap-2 w-full text-white hover:text-white/80 font-medium transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar ao login
@@ -286,7 +330,7 @@ const Auth = () => {
                   setMode("login");
                   setErrors({});
                 }}
-                className="flex items-center justify-center gap-1 w-full text-primary hover:underline"
+                className="flex items-center justify-center gap-2 w-full text-white hover:text-white/80 font-medium transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar ao login
@@ -295,6 +339,13 @@ const Auth = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Footer */}
+      <div className="absolute bottom-6 left-0 right-0 text-center">
+        <p className="text-white/40 text-sm">
+          © {new Date().getFullYear()} MedFlow — Sistema de Gestão Hospitalar
+        </p>
+      </div>
     </div>
   );
 };
