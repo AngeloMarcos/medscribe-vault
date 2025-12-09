@@ -4,16 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { PatientHeaderSkeleton } from "@/components/ui/skeletons";
+import { prescriptionToasts } from "@/lib/toastMessages";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -74,6 +75,8 @@ export default function MaintainPrescription() {
   const [dischargeDate, setDischargeDate] = useState<Date | undefined>();
   const [isPediatric, setIsPediatric] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   // Fetch patient data
   const { data: patient, isLoading: isLoadingPatient } = useQuery({
@@ -126,7 +129,10 @@ export default function MaintainPrescription() {
   };
 
   const handleAddItem = () => {
-    if (!selectedCategory || !newItemDescription.trim()) return;
+    if (!selectedCategory || !newItemDescription.trim()) {
+      prescriptionToasts.requiredField("Descrição");
+      return;
+    }
 
     const newItem: PrescriptionItem = {
       id: crypto.randomUUID(),
@@ -140,6 +146,7 @@ export default function MaintainPrescription() {
     setDialogOpen(false);
     setNewItemDescription("");
     setNewItemHighRisk(false);
+    prescriptionToasts.itemAdded();
   };
 
   const handleCopyItem = (item: PrescriptionItem) => {
@@ -148,17 +155,37 @@ export default function MaintainPrescription() {
       id: crypto.randomUUID(),
     };
     setItems([...items, copiedItem]);
+    prescriptionToasts.itemCopied();
   };
 
   const handleSuspendItem = (id: string) => {
-    setItems(items.map(item => 
-      item.id === id ? { ...item, suspended: !item.suspended } : item
+    const item = items.find(i => i.id === id);
+    setItems(items.map(i => 
+      i.id === id ? { ...i, suspended: !i.suspended } : i
     ));
+    prescriptionToasts.itemSuspended(!item?.suspended);
   };
 
   const handleDeleteItem = (id: string) => {
     setItems(items.filter(item => item.id !== id));
     setDeleteConfirmId(null);
+    prescriptionToasts.itemRemoved();
+  };
+
+  const handleConfirmPrescription = async () => {
+    setIsSaving(true);
+    // Simulate save - replace with actual Supabase save
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    prescriptionToasts.prescriptionConfirmed();
+    setIsSaving(false);
+  };
+
+  const handlePendingPrescription = async () => {
+    setIsPending(true);
+    // Simulate save - replace with actual Supabase save
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    prescriptionToasts.prescriptionSaved();
+    setIsPending(false);
   };
 
   const getCategoryLabel = (categoryId: string) => {
@@ -177,9 +204,33 @@ export default function MaintainPrescription() {
   const isLoading = isLoadingPatient || isLoadingConsultation;
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar - Categories */}
-      <aside className="w-[20%] min-w-[200px] bg-muted/50 border-r p-4 space-y-2">
+    <div className="flex min-h-screen flex-col lg:flex-row">
+      {/* Mobile Category Bar */}
+      <div className="lg:hidden flex overflow-x-auto gap-2 p-3 bg-muted/50 border-b">
+        {categories.map((category) => {
+          const Icon = category.icon;
+          return (
+            <Button
+              key={category.id}
+              variant="ghost"
+              size="sm"
+              className="flex-shrink-0 gap-2 hover:bg-background"
+              onClick={() => handleCategoryClick(category.id)}
+              aria-label={`Adicionar ${category.label}`}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              <span className="whitespace-nowrap">{category.label}</span>
+            </Button>
+          );
+        })}
+      </div>
+
+      {/* Desktop Sidebar - Categories */}
+      <aside 
+        className="hidden lg:block w-[20%] min-w-[200px] bg-muted/50 border-r p-4 space-y-2"
+        role="navigation"
+        aria-label="Categorias de prescrição"
+      >
         <h2 className="font-semibold text-lg mb-4 text-foreground">Seções</h2>
         {categories.map((category) => {
           const Icon = category.icon;
@@ -189,8 +240,9 @@ export default function MaintainPrescription() {
               variant="ghost"
               className="w-full justify-start gap-3 hover:bg-background"
               onClick={() => handleCategoryClick(category.id)}
+              aria-label={`Adicionar ${category.label}`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4" aria-hidden="true" />
               {category.label}
             </Button>
           );
@@ -225,11 +277,7 @@ export default function MaintainPrescription() {
         <Card>
           <CardContent className="pt-6">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
-              </div>
+              <PatientHeaderSkeleton />
             ) : patient ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Patient Info */}
@@ -340,33 +388,41 @@ export default function MaintainPrescription() {
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Edit className="h-4 w-4" />
+                          <div className="flex items-center gap-1" role="group" aria-label="Ações do item">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              aria-label="Editar item"
+                            >
+                              <Edit className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
                               onClick={() => handleCopyItem(item)}
+                              aria-label="Duplicar item"
                             >
-                              <Copy className="h-4 w-4" />
+                              <Copy className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
                               onClick={() => handleSuspendItem(item.id)}
+                              aria-label={item.suspended ? "Reativar item" : "Suspender item"}
                             >
-                              <Pause className="h-4 w-4" />
+                              <Pause className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive"
                               onClick={() => setDeleteConfirmId(item.id)}
+                              aria-label="Excluir item"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </div>
                         </div>
@@ -381,21 +437,37 @@ export default function MaintainPrescription() {
         </Card>
 
         {/* Footer Actions */}
-        <div className="flex flex-wrap gap-3">
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-            <Printer className="h-4 w-4" />
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Ações da prescrição">
+          <LoadingButton 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+            isLoading={isSaving}
+            loadingText="Salvando..."
+            onClick={handleConfirmPrescription}
+          >
+            <Printer className="h-4 w-4" aria-hidden="true" />
             Confirmar e Imprimir
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Clock className="h-4 w-4" />
+          </LoadingButton>
+          <LoadingButton 
+            variant="outline" 
+            className="gap-2"
+            isLoading={isPending}
+            loadingText="Salvando..."
+            onClick={handlePendingPrescription}
+          >
+            <Clock className="h-4 w-4" aria-hidden="true" />
             Deixar Pendente
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Eye className="h-4 w-4" />
+          </LoadingButton>
+          <Button variant="outline" className="gap-2" aria-label="Visualizar prescrição">
+            <Eye className="h-4 w-4" aria-hidden="true" />
             Visualizar
           </Button>
-          <Button variant="outline" className="gap-2 text-destructive border-destructive hover:bg-destructive/10">
-            <X className="h-4 w-4" />
+          <Button 
+            variant="outline" 
+            className="gap-2 text-destructive border-destructive hover:bg-destructive/10"
+            onClick={() => navigate(`/prescription/create/${patientId}`)}
+            aria-label="Cancelar e voltar"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
             Cancelar
           </Button>
         </div>
