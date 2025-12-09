@@ -228,10 +228,12 @@
 
 /* Print Styles for Clinical Documents */
 @media print {
+  /* Reset everything */
   body * {
     visibility: hidden;
   }
   
+  /* Show only printable content */
   .printable-area,
   .printable-area * {
     visibility: visible !important;
@@ -241,14 +243,16 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20mm;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20mm !important;
     box-shadow: none !important;
     border: none !important;
     background: white !important;
+    color: black !important;
   }
   
+  /* A4 page setup */
   @page {
     size: A4;
     margin: 0;
@@ -256,13 +260,62 @@
   
   /* Hide non-printable elements */
   .no-print,
-  header,
+  header:not(.printable-area header),
   nav,
   aside,
-  footer,
-  button,
   .sidebar,
-  [role="dialog"] {
+  [role="dialog"] > div:first-child,
+  button {
     display: none !important;
+  }
+  
+  /* Ensure text is black */
+  .printable-area h1,
+  .printable-area h2,
+  .printable-area h3,
+  .printable-area p,
+  .printable-area span,
+  .printable-area li {
+    color: black !important;
+  }
+  
+  /* Muted text stays gray */
+  .printable-area .text-muted-foreground {
+    color: #666 !important;
+  }
+  
+  /* Prevent page breaks inside sections */
+  .prescription-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Allow page break before new sections if needed */
+  .prescription-section:not(:first-child) {
+    page-break-before: auto;
+  }
+  
+  /* Keep footer at bottom */
+  .printable-area footer {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Remove shadows and backgrounds */
+  .printable-area * {
+    box-shadow: none !important;
+  }
+  
+  /* Ensure borders print */
+  .printable-area [class*="border"] {
+    border-color: #333 !important;
+  }
+  
+  /* Badge styling for print */
+  .printable-area .badge,
+  .printable-area [data-badge] {
+    border: 1px solid #333 !important;
+    background: transparent !important;
+    color: black !important;
   }
 }
