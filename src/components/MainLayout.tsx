@@ -6,7 +6,7 @@ export function MainLayout() {
   return (
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar />
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Spacer for mobile header */}
         <div className="h-14 lg:hidden" aria-hidden="true" />
         <AppHeader />

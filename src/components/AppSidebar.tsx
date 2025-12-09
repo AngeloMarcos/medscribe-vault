@@ -19,24 +19,26 @@ import {
   ChevronRight,
   Menu,
   X,
-  LogOut,
-  Bell,
-  UserCog,
+  Pill,
+  ShieldCheck,
+  Syringe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useAdminAccess } from "@/hooks/useAdminAccess";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/contexts/AuthContext";
+import { Permission, PERMISSIONS } from "@/types/auth";
 
 interface MenuItem {
   name: string;
   href?: string;
   icon: React.ElementType;
+  permission?: Permission;
   children?: MenuItem[];
 }
 
-const baseMenuItems: MenuItem[] = [
+const menuItems: MenuItem[] = [
   { name: "Painel Geral", href: "/", icon: LayoutDashboard },
   {
     name: "Ambulatório",
@@ -47,15 +49,17 @@ const baseMenuItems: MenuItem[] = [
       { name: "Grades de Agendamento", href: "/grades", icon: CalendarDays },
     ],
   },
-  { name: "Pacientes", href: "/patients", icon: Users },
+  { name: "Pacientes", href: "/patients", icon: Users, permission: PERMISSIONS.VIEW_PATIENTS },
   {
     name: "Prescrição Médica",
     icon: FileText,
+    permission: PERMISSIONS.PRESCRIBE,
     children: [
       { name: "Lista de Pacientes", href: "/prescription", icon: Users },
     ],
   },
-  { name: "Enfermagem", href: "/enfermagem", icon: Stethoscope },
+  { name: "Enfermagem", href: "/enfermagem", icon: Syringe, permission: PERMISSIONS.ADMINISTER_MEDS },
+  { name: "Farmácia", href: "/farmacia", icon: Pill, permission: PERMISSIONS.DISPENSE },
   { name: "Importar SISREG", href: "/importar-sisreg", icon: Upload },
   { name: "Estornar Consulta", href: "/estornar", icon: RotateCcw },
   { name: "Atualizar Consulta", href: "/atualizar", icon: RefreshCw },
@@ -63,30 +67,34 @@ const baseMenuItems: MenuItem[] = [
   { name: "Pesquisas", href: "/pesquisas", icon: Search },
   { name: "Diária", href: "/diaria", icon: BarChart3 },
   { name: "Relatórios", href: "/relatorios", icon: FileBarChart },
+  { name: "Administração", href: "/usuarios", icon: ShieldCheck, permission: PERMISSIONS.ALL },
 ];
-
-const adminMenuItem: MenuItem = { name: "Usuários", href: "/usuarios", icon: UserCog };
 
 export function AppSidebar() {
   const location = useLocation();
-  const { toast } = useToast();
-  const { isAdmin } = useAdminAccess();
+  const { hasPermission, isAdmin } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>(["Ambulatório"]);
 
-  // Build menu items based on admin status
-  const menuItems = isAdmin 
-    ? [...baseMenuItems, adminMenuItem] 
-    : baseMenuItems;
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Desconectado",
-      description: "Você foi desconectado com sucesso.",
+  // Filter menu items based on permissions
+  const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
+    return items.filter((item) => {
+      // No permission required - show to all
+      if (!item.permission) return true;
+      // Admin sees everything
+      if (isAdmin) return true;
+      // Check specific permission
+      return hasPermission(item.permission);
+    }).map((item) => {
+      if (item.children) {
+        return { ...item, children: filterMenuItems(item.children) };
+      }
+      return item;
     });
   };
+
+  const visibleMenuItems = filterMenuItems(menuItems);
 
   const toggleExpanded = (name: string) => {
     setExpandedItems((prev) =>
@@ -97,12 +105,15 @@ export function AppSidebar() {
   };
 
   const isActive = (href?: string) => href && location.pathname === href;
+  const isChildActive = (children?: MenuItem[]) => 
+    children?.some((child) => isActive(child.href));
 
   const renderMenuItem = (item: MenuItem, depth = 0) => {
     const Icon = item.icon;
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.includes(item.name);
     const active = isActive(item.href);
+    const childActive = isChildActive(item.children);
 
     if (hasChildren) {
       return (
@@ -111,6 +122,7 @@ export function AppSidebar() {
             onClick={() => toggleExpanded(item.name)}
             className={cn(
               "w-full flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 rounded-lg mx-2",
+              (isExpanded || childActive) && "bg-sidebar-accent/50",
               collapsed && "justify-center px-2"
             )}
           >
@@ -121,18 +133,23 @@ export function AppSidebar() {
                   {item.name}
                 </span>
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200" />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 transition-transform duration-200" />
                 )}
               </>
             )}
           </button>
-          {!collapsed && isExpanded && (
+          <div
+            className={cn(
+              "overflow-hidden transition-all duration-300",
+              !collapsed && isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
             <div className="ml-4 mt-1 space-y-1">
               {item.children?.map((child) => renderMenuItem(child, depth + 1))}
             </div>
-          )}
+          </div>
         </div>
       );
     }
@@ -141,9 +158,10 @@ export function AppSidebar() {
       <Link
         key={item.name}
         to={item.href || "#"}
+        onClick={() => setMobileOpen(false)}
         className={cn(
           "flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 rounded-lg mx-2",
-          active && "bg-white/10 border-l-4 border-white text-sidebar-foreground font-semibold",
+          active && "bg-white/15 border-l-4 border-white text-sidebar-foreground font-semibold shadow-sm",
           collapsed && "justify-center px-2",
           depth > 0 && "py-2.5 text-sm"
         )}
@@ -158,107 +176,95 @@ export function AppSidebar() {
     );
   };
 
+  const SidebarContent = () => (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+        {!collapsed && (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white">MedFlow</h1>
+              <p className="text-xs text-white/70">Sistema de Gestão</p>
+            </div>
+          </div>
+        )}
+        {collapsed && (
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mx-auto">
+            <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <ScrollArea className="flex-1 py-4">
+        <nav className="space-y-1" role="menu">
+          {visibleMenuItems.map((item) => renderMenuItem(item))}
+        </nav>
+      </ScrollArea>
+    </>
+  );
+
   return (
     <>
-      {/* Mobile Sidebar - Hidden on desktop */}
-      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b w-full flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-foreground"
-          aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b w-full flex items-center gap-3 shadow-sm">
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-foreground"
+              aria-label="Abrir menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-72 bg-primary border-0">
+            <div className="h-full flex flex-col">
+              <SidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
         <div className="flex items-center gap-2">
           <Stethoscope className="h-5 w-5 text-primary" />
           <span className="font-semibold text-foreground">MedFlow</span>
         </div>
       </div>
 
-      {/* Mobile Overlay */}
-      {mobileOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
-          onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "h-screen bg-primary flex flex-col transition-all duration-300",
-          // Mobile: fixed, slide in/out
-          "fixed lg:sticky top-0 z-50",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-          // Width
+          "hidden lg:flex h-screen bg-primary flex-col transition-all duration-300 sticky top-0",
           collapsed ? "w-20" : "w-72"
         )}
         role="navigation"
         aria-label="Menu principal"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-          {!collapsed && (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white">MedFlow</h1>
-                <p className="text-xs text-white/70">Sistema de Gestão</p>
-              </div>
-            </div>
-          )}
+        <SidebarContent />
+
+        {/* Collapse Toggle */}
+        <div className="p-4 border-t border-sidebar-border">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (window.innerWidth < 1024) {
-                setMobileOpen(false);
-              } else {
-                setCollapsed(!collapsed);
-              }
-            }}
-            className="text-white hover:bg-white/10"
+            size="sm"
+            onClick={() => setCollapsed(!collapsed)}
+            className={cn(
+              "w-full text-white/90 hover:bg-white/10 hover:text-white transition-all duration-200",
+              collapsed && "px-2"
+            )}
             aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
           >
-            {collapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
-          </Button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 py-4 space-y-1 overflow-y-auto custom-scrollbar" role="menu">
-          {menuItems.map((item) => renderMenuItem(item))}
-        </nav>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-sidebar-border space-y-2">
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start gap-3 text-white/90 hover:bg-white/10 hover:text-white",
-              collapsed && "justify-center px-2"
+            {collapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <>
+                <X className="h-5 w-5 mr-2" />
+                <span>Recolher</span>
+              </>
             )}
-            aria-label="Notificações"
-          >
-            <Bell className="h-5 w-5" aria-hidden="true" />
-            {!collapsed && <span>Notificações</span>}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className={cn(
-              "w-full justify-start gap-3 text-white/90 hover:bg-white/10 hover:text-white",
-              collapsed && "justify-center px-2"
-            )}
-            aria-label="Sair do sistema"
-          >
-            <LogOut className="h-5 w-5" aria-hidden="true" />
-            {!collapsed && <span>Sair</span>}
           </Button>
         </div>
       </aside>
