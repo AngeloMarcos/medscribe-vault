@@ -279,47 +279,37 @@ export default function AdminUserManagement() {
     enabled: isAdmin,
   });
 
-  // Mutation: Create user
+  // Mutation: Create user via Edge Function (avoids auto-login issue)
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserFormData) => {
-      // 1. Create user via signUp
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.full_name,
-          },
+      // Get current session token
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error("Você precisa estar logado como admin");
+      }
+
+      // Call edge function to create user (uses Admin API, no auto-login)
+      const { data: result, error } = await supabase.functions.invoke("create-user", {
+        body: {
+          email: data.email,
+          password: data.password,
+          full_name: data.full_name,
+          role: data.role,
+          professional_id: data.professional_id || null,
+          phone: data.phone || null,
         },
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Falha ao criar usuário");
-
-      const userId = authData.user.id;
-
-      // 2. Update profile with additional data
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          professional_id: data.professional_id || null,
-          phone: data.phone || null,
-        })
-        .eq("id", userId);
-
-      if (profileError) {
-        console.error("Error updating profile:", profileError);
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Erro ao criar usuário");
       }
 
-      // 3. Insert role
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: userId,
-        role: data.role,
-      });
+      if (!result.success) {
+        throw new Error(result.error || "Erro ao criar usuário");
+      }
 
-      if (roleError) throw roleError;
-
-      return { userId };
+      return { userId: result.userId };
     },
     onSuccess: () => {
       toast.success("Usuário criado com sucesso!");
@@ -329,11 +319,7 @@ export default function AdminUserManagement() {
     },
     onError: (error: any) => {
       console.error("Create user error:", error);
-      if (error.message?.includes("already registered")) {
-        toast.error("Este email já está cadastrado");
-      } else {
-        toast.error(error.message || "Erro ao criar usuário");
-      }
+      toast.error(error.message || "Erro ao criar usuário");
     },
   });
 
