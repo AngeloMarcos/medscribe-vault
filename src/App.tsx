@@ -16,6 +16,7 @@ import EstornarConsulta from "./pages/EstornarConsulta";
 import Appointments from "./pages/Appointments";
 import UserManagement from "./pages/UserManagement";
 import Atendimento from "./pages/Atendimento";
+import PrescriptionList from "./pages/PrescriptionList";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -69,7 +70,8 @@ const App = () => {
                 <Route path="marcar-consulta" element={<MarcarConsulta />} />
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="grades" element={<div className="p-8 text-center text-muted-foreground">Grades de Agendamento - Em desenvolvimento</div>} />
-                <Route path="prescricao" element={<div className="p-8 text-center text-muted-foreground">Prescrição - Em desenvolvimento</div>} />
+                <Route path="prescricao" element={<PrescriptionList />} />
+                <Route path="prescription/create/:patientId" element={<div className="p-8 text-center text-muted-foreground">Criar Prescrição - Em desenvolvimento</div>} />
                 <Route path="enfermagem" element={<div className="p-8 text-center text-muted-foreground">Enfermagem - Em desenvolvimento</div>} />
                 <Route path="importar-sisreg" element={<div className="p-8 text-center text-muted-foreground">Importar SISREG - Em desenvolvimento</div>} />
                 <Route path="estornar" element={<EstornarConsulta />} />
