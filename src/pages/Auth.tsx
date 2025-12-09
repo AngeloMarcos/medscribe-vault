@@ -11,7 +11,7 @@ import { authSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
 import { z } from "zod";
 
-type AuthMode = "login" | "signup" | "forgot-password" | "reset-password";
+type AuthMode = "login" | "forgot-password";
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().email("Email inválido").max(255, "Email deve ter no máximo 255 caracteres"),
@@ -22,7 +22,6 @@ const Auth = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<AuthMode>("login");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -83,53 +82,6 @@ const Auth = () => {
     }
   };
 
-  const handleSignUp = async () => {
-    setErrors({});
-    const result = authSchema.safeParse({ email, password });
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as string] = err.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setErrors({ confirmPassword: "As senhas não conferem" });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: result.data.email,
-        password: result.data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        },
-      });
-      if (error) throw error;
-      toast({
-        title: "Conta criada!",
-        description: "Você pode fazer login agora.",
-      });
-      setMode("login");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: getUserFriendlyError(error),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleForgotPassword = async () => {
     setErrors({});
     const result = forgotPasswordSchema.safeParse({ email });
@@ -170,8 +122,6 @@ const Auth = () => {
     e.preventDefault();
     if (mode === "login") {
       await handleLogin();
-    } else if (mode === "signup") {
-      await handleSignUp();
     } else if (mode === "forgot-password") {
       await handleForgotPassword();
     }
@@ -181,8 +131,6 @@ const Auth = () => {
     switch (mode) {
       case "login":
         return "Entre na sua conta";
-      case "signup":
-        return "Criar nova conta";
       case "forgot-password":
         return "Recuperar senha";
       default:
@@ -194,8 +142,6 @@ const Auth = () => {
     switch (mode) {
       case "login":
         return "Entrar";
-      case "signup":
-        return "Criar conta";
       case "forgot-password":
         return "Enviar email";
       default:
@@ -273,26 +219,6 @@ const Auth = () => {
               </div>
             )}
 
-            {/* Confirmar Senha (Signup) */}
-            {mode === "signup" && (
-              <div className="space-y-2">
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
-                  <Input
-                    type="password"
-                    placeholder="Confirmar senha"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    maxLength={128}
-                    required
-                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/20 h-12"
-                  />
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-300 pl-1">{errors.confirmPassword}</p>
-                )}
-              </div>
-            )}
 
             {/* Botão de ação */}
             <Button 
@@ -308,45 +234,15 @@ const Auth = () => {
           {/* Links de navegação */}
           <div className="mt-6 space-y-3 text-center">
             {mode === "login" && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("forgot-password");
-                    setErrors({});
-                  }}
-                  className="block w-full text-white/60 hover:text-white text-sm transition-colors"
-                >
-                  Esqueceu a senha?
-                </button>
-                <div className="h-px bg-white/20 my-4" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("signup");
-                    setErrors({});
-                    setPassword("");
-                  }}
-                  className="block w-full text-white hover:text-white/80 font-medium transition-colors"
-                >
-                  Não tem conta? <span className="underline underline-offset-2">Criar agora</span>
-                </button>
-              </>
-            )}
-
-            {mode === "signup" && (
               <button
                 type="button"
                 onClick={() => {
-                  setMode("login");
+                  setMode("forgot-password");
                   setErrors({});
-                  setPassword("");
-                  setConfirmPassword("");
                 }}
-                className="flex items-center justify-center gap-2 w-full text-white hover:text-white/80 font-medium transition-colors"
+                className="block w-full text-white/60 hover:text-white text-sm transition-colors"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Voltar ao login
+                Esqueceu a senha?
               </button>
             )}
 
