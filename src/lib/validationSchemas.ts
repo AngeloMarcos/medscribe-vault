@@ -84,9 +84,52 @@ export const authSchema = z.object({
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres').max(128, 'Senha deve ter no máximo 128 caracteres'),
 });
 
+// Clinical attendance validation
+export const atendimentoSchema = z.object({
+  anamnese: z.string().max(10000, 'Anamnese deve ter no máximo 10000 caracteres').optional().or(z.literal('')),
+  evolucao: z.string().max(10000, 'Evolução deve ter no máximo 10000 caracteres').optional().or(z.literal('')),
+  prescricao: z.string().max(10000, 'Prescrição deve ter no máximo 10000 caracteres').optional().or(z.literal('')),
+});
+
+export const vitalsSchema = z.object({
+  blood_pressure: z.string()
+    .max(20, 'Pressão arterial deve ter no máximo 20 caracteres')
+    .refine((val) => !val || /^\d{2,3}\/\d{2,3}$/.test(val), 'Formato inválido. Use ex: 120/80')
+    .optional().or(z.literal('')),
+  heart_rate: z.string()
+    .max(10, 'Frequência cardíaca deve ter no máximo 10 caracteres')
+    .refine((val) => !val || /^\d{1,3}$/.test(val), 'Use apenas números (ex: 72)')
+    .optional().or(z.literal('')),
+  respiratory_rate: z.string()
+    .max(10, 'Frequência respiratória deve ter no máximo 10 caracteres')
+    .refine((val) => !val || /^\d{1,3}$/.test(val), 'Use apenas números (ex: 16)')
+    .optional().or(z.literal('')),
+  temperature: z.string()
+    .max(10, 'Temperatura deve ter no máximo 10 caracteres')
+    .refine((val) => !val || /^\d{2}([.,]\d)?$/.test(val), 'Formato inválido. Use ex: 36.5')
+    .optional().or(z.literal('')),
+  o2_sat: z.string()
+    .max(10, 'Saturação O2 deve ter no máximo 10 caracteres')
+    .refine((val) => !val || /^\d{1,3}$/.test(val), 'Use apenas números (ex: 98)')
+    .optional().or(z.literal('')),
+});
+
+export const finishAttendanceSchema = z.object({
+  conduta: z.string()
+    .trim()
+    .min(1, 'A conduta é obrigatória')
+    .max(2000, 'Conduta deve ter no máximo 2000 caracteres'),
+  destino: z.string().min(1, 'Selecione o destino do paciente'),
+  setorEncaminhamento: z.string().max(100, 'Setor deve ter no máximo 100 caracteres').optional().or(z.literal('')),
+  observacoes: z.string().max(2000, 'Observações devem ter no máximo 2000 caracteres').optional().or(z.literal('')),
+});
+
 export type PatientFormData = z.infer<typeof patientSchema>;
 export type AppointmentFormData = z.infer<typeof appointmentSchema>;
 export type ExamRequestFormData = z.infer<typeof examRequestSchema>;
 export type ProcedureFormData = z.infer<typeof procedureSchema>;
 export type ReportFormData = z.infer<typeof reportSchema>;
 export type AuthFormData = z.infer<typeof authSchema>;
+export type AtendimentoFormData = z.infer<typeof atendimentoSchema>;
+export type VitalsFormData = z.infer<typeof vitalsSchema>;
+export type FinishAttendanceFormData = z.infer<typeof finishAttendanceSchema>;

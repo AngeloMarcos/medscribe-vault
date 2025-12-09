@@ -16,6 +16,7 @@ import { FinishAttendanceModal } from "@/components/atendimento/FinishAttendance
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInYears, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { atendimentoSchema, vitalsSchema } from "@/lib/validationSchemas";
 import {
   User,
   Calendar,
@@ -150,6 +151,16 @@ export default function Atendimento() {
   const handleSaveVitals = async () => {
     if (!consulta?.patients?.id) return;
 
+    const validation = vitalsSchema.safeParse(vitals);
+    if (!validation.success) {
+      toast({
+        title: "Dados inválidos",
+        description: validation.error.errors[0]?.message || "Verifique os valores informados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.from("vitals").insert({
         patient_id: consulta.patients.id,
@@ -179,17 +190,23 @@ export default function Atendimento() {
   }) => {
     if (!consulta?.patients?.id || !id) return;
 
+    // Validate clinical data before saving
+    const clinicalValidation = atendimentoSchema.safeParse({ anamnese, evolucao, prescricao });
+    if (!clinicalValidation.success) {
+      throw new Error(clinicalValidation.error.errors[0]?.message || "Dados clínicos inválidos");
+    }
+
     // Upsert atendimento record
     const atendimentoData = {
       consulta_id: id,
       paciente_id: consulta.patients.id,
       profissional_id: consulta.profissional_id,
-      anamnese,
-      evolucao,
-      prescricao,
+      anamnese: anamnese.slice(0, 10000),
+      evolucao: evolucao.slice(0, 10000),
+      prescricao: prescricao.slice(0, 10000),
       cid_principal: selectedCids[0] || null,
       cids_secundarios: selectedCids.slice(1),
-      observacoes: data.observacoes,
+      observacoes: data.observacoes?.slice(0, 2000),
       assinado: true,
       data_assinatura: new Date().toISOString(),
     };
