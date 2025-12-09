@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Bell, User, ChevronDown } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,20 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { UserProfile } from "@/components/auth/UserProfile";
 
 export function AppHeader() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Desconectado",
-      description: "Você foi desconectado com sucesso.",
-    });
-  };
 
   return (
     <header className="h-[72px] bg-card border-b border-border shadow-soft sticky top-0 z-40">
@@ -95,30 +85,7 @@ export function AppHeader() {
           </DropdownMenu>
 
           {/* User Profile */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 px-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
-                </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">Dr. Ricardo</p>
-                  <p className="text-xs text-muted-foreground">Médico</p>
-                </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Perfil</DropdownMenuItem>
-              <DropdownMenuItem>Configurações</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <UserProfile />
         </div>
       </div>
     </header>
