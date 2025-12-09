@@ -199,7 +199,7 @@ export default function AdminUserManagement() {
     },
   });
 
-  // Query: Fetch users with roles
+  // Query: Fetch users with roles (separate queries since no FK relationship)
   const {
     data: usersData,
     isLoading: usersLoading,
@@ -207,22 +207,10 @@ export default function AdminUserManagement() {
   } = useQuery({
     queryKey: ["admin-users", search, roleFilter, statusFilter, page],
     queryFn: async () => {
+      // First, fetch profiles
       let query = supabase
         .from("profiles")
-        .select(
-          `
-          id,
-          email,
-          full_name,
-          professional_id,
-          phone,
-          avatar_url,
-          is_active,
-          created_at,
-          user_roles!left(id, role)
-        `,
-          { count: "exact" }
-        )
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
       // Apply search filter
@@ -243,13 +231,34 @@ export default function AdminUserManagement() {
       const offset = (page - 1) * PAGE_SIZE;
       query = query.range(offset, offset + PAGE_SIZE - 1);
 
-      const { data, error, count } = await query;
+      const { data: profiles, error: profilesError, count } = await query;
 
-      if (error) throw error;
+      if (profilesError) throw profilesError;
+
+      if (!profiles || profiles.length === 0) {
+        return { users: [], total: 0, totalPages: 0 };
+      }
+
+      // Then, fetch roles for these users
+      const userIds = profiles.map((p) => p.id);
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("id, user_id, role")
+        .in("user_id", userIds);
+
+      if (rolesError) {
+        console.error("Error fetching roles:", rolesError);
+        // Continue without roles
+      }
+
+      // Create a map of user_id -> role data
+      const rolesMap = new Map(
+        (roles || []).map((r) => [r.user_id, { id: r.id, role: r.role }])
+      );
 
       // Transform data
-      const users: UserWithRole[] = (data || []).map((profile: any) => {
-        const userRole = profile.user_roles?.[0];
+      const users: UserWithRole[] = profiles.map((profile) => {
+        const userRole = rolesMap.get(profile.id);
         return {
           id: profile.id,
           email: profile.email,
@@ -259,12 +268,12 @@ export default function AdminUserManagement() {
           avatar_url: profile.avatar_url,
           is_active: profile.is_active ?? true,
           created_at: profile.created_at,
-          role: userRole?.role || null,
+          role: (userRole?.role as AppRole) || null,
           role_id: userRole?.id || null,
         };
       });
 
-      // Filter by role (client-side since it's a join)
+      // Filter by role (client-side)
       const filteredUsers =
         roleFilter === "all"
           ? users
