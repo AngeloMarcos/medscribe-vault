@@ -19,6 +19,8 @@ import {
   Loader2,
   ShieldAlert,
   ArrowLeft,
+  KeyRound,
+  Activity,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -75,8 +77,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AppRole, ROLE_LABELS } from "@/types/auth";
+import UserActivityLogs from "@/components/admin/UserActivityLogs";
+import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
 
 // Types
 interface UserWithRole {
@@ -166,7 +171,9 @@ export default function AdminUserManagement() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
+  const [activeTab, setActiveTab] = useState("users");
 
   // Forms
   const createForm = useForm<CreateUserFormData>({
@@ -470,6 +477,11 @@ export default function AdminUserManagement() {
     setDeleteDialogOpen(true);
   };
 
+  const handleResetPasswordClick = (user: UserWithRole) => {
+    setSelectedUser(user);
+    setResetPasswordDialogOpen(true);
+  };
+
   const handleToggleStatus = (user: UserWithRole) => {
     toggleStatusMutation.mutate({
       userId: user.id,
@@ -546,7 +558,7 @@ export default function AdminUserManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{totalUsers}</div>
@@ -565,7 +577,34 @@ export default function AdminUserManagement() {
             <p className="text-sm text-muted-foreground">Usuários inativos</p>
           </CardContent>
         </Card>
+        <Card
+          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={() => setActiveTab("logs")}
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium">Logs de Atividade</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Ver histórico de ações</p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="users" className="gap-2">
+            <Users className="h-4 w-4" />
+            Usuários
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-2">
+            <Activity className="h-4 w-4" />
+            Logs de Atividade
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="users" className="space-y-4 mt-4">
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -724,6 +763,12 @@ export default function AdminUserManagement() {
                               </>
                             )}
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleResetPasswordClick(user)}
+                          >
+                            <KeyRound className="h-4 w-4 mr-2" />
+                            Redefinir Senha
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => handleDeleteClick(user)}
@@ -767,6 +812,12 @@ export default function AdminUserManagement() {
           </Button>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="logs" className="mt-4">
+          <UserActivityLogs />
+        </TabsContent>
+      </Tabs>
 
       {/* Create User Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -1062,6 +1113,13 @@ export default function AdminUserManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reset Password Dialog */}
+      <ResetPasswordDialog
+        open={resetPasswordDialogOpen}
+        onOpenChange={setResetPasswordDialogOpen}
+        user={selectedUser}
+      />
     </div>
   );
 }
