@@ -160,8 +160,8 @@ export function AppSidebar() {
         to={item.href || "#"}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 rounded-lg mx-2",
-          active && "bg-white/15 border-l-4 border-white text-sidebar-foreground font-semibold shadow-sm",
+          "flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-white/10 hover:text-sidebar-foreground transition-all duration-200 rounded-xl mx-2",
+          active && "bg-white/20 text-sidebar-foreground font-semibold shadow-sm",
           collapsed && "justify-center px-2",
           depth > 0 && "py-2.5 text-sm"
         )}
@@ -182,17 +182,17 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <div className="w-11 h-11 bg-white/25 rounded-xl flex items-center justify-center shadow-sm">
               <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">MedFlow</h1>
-              <p className="text-xs text-white/70">Sistema de Gestão</p>
+              <h1 className="text-lg font-bold text-white tracking-tight">MedFlow</h1>
+              <p className="text-[10px] text-white/80 font-medium">MentoArk Health</p>
             </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mx-auto">
+          <div className="w-11 h-11 bg-white/25 rounded-xl flex items-center justify-center mx-auto shadow-sm">
             <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
           </div>
         )}
@@ -229,8 +229,13 @@ export function AppSidebar() {
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-2">
-          <Stethoscope className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-foreground">MedFlow</span>
+          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Stethoscope className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <span className="font-semibold text-foreground text-sm">MedFlow</span>
+            <p className="text-[9px] text-muted-foreground">MentoArk Health</p>
+          </div>
         </div>
       </div>
 

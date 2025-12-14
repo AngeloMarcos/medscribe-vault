@@ -101,40 +101,40 @@ export default function NewDashboard() {
   const isLoading = isLoadingConsultas || isLoadingPatients;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Painel Geral</h1>
-          <p className="text-muted-foreground capitalize">{today}</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel Geral</h1>
+          <p className="text-muted-foreground capitalize text-sm mt-1">{today}</p>
         </div>
         <div className="flex gap-3">
-          <Button asChild>
+          <Button asChild className="shadow-sm">
             <Link to="/marcar-consulta">Nova Consulta</Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="shadow-sm">
             <Link to="/lista-pacientes">Ver Lista de Pacientes</Link>
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="card-neumorphic">
+            <Card key={stat.title} className="card-neumorphic border-0 hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
+                    <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
                     {isLoading ? (
-                      <Skeleton className="h-9 w-12 mt-1" />
+                      <Skeleton className="h-9 w-12 mt-2" />
                     ) : (
-                      <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                      <p className="text-3xl font-bold mt-2 tracking-tight">{stat.value}</p>
                     )}
                   </div>
-                  <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+                  <div className={`p-4 rounded-2xl ${stat.bgColor}`}>
                     <Icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
@@ -145,13 +145,13 @@ export default function NewDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Upcoming Appointments */}
-        <Card className="card-neumorphic lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="card-neumorphic lg:col-span-2 border-0">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>
-              <CardTitle className="text-lg">Próximos Atendimentos</CardTitle>
-              <CardDescription>Pacientes agendados para hoje</CardDescription>
+              <CardTitle className="text-lg font-semibold">Próximos Atendimentos</CardTitle>
+              <CardDescription className="mt-1">Pacientes agendados para hoje</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link to="/lista-pacientes">Ver todos</Link>
@@ -207,11 +207,11 @@ export default function NewDashboard() {
         </Card>
 
         {/* Quick Actions & Alerts */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Quick Stats */}
-          <Card className="card-neumorphic">
-            <CardHeader>
-              <CardTitle className="text-lg">Resumo do Dia</CardTitle>
+          <Card className="card-neumorphic border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold">Resumo do Dia</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -250,11 +250,11 @@ export default function NewDashboard() {
           </Card>
 
           {/* Alerts */}
-          <Card className="card-neumorphic border-warning/50">
-            <CardHeader className="pb-3">
+          <Card className="card-neumorphic border-l-4 border-l-warning border-t-0 border-r-0 border-b-0">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-warning" />
-                <CardTitle className="text-lg">Alertas</CardTitle>
+                <CardTitle className="text-lg font-semibold">Alertas</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
