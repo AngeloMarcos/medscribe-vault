@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout } from "./components/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -29,100 +30,109 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <BrowserRouter>
-            <ErrorBoundary>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/auth" element={<Auth />} />
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AuthProvider>
+            <BrowserRouter>
+              <ErrorBoundary>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/auth" element={<Auth />} />
 
-                {/* Protected routes */}
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <MainLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<NewDashboard />} />
-                  <Route path="patients" element={<Patients />} />
-                  <Route path="patients/:id" element={<PatientDetail />} />
-                  <Route path="lista-pacientes" element={<ListaPacientes />} />
-                  <Route path="marcar-consulta" element={<MarcarConsulta />} />
-                  <Route path="appointments" element={<Appointments />} />
-                  <Route path="grades" element={<UnderConstruction title="Grades de Agendamento" />} />
-
-                  {/* Prescription Routes - Protected for medical staff */}
+                  {/* Protected routes */}
                   <Route
-                    path="prescription"
+                    path="/"
                     element={
-                      <ProtectedRoute requireMedical>
-                        <PrescriptionList />
+                      <ProtectedRoute>
+                        <MainLayout />
                       </ProtectedRoute>
                     }
-                  />
-                  <Route path="prescription/list" element={<Navigate to="/prescription" replace />} />
-                  <Route
-                    path="prescription/create/:patientId"
-                    element={
-                      <ProtectedRoute requireMedical>
-                        <CreatePrescription />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="prescription/maintain/:patientId"
-                    element={
-                      <ProtectedRoute requireMedical>
-                        <MaintainPrescription />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="prescription/maintain/:patientId/:prescriptionId"
-                    element={
-                      <ProtectedRoute requireMedical>
-                        <MaintainPrescription />
-                      </ProtectedRoute>
-                    }
-                  />
-                  {/* Legacy route redirect */}
-                  <Route path="prescricao" element={<Navigate to="/prescription" replace />} />
+                  >
+                    <Route index element={<NewDashboard />} />
+                    <Route path="patients" element={<Patients />} />
+                    <Route path="patients/:id" element={<PatientDetail />} />
+                    <Route path="lista-pacientes" element={<ListaPacientes />} />
+                    <Route path="marcar-consulta" element={<MarcarConsulta />} />
+                    <Route path="appointments" element={<Appointments />} />
+                    <Route path="grades" element={<UnderConstruction title="Grades de Agendamento" />} />
 
-                  <Route path="enfermagem" element={<UnderConstruction title="Enfermagem" />} />
-                  <Route path="importar-sisreg" element={<UnderConstruction title="Importar SISREG" />} />
-                  <Route path="estornar" element={<EstornarConsulta />} />
-                  <Route path="atualizar" element={<UnderConstruction title="Atualizar Consulta" />} />
-                  <Route path="atendimento/:id" element={<Atendimento />} />
-                  <Route path="cadastros" element={<UnderConstruction title="Cadastros" />} />
-                  <Route path="pesquisas" element={<UnderConstruction title="Pesquisas" />} />
-                  <Route path="diaria" element={<UnderConstruction title="Diária" />} />
-                  <Route path="relatorios" element={<UnderConstruction title="Relatórios" />} />
+                    {/* Odontologia Routes */}
+                    <Route path="odonto/agendar" element={<UnderConstruction title="Agendar Atendimento Odontológico" />} />
+                    <Route path="odonto/pacientes" element={<UnderConstruction title="Lista de Pacientes - Odontologia" />} />
+                    <Route path="odonto/odontograma" element={<UnderConstruction title="Odontograma" />} />
+                    <Route path="odonto/tratamento" element={<UnderConstruction title="Plano de Tratamento Odontológico" />} />
 
-                  {/* Admin routes */}
-                  <Route
-                    path="usuarios"
-                    element={
-                      <ProtectedRoute requireAdmin>
-                        <AdminUserManagement />
-                      </ProtectedRoute>
-                    }
-                  />
+                    {/* Prescription Routes - Protected for medical staff */}
+                    <Route
+                      path="prescription"
+                      element={
+                        <ProtectedRoute requireMedical>
+                          <PrescriptionList />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="prescription/list" element={<Navigate to="/prescription" replace />} />
+                    <Route
+                      path="prescription/create/:patientId"
+                      element={
+                        <ProtectedRoute requireMedical>
+                          <CreatePrescription />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="prescription/maintain/:patientId"
+                      element={
+                        <ProtectedRoute requireMedical>
+                          <MaintainPrescription />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="prescription/maintain/:patientId/:prescriptionId"
+                      element={
+                        <ProtectedRoute requireMedical>
+                          <MaintainPrescription />
+                        </ProtectedRoute>
+                      }
+                    />
+                    {/* Legacy route redirect */}
+                    <Route path="prescricao" element={<Navigate to="/prescription" replace />} />
 
-                  <Route path="perfil" element={<MyProfile />} />
-                </Route>
+                    <Route path="enfermagem" element={<UnderConstruction title="Enfermagem" />} />
+                    <Route path="farmacia" element={<UnderConstruction title="Farmácia" />} />
+                    <Route path="importar-sisreg" element={<UnderConstruction title="Importar SISREG" />} />
+                    <Route path="estornar" element={<EstornarConsulta />} />
+                    <Route path="atualizar" element={<UnderConstruction title="Atualizar Consulta" />} />
+                    <Route path="atendimento/:id" element={<Atendimento />} />
+                    <Route path="cadastros" element={<UnderConstruction title="Cadastros" />} />
+                    <Route path="pesquisas" element={<UnderConstruction title="Pesquisas" />} />
+                    <Route path="diaria" element={<UnderConstruction title="Diária" />} />
+                    <Route path="relatorios" element={<UnderConstruction title="Relatórios" />} />
 
-                {/* Catch-all redirect */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </ErrorBoundary>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
+                    {/* Admin routes */}
+                    <Route
+                      path="usuarios"
+                      element={
+                        <ProtectedRoute requireAdmin>
+                          <AdminUserManagement />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route path="perfil" element={<MyProfile />} />
+                  </Route>
+
+                  {/* Catch-all redirect */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
+            </BrowserRouter>
+          </AuthProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

@@ -78,52 +78,69 @@
   }
 
   .dark {
-    /* MentoArk Health Theme - Dark Mode (kept for compatibility) */
-    --primary: 183 90% 30%;
+    /* MentoArk Health Theme - Dark Mode */
+    
+    /* Primary - Sidebar background (deep dark) */
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 174 85% 35%;
+    /* Secondary - Green vibrant for buttons */
+    --secondary: 142 76% 36%;
     --secondary-foreground: 0 0% 100%;
     
-    --accent: 170 85% 32%;
+    /* Accent - Hover state */
+    --accent: 142 64% 30%;
     --accent-foreground: 0 0% 100%;
     
-    --background: 222 47% 8%;
-    --foreground: 175 30% 95%;
+    /* Background - #020617 (deep blue-black) */
+    --background: 222 47% 2%;
+    /* Foreground - #E5E7EB (light gray) */
+    --foreground: 220 13% 91%;
     
-    --card: 222 47% 11%;
-    --card-foreground: 175 30% 95%;
+    /* Card - #0B1020 (slightly lighter dark) */
+    --card: 222 47% 5%;
+    --card-foreground: 220 13% 91%;
     
-    --popover: 222 47% 11%;
-    --popover-foreground: 175 30% 95%;
+    /* Popover */
+    --popover: 222 47% 5%;
+    --popover-foreground: 220 13% 91%;
     
-    --muted: 222 30% 16%;
-    --muted-foreground: 220 13% 60%;
+    /* Muted */
+    --muted: 222 30% 12%;
+    --muted-foreground: 220 13% 65%;
     
-    --destructive: 0 70% 50%;
+    /* Status Colors - more vibrant for dark mode */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --success: 142 70% 42%;
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
     
-    --warning: 38 85% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 0%;
     
-    --info: 174 80% 38%;
+    --info: 142 76% 40%;
     --info-foreground: 0 0% 100%;
     
-    --border: 222 30% 20%;
-    --input: 222 30% 18%;
-    --ring: 174 80% 38%;
+    /* Border & Input */
+    --border: 222 30% 15%;
+    --input: 222 30% 12%;
+    --ring: 142 76% 36%;
     
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 175 30% 95%;
-    --sidebar-primary: 174 80% 38%;
+    /* Sidebar - matches dark background */
+    --sidebar-background: 222 47% 2%;
+    --sidebar-foreground: 220 13% 91%;
+    --sidebar-primary: 142 76% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 30% 16%;
-    --sidebar-accent-foreground: 175 30% 95%;
-    --sidebar-border: 222 30% 20%;
-    --sidebar-ring: 174 80% 38%;
+    --sidebar-accent: 222 30% 12%;
+    --sidebar-accent-foreground: 220 13% 91%;
+    --sidebar-border: 222 30% 15%;
+    --sidebar-ring: 142 76% 36%;
+    
+    /* Custom shadows for dark mode */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 }
 
