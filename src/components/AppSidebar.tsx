@@ -32,6 +32,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { Permission, PERMISSIONS } from "@/types/auth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface MenuItem {
   name: string;
@@ -223,33 +224,36 @@ export function AppSidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b border-border w-full flex items-center gap-3 shadow-sm">
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-foreground"
-              aria-label="Abrir menu"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 bg-sidebar border-0">
-            <div className="h-full flex flex-col">
-              <SidebarContent />
+      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b border-border w-full flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground"
+                aria-label="Abrir menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-72 bg-sidebar border-0">
+              <div className="h-full flex flex-col">
+                <SidebarContent />
+              </div>
+            </SheetContent>
+          </Sheet>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Stethoscope className="h-4 w-4 text-primary" />
             </div>
-          </SheetContent>
-        </Sheet>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-            <Stethoscope className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <span className="font-semibold text-foreground text-sm">HealthFlow</span>
-            <p className="text-[8px] text-muted-foreground leading-tight">Sistema de Gestão Clínica</p>
+            <div>
+              <span className="font-semibold text-foreground text-sm">HealthFlow</span>
+              <p className="text-[8px] text-muted-foreground leading-tight">Sistema de Gestão Clínica</p>
+            </div>
           </div>
         </div>
+        <ThemeToggle />
       </div>
 
       {/* Desktop Sidebar */}
