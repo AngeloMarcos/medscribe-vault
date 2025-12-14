@@ -6,6 +6,9 @@ import {
   UserCheck,
   Activity,
   AlertTriangle,
+  Users,
+  TrendingUp,
+  Stethoscope,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +37,8 @@ export default function NewDashboard() {
           *,
           patients:paciente_id(name, medical_record_number),
           especialidades:especialidade_id(nome),
-          salas:sala_id(numero)
+          salas:sala_id(numero),
+          profissionais:profissional_id(nome)
         `)
         .eq("data_consulta", todayDate)
         .order("hora_inicio", { ascending: true });
@@ -61,51 +65,81 @@ export default function NewDashboard() {
       description: "Total de consultas agendadas",
       value: consultas?.length || 0,
       icon: UserRound,
-      color: "text-secondary",
-      bgColor: "bg-[#E0F2F1]",
     },
     {
-      title: "Aguardando",
+      title: "Aguardando Atendimento",
       description: "Na recepção ou sala de espera",
       value: consultas?.filter((c) => c.status === "aguardando").length || 0,
       icon: Clock,
-      color: "text-[#F59E0B]",
-      bgColor: "bg-[#FEF3C7]",
     },
     {
       title: "Em Atendimento",
       description: "Sendo atendidos agora",
       value: consultas?.filter((c) => c.status === "em_atendimento").length || 0,
       icon: Activity,
-      color: "text-secondary",
-      bgColor: "bg-[#E0F2F1]",
     },
     {
-      title: "Atendidos",
+      title: "Atendidos Hoje",
       description: "Consultas finalizadas",
       value: consultas?.filter((c) => c.status === "finalizado").length || 0,
       icon: UserCheck,
-      color: "text-[#16A34A]",
-      bgColor: "bg-[#DCFCE7]",
     },
   ];
 
   const upcomingConsultas = consultas?.filter(
-    (c) => c.status === "agendado" || c.status === "aguardando"
+    (c) => c.status === "agendado" || c.status === "aguardando" || c.status === "em_atendimento"
   ).slice(0, 5) || [];
 
   const ausentesCount = consultas?.filter((c) => c.faltou_paciente).length || 0;
   const pendentesCount = consultas?.filter((c) => c.status === "pendente").length || 0;
-  const totalAtendidos = consultas?.filter((c) => c.status === "finalizado").length || 0;
   const totalConsultas = consultas?.length || 0;
   const taxaComparecimento = totalConsultas > 0 
     ? Math.round(((totalConsultas - ausentesCount) / totalConsultas) * 100) 
     : 0;
 
+  // Função para cor condicional da taxa de comparecimento
+  const getTaxaColor = (taxa: number) => {
+    if (taxa >= 80) return 'text-[#16A34A]';
+    if (taxa >= 50) return 'text-[#F59E0B]';
+    return 'text-[#DC2626]';
+  };
+
+  const getTaxaBgColor = (taxa: number) => {
+    if (taxa >= 80) return 'bg-[#DCFCE7]';
+    if (taxa >= 50) return 'bg-[#FEF3C7]';
+    return 'bg-[#FEE2E2]';
+  };
+
+  // Função para badge de status
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "aguardando":
+        return {
+          label: "Aguardando",
+          className: "bg-[#FEF3C7] text-[#B45309] border-[#FCD34D]",
+        };
+      case "em_atendimento":
+        return {
+          label: "Em atendimento",
+          className: "bg-[#E0F2F1] text-[#009688] border-[#80CBC4]",
+        };
+      case "finalizado":
+        return {
+          label: "Concluído",
+          className: "bg-[#DCFCE7] text-[#16A34A] border-[#86EFAC]",
+        };
+      default:
+        return {
+          label: "Agendado",
+          className: "bg-muted text-muted-foreground border-border",
+        };
+    }
+  };
+
   const isLoading = isLoadingConsultas || isLoadingPatients;
 
   return (
-    <div className="space-y-10 pb-10">
+    <div className="space-y-12 pb-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -125,26 +159,30 @@ export default function NewDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* Stats Cards - Ícone no canto superior direito */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="bg-card border border-[#E0F2F1] hover:border-secondary/30 hover:shadow-md transition-all duration-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-label text-muted-foreground">{stat.title}</p>
-                    {isLoading ? (
-                      <Skeleton className="h-9 w-12 mt-2" />
-                    ) : (
-                      <p className="text-3xl font-bold mt-2 tracking-tight text-foreground">{stat.value}</p>
-                    )}
-                    <p className="text-helper mt-1">{stat.description}</p>
-                  </div>
-                  <div className={`p-4 rounded-2xl ${stat.bgColor}`}>
-                    <Icon className={`h-6 w-6 ${stat.color}`} />
-                  </div>
+            <Card 
+              key={stat.title} 
+              className="relative overflow-hidden bg-card border border-[#E0F2F1]/60 hover:border-secondary/40 hover:shadow-lg transition-all duration-300 shadow-sm rounded-2xl"
+            >
+              <CardContent className="p-6 lg:p-7">
+                {/* Ícone posicionado no canto superior direito */}
+                <div className="absolute top-5 right-5 p-3 rounded-full bg-[#E0F2F1]">
+                  <Icon className="h-5 w-5 text-[#009688]" />
+                </div>
+                
+                {/* Conteúdo principal */}
+                <div className="pr-14">
+                  <p className="text-label text-muted-foreground">{stat.title}</p>
+                  {isLoading ? (
+                    <Skeleton className="h-12 w-16 mt-3" />
+                  ) : (
+                    <p className="text-4xl font-bold mt-3 tracking-tight text-foreground">{stat.value}</p>
+                  )}
+                  <p className="text-helper mt-2">{stat.description}</p>
                 </div>
               </CardContent>
             </Card>
@@ -153,140 +191,186 @@ export default function NewDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Upcoming Appointments */}
-        <Card className="bg-card lg:col-span-2 border border-[#E0F2F1] shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <div>
-              <CardTitle className="text-card-title">Próximos Atendimentos</CardTitle>
-              <CardDescription className="text-caption mt-1">Pacientes aguardando consulta hoje</CardDescription>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        {/* Upcoming Appointments - Lista aprimorada */}
+        <Card className="bg-card lg:col-span-2 border border-[#E0F2F1]/60 shadow-sm rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between pb-4 px-6 lg:px-8 pt-6 lg:pt-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#E0F2F1]">
+                <Stethoscope className="h-5 w-5 text-[#009688]" />
+              </div>
+              <div>
+                <CardTitle className="text-card-title">Próximos Atendimentos</CardTitle>
+                <CardDescription className="text-caption mt-0.5">Pacientes agendados para hoje</CardDescription>
+              </div>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link to="/lista-pacientes">Ver todos</Link>
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 lg:px-8 pb-6 lg:pb-8">
             {isLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-20 w-full" />
+                  <Skeleton key={i} className="h-20 w-full rounded-xl" />
                 ))}
               </div>
             ) : upcomingConsultas.length > 0 ? (
               <div className="space-y-4">
-                {upcomingConsultas.map((consulta) => (
-                  <div
-                    key={consulta.id}
-                    className="flex items-center justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#E0F2F1] flex items-center justify-center">
-                        <UserRound className="h-5 w-5 text-secondary" />
+                {upcomingConsultas.map((consulta) => {
+                  const statusBadge = getStatusBadge(consulta.status);
+                  return (
+                    <div
+                      key={consulta.id}
+                      className="grid grid-cols-[1fr_auto_auto_auto] gap-4 lg:gap-6 items-center p-4 lg:p-5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 border border-transparent hover:border-[#E0F2F1]"
+                    >
+                      {/* Paciente */}
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-full bg-[#E0F2F1] flex items-center justify-center flex-shrink-0">
+                          <UserRound className="h-5 w-5 text-[#009688]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-label truncate">{consulta.patients?.name || "Paciente"}</p>
+                          <p className="text-caption truncate">
+                            {consulta.especialidades?.nome || "Consulta"} • Sala {consulta.salas?.numero || "-"}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-label">{consulta.patients?.name || "Paciente"}</p>
-                        <p className="text-caption">
-                          {consulta.especialidades?.nome || "Consulta"} • Sala {consulta.salas?.numero || "-"}
+                      
+                      {/* Horário */}
+                      <div className="text-center">
+                        <p className="text-lg font-semibold text-foreground">{consulta.hora_inicio?.slice(0, 5)}</p>
+                      </div>
+                      
+                      {/* Profissional */}
+                      <div className="hidden md:block text-right min-w-0">
+                        <p className="text-body text-muted-foreground truncate max-w-[140px]">
+                          {consulta.profissionais?.nome || "—"}
                         </p>
                       </div>
+                      
+                      {/* Status com Badge colorido */}
+                      <div className="text-right">
+                        <Badge
+                          variant="outline"
+                          className={`text-xs font-medium border ${statusBadge.className}`}
+                        >
+                          {statusBadge.label}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{consulta.hora_inicio?.slice(0, 5)}</p>
-                      <Badge
-                        variant="secondary"
-                        className={
-                          consulta.status === "aguardando"
-                            ? "bg-warning/20 text-warning"
-                            : "bg-muted"
-                        }
-                      >
-                        {consulta.status === "aguardando" ? "Na recepção" : "Agendado"}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <p className="text-center text-caption py-8">
-                Nenhuma consulta agendada para hoje
-              </p>
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                  <CalendarHeart className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <p className="text-body text-muted-foreground">Nenhuma consulta agendada para hoje</p>
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Quick Actions & Alerts */}
         <div className="space-y-8">
-          {/* Quick Stats */}
-          <Card className="bg-card border border-[#E0F2F1] shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-card-title">Visão Geral de Hoje</CardTitle>
-              <CardDescription className="text-caption">Resumo dos atendimentos</CardDescription>
+          {/* Resumo do Dia */}
+          <Card className="bg-card border border-[#E0F2F1]/60 shadow-sm rounded-2xl">
+            <CardHeader className="pb-4 px-6 lg:px-7 pt-6 lg:pt-7">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[#E0F2F1]">
+                  <TrendingUp className="h-5 w-5 text-[#009688]" />
+                </div>
+                <div>
+                  <CardTitle className="text-card-title">Resumo do Dia</CardTitle>
+                  <CardDescription className="text-caption mt-0.5">Estatísticas dos atendimentos</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-body text-muted-foreground">Pacientes cadastrados</span>
+            <CardContent className="space-y-4 px-6 lg:px-7 pb-6 lg:pb-7">
+              {/* Total cadastrados */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                <div className="flex items-center gap-3">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-body text-muted-foreground">Total cadastrados</span>
+                </div>
                 {isLoading ? (
-                  <Skeleton className="h-5 w-10" />
+                  <Skeleton className="h-5 w-12" />
                 ) : (
-                  <span className="font-semibold">{patientsCount}</span>
+                  <span className="font-semibold text-foreground">{patientsCount}</span>
                 )}
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-body text-muted-foreground">Não compareceram</span>
+              
+              {/* Ausentes */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                <span className="text-body text-muted-foreground">Ausentes</span>
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
-                  <span className="font-semibold text-[#DC2626]">{ausentesCount}</span>
+                  <span className={`font-semibold ${ausentesCount > 0 ? 'text-[#DC2626]' : 'text-foreground'}`}>
+                    {ausentesCount}
+                  </span>
                 )}
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-body text-muted-foreground">Aguardando confirmação</span>
+              
+              {/* Pendentes */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                <span className="text-body text-muted-foreground">Pendentes</span>
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
-                  <span className="font-semibold text-[#F59E0B]">{pendentesCount}</span>
+                  <span className={`font-semibold ${pendentesCount > 0 ? 'text-[#F59E0B]' : 'text-foreground'}`}>
+                    {pendentesCount}
+                  </span>
                 )}
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-body text-muted-foreground">Taxa de comparecimento</span>
+              
+              {/* Taxa de comparecimento com cor condicional */}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-[#E0F2F1]/60">
+                <span className="text-body font-medium text-foreground">Taxa de comparecimento</span>
                 {isLoading ? (
-                  <Skeleton className="h-5 w-10" />
+                  <Skeleton className="h-8 w-16" />
                 ) : (
-                  <span className="font-semibold text-[#16A34A]">{taxaComparecimento}%</span>
+                  <span className={`font-bold text-lg px-4 py-1.5 rounded-full ${getTaxaBgColor(taxaComparecimento)} ${getTaxaColor(taxaComparecimento)}`}>
+                    {taxaComparecimento}%
+                  </span>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Alerts */}
-          <Card className="bg-card border border-[#E0F2F1] border-l-4 border-l-[#F59E0B] shadow-sm">
-            <CardHeader className="pb-4">
+          {/* Alertas */}
+          <Card className="bg-card border border-[#E0F2F1]/60 border-l-4 border-l-[#F59E0B] shadow-sm rounded-2xl">
+            <CardHeader className="pb-4 px-6 lg:px-7 pt-6 lg:pt-7">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-[#F59E0B]" />
                 <CardTitle className="text-card-title">Atenção</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {ausentesCount > 0 ? (
-                <div className="p-3 rounded-lg bg-[#FEE2E2]">
+            <CardContent className="space-y-3 px-6 lg:px-7 pb-6 lg:pb-7">
+              {ausentesCount > 0 && (
+                <div className="p-4 rounded-xl bg-[#FEE2E2] border border-[#FECACA]">
                   <p className="text-label text-[#DC2626]">Pacientes não compareceram</p>
-                  <p className="text-caption">
+                  <p className="text-caption mt-1">
                     {ausentesCount} paciente{ausentesCount > 1 ? 's' : ''} ainda não chegou para a consulta
                   </p>
                 </div>
-              ) : null}
-              {pendentesCount > 0 ? (
-                <div className="p-3 rounded-lg bg-[#FEF3C7]">
-                  <p className="text-label text-[#F59E0B]">Consultas pendentes</p>
-                  <p className="text-caption">
+              )}
+              {pendentesCount > 0 && (
+                <div className="p-4 rounded-xl bg-[#FEF3C7] border border-[#FCD34D]">
+                  <p className="text-label text-[#B45309]">Consultas pendentes</p>
+                  <p className="text-caption mt-1">
                     {pendentesCount} consulta{pendentesCount > 1 ? 's' : ''} precisa{pendentesCount > 1 ? 'm' : ''} de confirmação
                   </p>
                 </div>
-              ) : null}
+              )}
               {ausentesCount === 0 && pendentesCount === 0 && (
-                <p className="text-caption text-center py-2">
-                  Tudo em ordem por aqui! ✓
-                </p>
+                <div className="p-4 rounded-xl bg-[#DCFCE7] border border-[#86EFAC] text-center">
+                  <p className="text-body text-[#16A34A] font-medium">
+                    ✓ Tudo em ordem por aqui!
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
