@@ -121,8 +121,8 @@ export function AppSidebar() {
           <button
             onClick={() => toggleExpanded(item.name)}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 rounded-lg mx-2",
-              (isExpanded || childActive) && "bg-sidebar-accent/50",
+              "w-full flex items-center gap-3 px-4 py-3 text-white/90 hover:bg-[#057279] hover:text-white transition-all duration-200 rounded-lg mx-2",
+              (isExpanded || childActive) && "bg-[#057279]/60",
               collapsed && "justify-center px-2"
             )}
           >
@@ -160,8 +160,8 @@ export function AppSidebar() {
         to={item.href || "#"}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-white/10 hover:text-sidebar-foreground transition-all duration-200 rounded-xl mx-2",
-          active && "bg-white/20 text-sidebar-foreground font-semibold shadow-sm",
+          "flex items-center gap-3 px-4 py-3 text-white/90 hover:bg-[#057279] hover:text-white transition-all duration-200 rounded-lg mx-2",
+          active && "bg-[#057279] text-white font-semibold",
           collapsed && "justify-center px-2",
           depth > 0 && "py-2.5 text-sm"
         )}
@@ -222,7 +222,7 @@ export function AppSidebar() {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 bg-primary border-0">
+          <SheetContent side="left" className="p-0 w-72 bg-[#005F63] border-0">
             <div className="h-full flex flex-col">
               <SidebarContent />
             </div>
@@ -242,7 +242,7 @@ export function AppSidebar() {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex h-screen bg-primary flex-col transition-all duration-300 sticky top-0",
+          "hidden lg:flex h-screen bg-[#005F63] flex-col transition-all duration-300 sticky top-0",
           collapsed ? "w-20" : "w-72"
         )}
         role="navigation"

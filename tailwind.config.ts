@@ -82,11 +82,11 @@ export default {
         "2xl": "1.5rem",
       },
       boxShadow: {
-        soft: "0 2px 8px rgba(1, 93, 103, 0.06)",
-        hover: "0 4px 16px rgba(1, 93, 103, 0.12)",
-        card: "0 1px 3px rgba(1, 93, 103, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)",
-        neumorphic: "0 2px 8px rgba(1, 93, 103, 0.06)",
-        premium: "0 8px 24px rgba(1, 93, 103, 0.15)",
+        soft: "0 2px 8px rgba(0, 95, 99, 0.05)",
+        hover: "0 4px 16px rgba(0, 95, 99, 0.10)",
+        card: "0 1px 3px rgba(0, 95, 99, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)",
+        neumorphic: "0 2px 8px rgba(0, 95, 99, 0.05)",
+        premium: "0 8px 24px rgba(0, 95, 99, 0.12)",
       },
       keyframes: {
         "accordion-down": {

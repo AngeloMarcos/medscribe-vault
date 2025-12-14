@@ -60,29 +60,29 @@ export default function NewDashboard() {
       title: "Pacientes Hoje",
       value: consultas?.length || 0,
       icon: Users,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
+      color: "text-secondary",
+      bgColor: "bg-[#E0F2F1]",
     },
     {
       title: "Aguardando",
       value: consultas?.filter((c) => c.status === "aguardando").length || 0,
       icon: Clock,
-      color: "text-warning",
-      bgColor: "bg-warning/10",
+      color: "text-[#F59E0B]",
+      bgColor: "bg-[#FEF3C7]",
     },
     {
       title: "Em Atendimento",
       value: consultas?.filter((c) => c.status === "em_atendimento").length || 0,
       icon: Activity,
-      color: "text-info",
-      bgColor: "bg-info/10",
+      color: "text-secondary",
+      bgColor: "bg-[#E0F2F1]",
     },
     {
       title: "Atendidos",
       value: consultas?.filter((c) => c.status === "finalizado").length || 0,
       icon: UserCheck,
-      color: "text-success",
-      bgColor: "bg-success/10",
+      color: "text-[#16A34A]",
+      bgColor: "bg-[#DCFCE7]",
     },
   ];
 
@@ -123,7 +123,7 @@ export default function NewDashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="card-neumorphic border border-primary/10 hover:border-primary/20 hover:shadow-md transition-all duration-200">
+            <Card key={stat.title} className="bg-card border border-[#E0F2F1] hover:border-secondary/30 hover:shadow-md transition-all duration-200 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -131,7 +131,7 @@ export default function NewDashboard() {
                     {isLoading ? (
                       <Skeleton className="h-9 w-12 mt-2" />
                     ) : (
-                      <p className="text-3xl font-bold mt-2 tracking-tight">{stat.value}</p>
+                      <p className="text-3xl font-bold mt-2 tracking-tight text-foreground">{stat.value}</p>
                     )}
                   </div>
                   <div className={`p-4 rounded-2xl ${stat.bgColor}`}>
@@ -147,7 +147,7 @@ export default function NewDashboard() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Upcoming Appointments */}
-        <Card className="card-neumorphic lg:col-span-2 border border-primary/10">
+        <Card className="bg-card lg:col-span-2 border border-[#E0F2F1] shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>
               <CardTitle className="text-lg font-semibold">Próximos Atendimentos</CardTitle>
@@ -172,8 +172,8 @@ export default function NewDashboard() {
                     className="flex items-center justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Users className="h-5 w-5 text-primary" />
+                      <div className="w-12 h-12 rounded-full bg-[#E0F2F1] flex items-center justify-center">
+                        <Users className="h-5 w-5 text-secondary" />
                       </div>
                       <div>
                         <p className="font-medium">{consulta.patients?.name || "Paciente"}</p>
@@ -209,7 +209,7 @@ export default function NewDashboard() {
         {/* Quick Actions & Alerts */}
         <div className="space-y-8">
           {/* Quick Stats */}
-          <Card className="card-neumorphic border border-primary/10">
+          <Card className="bg-card border border-[#E0F2F1] shadow-sm">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-semibold">Resumo do Dia</CardTitle>
             </CardHeader>
@@ -227,7 +227,7 @@ export default function NewDashboard() {
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
-                  <span className="font-semibold text-destructive">{ausentesCount}</span>
+                  <span className="font-semibold text-[#DC2626]">{ausentesCount}</span>
                 )}
               </div>
               <div className="flex items-center justify-between">
@@ -235,7 +235,7 @@ export default function NewDashboard() {
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
-                  <span className="font-semibold text-warning">{pendentesCount}</span>
+                  <span className="font-semibold text-[#F59E0B]">{pendentesCount}</span>
                 )}
               </div>
               <div className="flex items-center justify-between">
@@ -243,32 +243,32 @@ export default function NewDashboard() {
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
-                  <span className="font-semibold text-success">{taxaComparecimento}%</span>
+                  <span className="font-semibold text-[#16A34A]">{taxaComparecimento}%</span>
                 )}
               </div>
             </CardContent>
           </Card>
 
           {/* Alerts */}
-          <Card className="card-neumorphic border-l-4 border-l-warning border-t-0 border-r-0 border-b-0">
+          <Card className="bg-card border border-[#E0F2F1] border-l-4 border-l-[#F59E0B] shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-warning" />
+                <AlertCircle className="h-5 w-5 text-[#F59E0B]" />
                 <CardTitle className="text-lg font-semibold">Alertas</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {ausentesCount > 0 ? (
-                <div className="p-3 rounded-lg bg-destructive/10 text-sm">
-                  <p className="font-medium text-destructive">Pacientes Ausentes</p>
+                <div className="p-3 rounded-lg bg-[#FEE2E2] text-sm">
+                  <p className="font-medium text-[#DC2626]">Pacientes Ausentes</p>
                   <p className="text-muted-foreground">
                     {ausentesCount} paciente(s) não compareceu(ram) hoje
                   </p>
                 </div>
               ) : null}
               {pendentesCount > 0 ? (
-                <div className="p-3 rounded-lg bg-warning/10 text-sm">
-                  <p className="font-medium text-warning">Consultas Pendentes</p>
+                <div className="p-3 rounded-lg bg-[#FEF3C7] text-sm">
+                  <p className="font-medium text-[#F59E0B]">Consultas Pendentes</p>
                   <p className="text-muted-foreground">
                     {pendentesCount} consulta(s) aguardando confirmação
                   </p>
