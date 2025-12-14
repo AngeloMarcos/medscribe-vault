@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { UserProfile } from "@/components/auth/UserProfile";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppHeader() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +34,10 @@ export function AppHeader() {
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -49,7 +53,7 @@ export function AppHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#16A34A]" />
+                  <div className="w-2 h-2 rounded-full bg-success" />
                   <span className="text-label">Paciente aguardando atendimento</span>
                 </div>
                 <p className="text-helper ml-4">
@@ -69,7 +73,7 @@ export function AppHeader() {
               </DropdownMenuItem>
               <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
+                  <div className="w-2 h-2 rounded-full bg-warning" />
                   <span className="text-label">Exame disponível para análise</span>
                 </div>
                 <p className="text-helper ml-4">

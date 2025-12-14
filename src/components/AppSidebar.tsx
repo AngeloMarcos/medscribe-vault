@@ -22,6 +22,9 @@ import {
   Pill,
   ShieldCheck,
   Syringe,
+  Smile,
+  Grid3X3,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,6 +50,16 @@ const menuItems: MenuItem[] = [
       { name: "Marcar Consulta", href: "/marcar-consulta", icon: CalendarPlus },
       { name: "Lista de Pacientes", href: "/lista-pacientes", icon: UserRound },
       { name: "Grades de Agendamento", href: "/grades", icon: CalendarDays },
+    ],
+  },
+  {
+    name: "Odontologia",
+    icon: Smile,
+    children: [
+      { name: "Agendar Atendimento", href: "/odonto/agendar", icon: CalendarPlus },
+      { name: "Lista de Pacientes", href: "/odonto/pacientes", icon: UserRound },
+      { name: "Odontograma", href: "/odonto/odontograma", icon: Grid3X3 },
+      { name: "Plano de Tratamento", href: "/odonto/tratamento", icon: FileText },
     ],
   },
   { name: "Pacientes", href: "/patients", icon: UserRound, permission: PERMISSIONS.VIEW_PATIENTS },
@@ -121,8 +134,8 @@ export function AppSidebar() {
           <button
             onClick={() => toggleExpanded(item.name)}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 text-white/90 hover:bg-[#057279] hover:text-white transition-all duration-200 rounded-lg mx-2",
-              (isExpanded || childActive) && "bg-[#057279]/60",
+              "w-full flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 rounded-lg mx-2",
+              (isExpanded || childActive) && "bg-sidebar-accent/60",
               collapsed && "justify-center px-2"
             )}
           >
@@ -160,8 +173,8 @@ export function AppSidebar() {
         to={item.href || "#"}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "flex items-center gap-3 px-4 py-3 text-white/90 hover:bg-[#057279] hover:text-white transition-all duration-200 rounded-lg mx-2",
-          active && "bg-[#057279] text-white font-semibold",
+          "flex items-center gap-3 px-4 py-3 text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 rounded-lg mx-2",
+          active && "bg-sidebar-accent text-sidebar-foreground font-semibold",
           collapsed && "justify-center px-2",
           depth > 0 && "py-2.5 text-sm"
         )}
@@ -182,18 +195,18 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white/25 rounded-xl flex items-center justify-center shadow-sm">
-              <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
+            <div className="w-11 h-11 bg-sidebar-foreground/25 rounded-xl flex items-center justify-center shadow-sm">
+              <Stethoscope className="h-6 w-6 text-sidebar-foreground" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white tracking-tight">MedFlow</h1>
-              <p className="text-[9px] text-white/75 font-medium leading-tight">Sistema de Gestão MentoArk Health</p>
+              <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight">HealthFlow</h1>
+              <p className="text-[9px] text-sidebar-foreground/75 font-medium leading-tight">Sistema de Gestão Clínica</p>
             </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-11 h-11 bg-white/25 rounded-xl flex items-center justify-center mx-auto shadow-sm">
-            <Stethoscope className="h-6 w-6 text-white" aria-hidden="true" />
+          <div className="w-11 h-11 bg-sidebar-foreground/25 rounded-xl flex items-center justify-center mx-auto shadow-sm">
+            <Stethoscope className="h-6 w-6 text-sidebar-foreground" aria-hidden="true" />
           </div>
         )}
       </div>
@@ -210,7 +223,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b w-full flex items-center gap-3 shadow-sm">
+      <div className="lg:hidden fixed top-0 left-0 z-50 p-3 bg-background border-b border-border w-full flex items-center gap-3 shadow-sm">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <Button
@@ -222,7 +235,7 @@ export function AppSidebar() {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 bg-[#005F63] border-0">
+          <SheetContent side="left" className="p-0 w-72 bg-sidebar border-0">
             <div className="h-full flex flex-col">
               <SidebarContent />
             </div>
@@ -233,8 +246,8 @@ export function AppSidebar() {
             <Stethoscope className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <span className="font-semibold text-foreground text-sm">MedFlow</span>
-            <p className="text-[8px] text-muted-foreground leading-tight">Sistema de Gestão MentoArk Health</p>
+            <span className="font-semibold text-foreground text-sm">HealthFlow</span>
+            <p className="text-[8px] text-muted-foreground leading-tight">Sistema de Gestão Clínica</p>
           </div>
         </div>
       </div>
@@ -242,7 +255,7 @@ export function AppSidebar() {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex h-screen bg-[#005F63] flex-col transition-all duration-300 sticky top-0",
+          "hidden lg:flex h-screen bg-sidebar flex-col transition-all duration-300 sticky top-0",
           collapsed ? "w-20" : "w-72"
         )}
         role="navigation"
@@ -257,7 +270,7 @@ export function AppSidebar() {
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              "w-full text-white/90 hover:bg-white/10 hover:text-white transition-all duration-200",
+              "w-full text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200",
               collapsed && "px-2"
             )}
             aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
