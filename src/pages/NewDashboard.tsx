@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  Users,
-  Calendar,
+  UserRound,
+  CalendarHeart,
   Clock,
   UserCheck,
   Activity,
-  AlertCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,13 +58,15 @@ export default function NewDashboard() {
   const stats = [
     {
       title: "Pacientes Hoje",
+      description: "Total de consultas agendadas",
       value: consultas?.length || 0,
-      icon: Users,
+      icon: UserRound,
       color: "text-secondary",
       bgColor: "bg-[#E0F2F1]",
     },
     {
       title: "Aguardando",
+      description: "Na recepção ou sala de espera",
       value: consultas?.filter((c) => c.status === "aguardando").length || 0,
       icon: Clock,
       color: "text-[#F59E0B]",
@@ -72,6 +74,7 @@ export default function NewDashboard() {
     },
     {
       title: "Em Atendimento",
+      description: "Sendo atendidos agora",
       value: consultas?.filter((c) => c.status === "em_atendimento").length || 0,
       icon: Activity,
       color: "text-secondary",
@@ -79,6 +82,7 @@ export default function NewDashboard() {
     },
     {
       title: "Atendidos",
+      description: "Consultas finalizadas",
       value: consultas?.filter((c) => c.status === "finalizado").length || 0,
       icon: UserCheck,
       color: "text-[#16A34A]",
@@ -101,25 +105,28 @@ export default function NewDashboard() {
   const isLoading = isLoadingConsultas || isLoadingPatients;
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-10 pb-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel Geral</h1>
-          <p className="text-muted-foreground capitalize text-sm mt-1">{today}</p>
+          <h1 className="text-page-title">Painel Geral</h1>
+          <p className="text-caption capitalize mt-1">Acompanhe os atendimentos do dia • {today}</p>
         </div>
         <div className="flex gap-3">
           <Button asChild className="shadow-sm">
-            <Link to="/marcar-consulta">Nova Consulta</Link>
+            <Link to="/marcar-consulta">
+              <CalendarHeart className="h-4 w-4 mr-2" />
+              Nova Consulta
+            </Link>
           </Button>
           <Button variant="outline" asChild className="shadow-sm">
-            <Link to="/lista-pacientes">Ver Lista de Pacientes</Link>
+            <Link to="/lista-pacientes">Ver Pacientes</Link>
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -127,12 +134,13 @@ export default function NewDashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
+                    <p className="text-label text-muted-foreground">{stat.title}</p>
                     {isLoading ? (
                       <Skeleton className="h-9 w-12 mt-2" />
                     ) : (
                       <p className="text-3xl font-bold mt-2 tracking-tight text-foreground">{stat.value}</p>
                     )}
+                    <p className="text-helper mt-1">{stat.description}</p>
                   </div>
                   <div className={`p-4 rounded-2xl ${stat.bgColor}`}>
                     <Icon className={`h-6 w-6 ${stat.color}`} />
@@ -145,13 +153,13 @@ export default function NewDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Upcoming Appointments */}
         <Card className="bg-card lg:col-span-2 border border-[#E0F2F1] shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>
-              <CardTitle className="text-lg font-semibold">Próximos Atendimentos</CardTitle>
-              <CardDescription className="mt-1">Pacientes agendados para hoje</CardDescription>
+              <CardTitle className="text-card-title">Próximos Atendimentos</CardTitle>
+              <CardDescription className="text-caption mt-1">Pacientes aguardando consulta hoje</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link to="/lista-pacientes">Ver todos</Link>
@@ -173,11 +181,11 @@ export default function NewDashboard() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-[#E0F2F1] flex items-center justify-center">
-                        <Users className="h-5 w-5 text-secondary" />
+                        <UserRound className="h-5 w-5 text-secondary" />
                       </div>
                       <div>
-                        <p className="font-medium">{consulta.patients?.name || "Paciente"}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-label">{consulta.patients?.name || "Paciente"}</p>
+                        <p className="text-caption">
                           {consulta.especialidades?.nome || "Consulta"} • Sala {consulta.salas?.numero || "-"}
                         </p>
                       </div>
@@ -192,14 +200,14 @@ export default function NewDashboard() {
                             : "bg-muted"
                         }
                       >
-                        {consulta.status === "aguardando" ? "Aguardando" : "Agendado"}
+                        {consulta.status === "aguardando" ? "Na recepção" : "Agendado"}
                       </Badge>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">
+              <p className="text-center text-caption py-8">
                 Nenhuma consulta agendada para hoje
               </p>
             )}
@@ -211,11 +219,12 @@ export default function NewDashboard() {
           {/* Quick Stats */}
           <Card className="bg-card border border-[#E0F2F1] shadow-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold">Resumo do Dia</CardTitle>
+              <CardTitle className="text-card-title">Visão Geral de Hoje</CardTitle>
+              <CardDescription className="text-caption">Resumo dos atendimentos</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Cadastrados</span>
+                <span className="text-body text-muted-foreground">Pacientes cadastrados</span>
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
@@ -223,7 +232,7 @@ export default function NewDashboard() {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Ausentes</span>
+                <span className="text-body text-muted-foreground">Não compareceram</span>
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
@@ -231,7 +240,7 @@ export default function NewDashboard() {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Pendentes</span>
+                <span className="text-body text-muted-foreground">Aguardando confirmação</span>
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
@@ -239,7 +248,7 @@ export default function NewDashboard() {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Taxa Comparecimento</span>
+                <span className="text-body text-muted-foreground">Taxa de comparecimento</span>
                 {isLoading ? (
                   <Skeleton className="h-5 w-10" />
                 ) : (
@@ -253,30 +262,30 @@ export default function NewDashboard() {
           <Card className="bg-card border border-[#E0F2F1] border-l-4 border-l-[#F59E0B] shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-[#F59E0B]" />
-                <CardTitle className="text-lg font-semibold">Alertas</CardTitle>
+                <AlertTriangle className="h-5 w-5 text-[#F59E0B]" />
+                <CardTitle className="text-card-title">Atenção</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {ausentesCount > 0 ? (
-                <div className="p-3 rounded-lg bg-[#FEE2E2] text-sm">
-                  <p className="font-medium text-[#DC2626]">Pacientes Ausentes</p>
-                  <p className="text-muted-foreground">
-                    {ausentesCount} paciente(s) não compareceu(ram) hoje
+                <div className="p-3 rounded-lg bg-[#FEE2E2]">
+                  <p className="text-label text-[#DC2626]">Pacientes não compareceram</p>
+                  <p className="text-caption">
+                    {ausentesCount} paciente{ausentesCount > 1 ? 's' : ''} ainda não chegou para a consulta
                   </p>
                 </div>
               ) : null}
               {pendentesCount > 0 ? (
-                <div className="p-3 rounded-lg bg-[#FEF3C7] text-sm">
-                  <p className="font-medium text-[#F59E0B]">Consultas Pendentes</p>
-                  <p className="text-muted-foreground">
-                    {pendentesCount} consulta(s) aguardando confirmação
+                <div className="p-3 rounded-lg bg-[#FEF3C7]">
+                  <p className="text-label text-[#F59E0B]">Consultas pendentes</p>
+                  <p className="text-caption">
+                    {pendentesCount} consulta{pendentesCount > 1 ? 's' : ''} precisa{pendentesCount > 1 ? 'm' : ''} de confirmação
                   </p>
                 </div>
               ) : null}
               {ausentesCount === 0 && pendentesCount === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-2">
-                  Nenhum alerta no momento
+                <p className="text-caption text-center py-2">
+                  Tudo em ordem por aqui! ✓
                 </p>
               )}
             </CardContent>

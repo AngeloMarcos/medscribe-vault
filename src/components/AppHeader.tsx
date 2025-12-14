@@ -49,33 +49,33 @@ export function AppHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="font-medium text-sm">Paciente chegou para consulta</span>
+                  <div className="w-2 h-2 rounded-full bg-[#16A34A]" />
+                  <span className="text-label">Paciente aguardando atendimento</span>
                 </div>
-                <p className="text-xs text-muted-foreground ml-4">
-                  Maria Bezerly - Sala 39
+                <p className="text-helper ml-4">
+                  Maria Bezerly está na recepção • Sala 39
                 </p>
-                <span className="text-xs text-muted-foreground ml-4">há 2 minutos</span>
+                <span className="text-helper ml-4">há 2 minutos</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  <span className="font-medium text-sm">Nova consulta agendada</span>
+                  <div className="w-2 h-2 rounded-full bg-secondary" />
+                  <span className="text-label">Nova consulta marcada</span>
                 </div>
-                <p className="text-xs text-muted-foreground ml-4">
-                  João Silva - 14/12 às 15:00
+                <p className="text-helper ml-4">
+                  João Silva agendado para 14/12 às 15:00
                 </p>
-                <span className="text-xs text-muted-foreground ml-4">há 15 minutos</span>
+                <span className="text-helper ml-4">há 15 minutos</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex flex-col items-start gap-1 py-3 cursor-pointer">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                  <span className="font-medium text-sm">Exame pendente de análise</span>
+                  <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
+                  <span className="text-label">Exame disponível para análise</span>
                 </div>
-                <p className="text-xs text-muted-foreground ml-4">
-                  Ana Paula - Hemograma
+                <p className="text-helper ml-4">
+                  Hemograma de Ana Paula pronto
                 </p>
-                <span className="text-xs text-muted-foreground ml-4">há 1 hora</span>
+                <span className="text-helper ml-4">há 1 hora</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="justify-center text-primary font-medium cursor-pointer">
