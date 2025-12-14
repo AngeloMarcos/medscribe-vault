@@ -123,7 +123,7 @@ export default function NewDashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="card-neumorphic border-0 hover:shadow-md transition-shadow duration-200">
+            <Card key={stat.title} className="card-neumorphic border border-primary/10 hover:border-primary/20 hover:shadow-md transition-all duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -147,7 +147,7 @@ export default function NewDashboard() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Upcoming Appointments */}
-        <Card className="card-neumorphic lg:col-span-2 border-0">
+        <Card className="card-neumorphic lg:col-span-2 border border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>
               <CardTitle className="text-lg font-semibold">Próximos Atendimentos</CardTitle>
@@ -209,7 +209,7 @@ export default function NewDashboard() {
         {/* Quick Actions & Alerts */}
         <div className="space-y-8">
           {/* Quick Stats */}
-          <Card className="card-neumorphic border-0">
+          <Card className="card-neumorphic border border-primary/10">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-semibold">Resumo do Dia</CardTitle>
             </CardHeader>

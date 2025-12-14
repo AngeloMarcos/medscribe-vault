@@ -187,7 +187,7 @@ export function AppSidebar() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white tracking-tight">MedFlow</h1>
-              <p className="text-[10px] text-white/80 font-medium">MentoArk Health</p>
+              <p className="text-[9px] text-white/75 font-medium leading-tight">Sistema de Gestão MentoArk Health</p>
             </div>
           </div>
         )}
@@ -234,7 +234,7 @@ export function AppSidebar() {
           </div>
           <div>
             <span className="font-semibold text-foreground text-sm">MedFlow</span>
-            <p className="text-[9px] text-muted-foreground">MentoArk Health</p>
+            <p className="text-[8px] text-muted-foreground leading-tight">Sistema de Gestão MentoArk Health</p>
           </div>
         </div>
       </div>
