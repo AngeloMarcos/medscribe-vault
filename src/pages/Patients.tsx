@@ -32,11 +32,11 @@ const Patients = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Pacientes</h2>
-          <p className="text-muted-foreground">Gerencie os pacientes cadastrados</p>
+          <h2 className="text-page-title">Pacientes</h2>
+          <p className="text-caption mt-1">Gerencie os pacientes cadastrados no sistema</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -54,15 +54,15 @@ const Patients = () => {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredPatients?.map((patient) => (
           <Link key={patient.id} to={`/patients/${patient.id}`}>
-            <Card className="cursor-pointer transition-shadow hover:shadow-md">
+            <Card className="cursor-pointer transition-shadow hover:shadow-md border border-[#E0F2F1]">
               <CardHeader>
-                <CardTitle className="text-lg">{patient.name}</CardTitle>
+                <CardTitle className="text-card-title">{patient.name}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
+              <CardContent className="space-y-2">
+                <div className="flex justify-between text-body">
                   <span className="text-muted-foreground">CPF:</span>
                   <span className="font-medium">{patient.cpf}</span>
                 </div>
@@ -86,7 +86,7 @@ const Patients = () => {
 
       {filteredPatients?.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Nenhum paciente encontrado</p>
+          <p className="text-caption">Nenhum paciente encontrado com os critérios informados</p>
         </div>
       )}
 

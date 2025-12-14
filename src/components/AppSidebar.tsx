@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Calendar,
-  Users,
+  Activity,
+  CalendarHeart,
+  UserRound,
   CalendarPlus,
   CalendarDays,
   Stethoscope,
-  FileText,
-  Upload,
+  ClipboardList,
+  FileUp,
   RotateCcw,
   RefreshCw,
   FolderOpen,
   Search,
   BarChart3,
-  FileBarChart,
+  ClipboardCheck,
   ChevronDown,
   ChevronRight,
   Menu,
@@ -39,34 +39,34 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { name: "Painel Geral", href: "/", icon: LayoutDashboard },
+  { name: "Painel Geral", href: "/", icon: Activity },
   {
     name: "Ambulatório",
-    icon: Calendar,
+    icon: CalendarHeart,
     children: [
       { name: "Marcar Consulta", href: "/marcar-consulta", icon: CalendarPlus },
-      { name: "Lista de Pacientes", href: "/lista-pacientes", icon: Users },
+      { name: "Lista de Pacientes", href: "/lista-pacientes", icon: UserRound },
       { name: "Grades de Agendamento", href: "/grades", icon: CalendarDays },
     ],
   },
-  { name: "Pacientes", href: "/patients", icon: Users, permission: PERMISSIONS.VIEW_PATIENTS },
+  { name: "Pacientes", href: "/patients", icon: UserRound, permission: PERMISSIONS.VIEW_PATIENTS },
   {
     name: "Prescrição Médica",
-    icon: FileText,
+    icon: ClipboardList,
     permission: PERMISSIONS.PRESCRIBE,
     children: [
-      { name: "Lista de Pacientes", href: "/prescription", icon: Users },
+      { name: "Lista de Pacientes", href: "/prescription", icon: UserRound },
     ],
   },
   { name: "Enfermagem", href: "/enfermagem", icon: Syringe, permission: PERMISSIONS.ADMINISTER_MEDS },
   { name: "Farmácia", href: "/farmacia", icon: Pill, permission: PERMISSIONS.DISPENSE },
-  { name: "Importar SISREG", href: "/importar-sisreg", icon: Upload },
+  { name: "Importar SISREG", href: "/importar-sisreg", icon: FileUp },
   { name: "Estornar Consulta", href: "/estornar", icon: RotateCcw },
   { name: "Atualizar Consulta", href: "/atualizar", icon: RefreshCw },
   { name: "Cadastros", href: "/cadastros", icon: FolderOpen },
   { name: "Pesquisas", href: "/pesquisas", icon: Search },
   { name: "Diária", href: "/diaria", icon: BarChart3 },
-  { name: "Relatórios", href: "/relatorios", icon: FileBarChart },
+  { name: "Relatórios", href: "/relatorios", icon: ClipboardCheck },
   { name: "Administração", href: "/usuarios", icon: ShieldCheck, permission: PERMISSIONS.ALL },
 ];
 

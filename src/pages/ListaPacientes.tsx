@@ -123,19 +123,19 @@ export default function ListaPacientes() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Lista de Pacientes do Ambulatório</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie os pacientes agendados para hoje
+        <h1 className="text-page-title">Lista de Pacientes do Ambulatório</h1>
+        <p className="text-caption mt-1">
+          Acompanhe e gerencie os pacientes com consulta agendada para hoje
         </p>
       </div>
 
       {/* Filters Card */}
       <Card className="card-neumorphic">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Filtros</CardTitle>
+          <CardTitle className="text-card-title">Filtros de Busca</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
