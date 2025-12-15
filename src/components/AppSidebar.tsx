@@ -196,19 +196,28 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-sidebar-foreground/25 rounded-xl flex items-center justify-center shadow-sm">
-              <Stethoscope className="h-6 w-6 text-sidebar-foreground" aria-hidden="true" />
-            </div>
+            <img 
+              src="/logo.svg" 
+              alt="HealthFlow Logo" 
+              className="w-11 h-11 rounded-xl shadow-sm"
+            />
             <div>
               <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight">HealthFlow</h1>
-              <p className="text-[9px] text-sidebar-foreground/75 font-medium leading-tight">Sistema de Gestão Clínica</p>
+              <p className="text-[9px] text-sidebar-foreground/70 font-medium leading-tight">
+                Sistema de Gestão Clínica
+              </p>
+              <p className="text-[8px] text-sidebar-foreground/50 font-normal leading-tight">
+                MentoArk Health
+              </p>
             </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-11 h-11 bg-sidebar-foreground/25 rounded-xl flex items-center justify-center mx-auto shadow-sm">
-            <Stethoscope className="h-6 w-6 text-sidebar-foreground" aria-hidden="true" />
-          </div>
+          <img 
+            src="/logo.svg" 
+            alt="HealthFlow Logo" 
+            className="w-11 h-11 rounded-xl shadow-sm mx-auto"
+          />
         )}
       </div>
 
@@ -244,12 +253,14 @@ export function AppSidebar() {
             </SheetContent>
           </Sheet>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-              <Stethoscope className="h-4 w-4 text-primary" />
-            </div>
+            <img 
+              src="/logo.svg" 
+              alt="HealthFlow Logo" 
+              className="w-8 h-8 rounded-lg"
+            />
             <div>
               <span className="font-semibold text-foreground text-sm">HealthFlow</span>
-              <p className="text-[8px] text-muted-foreground leading-tight">Sistema de Gestão Clínica</p>
+              <p className="text-[8px] text-muted-foreground leading-tight">MentoArk Health</p>
             </div>
           </div>
         </div>
