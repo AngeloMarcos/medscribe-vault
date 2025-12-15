@@ -19,6 +19,7 @@ import ListaPacientes from "./pages/ListaPacientes";
 import MarcarConsulta from "./pages/MarcarConsulta";
 import EstornarConsulta from "./pages/EstornarConsulta";
 import Appointments from "./pages/Appointments";
+import AgendarOdonto from "./pages/AgendarOdonto";
 import AdminUserManagement from "./pages/admin/UserManagement";
 import Atendimento from "./pages/Atendimento";
 import PrescriptionList from "./pages/PrescriptionList";
@@ -59,7 +60,7 @@ const App = () => {
                     <Route path="grades" element={<UnderConstruction title="Grades de Agendamento" />} />
 
                     {/* Odontologia Routes */}
-                    <Route path="odonto/agendar" element={<UnderConstruction title="Agendar Atendimento Odontológico" />} />
+                    <Route path="odonto/agendar" element={<AgendarOdonto />} />
                     <Route path="odonto/pacientes" element={<UnderConstruction title="Lista de Pacientes - Odontologia" />} />
                     <Route path="odonto/odontograma" element={<UnderConstruction title="Odontograma" />} />
                     <Route path="odonto/tratamento" element={<UnderConstruction title="Plano de Tratamento Odontológico" />} />
