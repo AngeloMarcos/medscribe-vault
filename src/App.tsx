@@ -29,6 +29,7 @@ import Atendimento from "./pages/Atendimento";
 import PrescriptionList from "./pages/PrescriptionList";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Enfermagem from "./pages/Enfermagem";
 
 const queryClient = new QueryClient();
 
@@ -108,7 +109,7 @@ const App = () => {
                     {/* Legacy route redirect */}
                     <Route path="prescricao" element={<Navigate to="/prescription" replace />} />
 
-                    <Route path="enfermagem" element={<UnderConstruction title="Enfermagem" />} />
+                    <Route path="enfermagem" element={<Enfermagem />} />
                     <Route path="farmacia" element={<UnderConstruction title="Farmácia" />} />
                     <Route path="importar-sisreg" element={<UnderConstruction title="Importar SISREG" />} />
                     <Route path="estornar" element={<EstornarConsulta />} />
