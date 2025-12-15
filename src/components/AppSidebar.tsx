@@ -6,7 +6,6 @@ import {
   UserRound,
   CalendarPlus,
   CalendarDays,
-  Stethoscope,
   ClipboardList,
   FileUp,
   RotateCcw,
@@ -32,7 +31,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/contexts/TenantContext";
+import { useModules } from "@/hooks/useModules";
 import { Permission, PERMISSIONS } from "@/types/auth";
+import { ModuleKey } from "@/types/modules";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface MenuItem {
@@ -40,14 +41,16 @@ interface MenuItem {
   href?: string;
   icon: React.ElementType;
   permission?: Permission;
+  moduleKey?: ModuleKey;
   children?: MenuItem[];
 }
 
 const menuItems: MenuItem[] = [
-  { name: "Painel Geral", href: "/", icon: Activity },
+  { name: "Painel Geral", href: "/", icon: Activity, moduleKey: "dashboard" },
   {
     name: "Ambulatório",
     icon: CalendarHeart,
+    moduleKey: "ambulatorio",
     children: [
       { name: "Marcar Consulta", href: "/marcar-consulta", icon: CalendarPlus },
       { name: "Lista de Pacientes", href: "/lista-pacientes", icon: UserRound },
@@ -57,6 +60,7 @@ const menuItems: MenuItem[] = [
   {
     name: "Odontologia",
     icon: Smile,
+    moduleKey: "odontologia",
     children: [
       { name: "Agendar Atendimento", href: "/odonto/agendar", icon: CalendarPlus },
       { name: "Lista de Pacientes", href: "/odonto/pacientes", icon: UserRound },
@@ -64,31 +68,33 @@ const menuItems: MenuItem[] = [
       { name: "Plano de Tratamento", href: "/odonto/tratamento", icon: FileText },
     ],
   },
-  { name: "Pacientes", href: "/patients", icon: UserRound, permission: PERMISSIONS.VIEW_PATIENTS },
+  { name: "Pacientes", href: "/patients", icon: UserRound, permission: PERMISSIONS.VIEW_PATIENTS, moduleKey: "pacientes" },
   {
     name: "Prescrição Médica",
     icon: ClipboardList,
     permission: PERMISSIONS.PRESCRIBE,
+    moduleKey: "prescricao",
     children: [
       { name: "Lista de Pacientes", href: "/prescription", icon: UserRound },
     ],
   },
-  { name: "Enfermagem", href: "/enfermagem", icon: Syringe, permission: PERMISSIONS.ADMINISTER_MEDS },
-  { name: "Farmácia", href: "/farmacia", icon: Pill, permission: PERMISSIONS.DISPENSE },
-  { name: "Importar SISREG", href: "/importar-sisreg", icon: FileUp },
-  { name: "Estornar Consulta", href: "/estornar", icon: RotateCcw },
-  { name: "Atualizar Consulta", href: "/atualizar", icon: RefreshCw },
-  { name: "Cadastros", href: "/cadastros", icon: FolderOpen },
+  { name: "Enfermagem", href: "/enfermagem", icon: Syringe, permission: PERMISSIONS.ADMINISTER_MEDS, moduleKey: "enfermagem" },
+  { name: "Farmácia", href: "/farmacia", icon: Pill, permission: PERMISSIONS.DISPENSE, moduleKey: "farmacia" },
+  { name: "Importar SISREG", href: "/importar-sisreg", icon: FileUp, moduleKey: "sisreg" },
+  { name: "Estornar Consulta", href: "/estornar", icon: RotateCcw, moduleKey: "ambulatorio" },
+  { name: "Atualizar Consulta", href: "/atualizar", icon: RefreshCw, moduleKey: "ambulatorio" },
+  { name: "Cadastros", href: "/cadastros", icon: FolderOpen, moduleKey: "administracao" },
   { name: "Pesquisas", href: "/pesquisas", icon: Search },
-  { name: "Diária", href: "/diaria", icon: BarChart3 },
-  { name: "Relatórios", href: "/relatorios", icon: ClipboardCheck },
-  { name: "Administração", href: "/usuarios", icon: ShieldCheck, permission: PERMISSIONS.ALL },
+  { name: "Diária", href: "/diaria", icon: BarChart3, moduleKey: "relatorios" },
+  { name: "Relatórios", href: "/relatorios", icon: ClipboardCheck, moduleKey: "relatorios" },
+  { name: "Administração", href: "/usuarios", icon: ShieldCheck, permission: PERMISSIONS.ALL, moduleKey: "administracao" },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const { hasPermission, isAdmin } = useAuth();
   const { tenant } = useTenant();
+  const { isModuleEnabled, isLoading: modulesLoading } = useModules();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>(["Ambulatório"]);
@@ -110,7 +116,29 @@ export function AppSidebar() {
     });
   };
 
-  const visibleMenuItems = filterMenuItems(menuItems);
+  // Filter menu items based on enabled modules
+  const filterByModules = (items: MenuItem[]): MenuItem[] => {
+    if (modulesLoading) return items;
+    
+    return items.filter((item) => {
+      // No module key - always show
+      if (!item.moduleKey) return true;
+      // Check if module is enabled
+      return isModuleEnabled(item.moduleKey);
+    }).map((item) => {
+      if (item.children) {
+        const filteredChildren = filterByModules(item.children);
+        // If no children left after filtering, hide parent
+        if (filteredChildren.length === 0 && item.children.length > 0) {
+          return null;
+        }
+        return { ...item, children: filteredChildren };
+      }
+      return item;
+    }).filter(Boolean) as MenuItem[];
+  };
+
+  const visibleMenuItems = filterByModules(filterMenuItems(menuItems));
 
   const toggleExpanded = (name: string) => {
     setExpandedItems((prev) =>
