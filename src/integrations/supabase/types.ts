@@ -593,6 +593,168 @@ export type Database = {
           },
         ]
       }
+      medication_administrations: {
+        Row: {
+          administered_at: string | null
+          administered_by: string | null
+          created_at: string | null
+          id: string
+          observation: string | null
+          patient_id: string
+          prescription_item_id: string
+          scheduled_time: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          administered_at?: string | null
+          administered_by?: string | null
+          created_at?: string | null
+          id?: string
+          observation?: string | null
+          patient_id: string
+          prescription_item_id: string
+          scheduled_time: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          administered_at?: string | null
+          administered_by?: string | null
+          created_at?: string | null
+          id?: string
+          observation?: string | null
+          patient_id?: string
+          prescription_item_id?: string
+          scheduled_time?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_administrations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_administrations_prescription_item_id_fkey"
+            columns: ["prescription_item_id"]
+            isOneToOne: false
+            referencedRelation: "prescription_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nursing_notes: {
+        Row: {
+          consulta_id: string | null
+          content: string
+          created_at: string | null
+          created_by: string
+          id: string
+          is_critical: boolean | null
+          note_type: string | null
+          patient_id: string
+        }
+        Insert: {
+          consulta_id?: string | null
+          content: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_critical?: boolean | null
+          note_type?: string | null
+          patient_id: string
+        }
+        Update: {
+          consulta_id?: string | null
+          content?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_critical?: boolean | null
+          note_type?: string | null
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_notes_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nursing_queue: {
+        Row: {
+          attended_by: string | null
+          completed_at: string | null
+          consulta_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          priority: string | null
+          referred_from: string | null
+          sector: string
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          attended_by?: string | null
+          completed_at?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          priority?: string | null
+          referred_from?: string | null
+          sector: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          attended_by?: string | null
+          completed_at?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          priority?: string | null
+          referred_from?: string | null
+          sector?: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_queue_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_queue_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           birth_date: string | null
@@ -1299,6 +1461,7 @@ export type Database = {
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_admin_access: { Args: { _user_id: string }; Returns: boolean }
       has_medical_role: { Args: { _user_id: string }; Returns: boolean }
+      has_nursing_role: { Args: { _user_id: string }; Returns: boolean }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
