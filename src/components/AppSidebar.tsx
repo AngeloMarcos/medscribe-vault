@@ -20,6 +20,7 @@ import {
   X,
   Pill,
   ShieldCheck,
+  KeyRound,
   Syringe,
   Smile,
   Grid3X3,
@@ -87,7 +88,16 @@ const menuItems: MenuItem[] = [
   { name: "Pesquisas", href: "/pesquisas", icon: Search },
   { name: "Diária", href: "/diaria", icon: BarChart3, moduleKey: "relatorios" },
   { name: "Relatórios", href: "/relatorios", icon: ClipboardCheck, moduleKey: "relatorios" },
-  { name: "Administração", href: "/usuarios", icon: ShieldCheck, permission: PERMISSIONS.ALL, moduleKey: "administracao" },
+  { 
+    name: "Administração", 
+    icon: ShieldCheck, 
+    permission: PERMISSIONS.ALL, 
+    moduleKey: "administracao",
+    children: [
+      { name: "Usuários", href: "/usuarios", icon: UserRound },
+      { name: "Permissões", href: "/permissoes", icon: KeyRound },
+    ],
+  },
 ];
 
 export function AppSidebar() {

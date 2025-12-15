@@ -988,6 +988,50 @@ export type Database = {
           },
         ]
       }
+      tenant_user_permissions: {
+        Row: {
+          created_at: string | null
+          denied_permissions: string[] | null
+          granted_by: string | null
+          granted_permissions: string[] | null
+          id: string
+          notes: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          denied_permissions?: string[] | null
+          granted_by?: string | null
+          granted_permissions?: string[] | null
+          id?: string
+          notes?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          denied_permissions?: string[] | null
+          granted_by?: string | null
+          granted_permissions?: string[] | null
+          id?: string
+          notes?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_user_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_users: {
         Row: {
           created_at: string | null
@@ -1192,6 +1236,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_effective_permissions: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: string[]
+      }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_admin_access: { Args: { _user_id: string }; Returns: boolean }
       has_medical_role: { Args: { _user_id: string }; Returns: boolean }
@@ -1204,6 +1252,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_tenant_permission: {
+        Args: { _permission: string; _tenant_id: string; _user_id: string }
         Returns: boolean
       }
       is_tenant_owner: {
