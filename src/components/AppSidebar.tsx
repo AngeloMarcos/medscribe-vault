@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { Permission, PERMISSIONS } from "@/types/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -87,6 +88,7 @@ const menuItems: MenuItem[] = [
 export function AppSidebar() {
   const location = useLocation();
   const { hasPermission, isAdmin } = useAuth();
+  const { tenant } = useTenant();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>(["Ambulatório"]);
@@ -196,28 +198,48 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <img 
-              src="/logo.svg" 
-              alt="HealthFlow Logo" 
-              className="w-11 h-11 rounded-xl shadow-sm"
-            />
+            {tenant?.logo_url ? (
+              <img 
+                src={tenant.logo_url} 
+                alt={`${tenant.name} Logo`} 
+                className="w-11 h-11 rounded-xl shadow-sm object-cover"
+              />
+            ) : (
+              <img 
+                src="/logo.svg" 
+                alt="HealthFlow Logo" 
+                className="w-11 h-11 rounded-xl shadow-sm"
+              />
+            )}
             <div>
-              <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight">HealthFlow</h1>
+              <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight">
+                {tenant?.name || 'HealthFlow'}
+              </h1>
               <p className="text-[9px] text-sidebar-foreground/70 font-medium leading-tight">
                 Sistema de Gestão Clínica
               </p>
-              <p className="text-[8px] text-sidebar-foreground/50 font-normal leading-tight">
-                MentoArk Health
-              </p>
+              {tenant && (
+                <p className="text-[8px] text-sidebar-foreground/50 font-normal leading-tight">
+                  {tenant.name}
+                </p>
+              )}
             </div>
           </div>
         )}
         {collapsed && (
-          <img 
-            src="/logo.svg" 
-            alt="HealthFlow Logo" 
-            className="w-11 h-11 rounded-xl shadow-sm mx-auto"
-          />
+          tenant?.logo_url ? (
+            <img 
+              src={tenant.logo_url} 
+              alt={`${tenant.name} Logo`} 
+              className="w-11 h-11 rounded-xl shadow-sm mx-auto object-cover"
+            />
+          ) : (
+            <img 
+              src="/logo.svg" 
+              alt="HealthFlow Logo" 
+              className="w-11 h-11 rounded-xl shadow-sm mx-auto"
+            />
+          )
         )}
       </div>
 
@@ -253,14 +275,26 @@ export function AppSidebar() {
             </SheetContent>
           </Sheet>
           <div className="flex items-center gap-2">
-            <img 
-              src="/logo.svg" 
-              alt="HealthFlow Logo" 
-              className="w-8 h-8 rounded-lg"
-            />
+            {tenant?.logo_url ? (
+              <img 
+                src={tenant.logo_url} 
+                alt={`${tenant.name} Logo`} 
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+            ) : (
+              <img 
+                src="/logo.svg" 
+                alt="HealthFlow Logo" 
+                className="w-8 h-8 rounded-lg"
+              />
+            )}
             <div>
-              <span className="font-semibold text-foreground text-sm">HealthFlow</span>
-              <p className="text-[8px] text-muted-foreground leading-tight">MentoArk Health</p>
+              <span className="font-semibold text-foreground text-sm">
+                {tenant?.name || 'HealthFlow'}
+              </span>
+              {tenant && (
+                <p className="text-[8px] text-muted-foreground leading-tight">{tenant.name}</p>
+              )}
             </div>
           </div>
         </div>

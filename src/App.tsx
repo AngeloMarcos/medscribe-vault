@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { MainLayout } from "./components/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -36,8 +37,9 @@ const App = () => {
           <Toaster />
           <Sonner />
           <AuthProvider>
-            <BrowserRouter>
-              <ErrorBoundary>
+            <TenantProvider>
+              <BrowserRouter>
+                <ErrorBoundary>
                 <Routes>
                   {/* Public routes */}
                   <Route path="/auth" element={<Auth />} />
@@ -129,8 +131,9 @@ const App = () => {
                   {/* Catch-all redirect */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </ErrorBoundary>
-            </BrowserRouter>
+                </ErrorBoundary>
+              </BrowserRouter>
+            </TenantProvider>
           </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
