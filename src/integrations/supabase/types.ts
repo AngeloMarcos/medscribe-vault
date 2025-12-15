@@ -944,6 +944,50 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_modules: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          disabled_at: string | null
+          enabled_at: string | null
+          id: string
+          is_enabled: boolean | null
+          module_key: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          disabled_at?: string | null
+          enabled_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          module_key: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          disabled_at?: string | null
+          enabled_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          module_key?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_modules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_users: {
         Row: {
           created_at: string | null
