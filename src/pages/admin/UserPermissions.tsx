@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +72,7 @@ interface UserPermissionRow {
 export default function UserPermissions() {
   const { tenant } = useTenant();
   const { isAdmin } = useAuth();
+  const { logPermissionChange } = useAuditLog();
   const queryClient = useQueryClient();
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<Record<string, { granted: string[], denied: string[] }>>({});
@@ -137,7 +139,14 @@ export default function UserPermissions() {
 
   // Mutation para salvar permissões
   const saveMutation = useMutation({
-    mutationFn: async ({ userId, granted, denied }: { userId: string; granted: string[]; denied: string[] }) => {
+    mutationFn: async ({ userId, userName, granted, denied, oldGranted, oldDenied }: { 
+      userId: string; 
+      userName: string;
+      granted: string[]; 
+      denied: string[];
+      oldGranted: string[];
+      oldDenied: string[];
+    }) => {
       if (!tenant?.id) throw new Error('Tenant não encontrado');
 
       const { data: existing } = await supabase
@@ -170,6 +179,15 @@ export default function UserPermissions() {
 
         if (error) throw error;
       }
+
+      // Log da alteração
+      await logPermissionChange({
+        action: 'update',
+        targetUserId: userId,
+        beforeValue: { granted: oldGranted, denied: oldDenied },
+        afterValue: { granted, denied },
+        description: `Permissões alteradas para ${userName}`,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-users-permissions'] });
@@ -239,10 +257,17 @@ export default function UserPermissions() {
     const changes = pendingChanges[userId];
     if (!changes) return;
 
+    const user = users?.find(u => u.userId === userId);
+    const oldGranted = user?.tenantPermissions?.granted_permissions || [];
+    const oldDenied = user?.tenantPermissions?.denied_permissions || [];
+
     saveMutation.mutate({
       userId,
+      userName: user?.fullName || 'Usuário',
       granted: changes.granted,
       denied: changes.denied,
+      oldGranted,
+      oldDenied,
     });
 
     // Limpar pending changes após salvar

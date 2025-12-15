@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
+import { useAuth } from '@/contexts/AuthContext';
 import type { ModuleKey, TenantModule } from '@/types/modules';
 import { AVAILABLE_MODULES } from '@/config/modules';
 
@@ -19,8 +20,27 @@ const ModuleContext = createContext<ModuleContextType | undefined>(undefined);
 
 export function ModuleProvider({ children }: { children: React.ReactNode }) {
   const { tenant, isLoading: tenantLoading } = useTenant();
+  const { user } = useAuth();
   const [modules, setModules] = useState<TenantModule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const logModuleChange = useCallback(async (action: 'enable' | 'disable', moduleKey: string, moduleId?: string) => {
+    if (!user?.id || !tenant?.id) return;
+    try {
+      await supabase.from('tenant_audit_log').insert([{
+        tenant_id: tenant.id,
+        user_id: user.id,
+        entity_type: 'module',
+        entity_id: moduleId || null,
+        action: action,
+        after_value: { module_key: moduleKey, is_enabled: action === 'enable' },
+        description: `Módulo "${moduleKey}" ${action === 'enable' ? 'habilitado' : 'desabilitado'}`,
+        user_agent: navigator.userAgent,
+      }]);
+    } catch (error) {
+      console.error('Error logging module change:', error);
+    }
+  }, [user?.id, tenant?.id]);
 
   const fetchModules = useCallback(async () => {
     if (!tenant?.id) {
@@ -93,18 +113,24 @@ export function ModuleProvider({ children }: { children: React.ReactNode }) {
           disabled_at: null 
         })
         .eq('id', existingModule.id);
+      
+      await logModuleChange('enable', moduleKey, existingModule.id);
     } else {
-      await supabase
+      const { data } = await supabase
         .from('tenant_modules')
         .insert({ 
           tenant_id: tenant.id, 
           module_key: moduleKey, 
           is_enabled: true 
-        });
+        })
+        .select('id')
+        .single();
+      
+      await logModuleChange('enable', moduleKey, data?.id);
     }
 
     await fetchModules();
-  }, [tenant?.id, modules, fetchModules]);
+  }, [tenant?.id, modules, fetchModules, logModuleChange]);
 
   const disableModule = useCallback(async (moduleKey: ModuleKey) => {
     if (!tenant?.id) return;
@@ -120,9 +146,10 @@ export function ModuleProvider({ children }: { children: React.ReactNode }) {
         })
         .eq('id', existingModule.id);
 
+      await logModuleChange('disable', moduleKey, existingModule.id);
       await fetchModules();
     }
-  }, [tenant?.id, modules, fetchModules]);
+  }, [tenant?.id, modules, fetchModules, logModuleChange]);
 
   const value: ModuleContextType = {
     modules,

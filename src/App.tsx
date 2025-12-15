@@ -24,6 +24,7 @@ import Appointments from "./pages/Appointments";
 import AgendarOdonto from "./pages/AgendarOdonto";
 import AdminUserManagement from "./pages/admin/UserManagement";
 import UserPermissions from "./pages/admin/UserPermissions";
+import AuditLogs from "./pages/admin/AuditLogs";
 import Atendimento from "./pages/Atendimento";
 import PrescriptionList from "./pages/PrescriptionList";
 import Auth from "./pages/Auth";
@@ -132,6 +133,14 @@ const App = () => {
                       element={
                         <ProtectedRoute requireAdmin>
                           <UserPermissions />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="auditoria"
+                      element={
+                        <ProtectedRoute requireAdmin>
+                          <AuditLogs />
                         </ProtectedRoute>
                       }
                     />
