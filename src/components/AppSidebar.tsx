@@ -96,6 +96,7 @@ const menuItems: MenuItem[] = [
     children: [
       { name: "Usuários", href: "/usuarios", icon: UserRound },
       { name: "Permissões", href: "/permissoes", icon: KeyRound },
+      { name: "Auditoria", href: "/auditoria", icon: FileText },
     ],
   },
 ];
