@@ -1,155 +1,200 @@
-import { Button } from '@/components/ui/button';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { X } from 'lucide-react';
-import { ToothCondition } from './ToothIcon';
+import { X, Trash2 } from 'lucide-react';
+import { 
+  ToothCondition, 
+  conditionColors, 
+  conditionLabels 
+} from './teeth/toothUtils';
 
 interface ToothConditionPanelProps {
   toothNumber: number | null;
   conditions: ToothCondition[];
-  onAddCondition: (condition: ToothCondition) => void;
+  onAddCondition: (surface: ToothCondition['surface'], condition: ToothCondition['condition']) => void;
   onRemoveCondition: (surface: ToothCondition['surface']) => void;
   onClearAll: () => void;
   onClose: () => void;
 }
 
-const conditionOptions: { value: ToothCondition['condition']; label: string; color: string }[] = [
-  { value: 'healthy', label: 'Saudável', color: 'bg-gray-200' },
-  { value: 'caries', label: 'Cárie', color: 'bg-red-500' },
-  { value: 'restoration', label: 'Restauração', color: 'bg-blue-500' },
-  { value: 'extraction', label: 'Extração Indicada', color: 'bg-gray-500' },
-  { value: 'endodontic', label: 'Tratamento de Canal', color: 'bg-purple-500' },
-  { value: 'crown', label: 'Coroa', color: 'bg-amber-500' },
-  { value: 'implant', label: 'Implante', color: 'bg-green-500' },
-  { value: 'absent', label: 'Ausente', color: 'bg-gray-800' },
+const surfaceOptions: Array<{ value: ToothCondition['surface']; label: string }> = [
+  { value: 'all', label: 'Dente Inteiro' },
+  { value: 'oclusal', label: 'Oclusal/Incisal' },
+  { value: 'mesial', label: 'Mesial' },
+  { value: 'distal', label: 'Distal' },
+  { value: 'vestibular', label: 'Vestibular' },
+  { value: 'lingual', label: 'Lingual/Palatina' },
 ];
 
-const surfaceOptions: { value: ToothCondition['surface']; label: string }[] = [
-  { value: 'O', label: 'Oclusal (O)' },
-  { value: 'M', label: 'Mesial (M)' },
-  { value: 'D', label: 'Distal (D)' },
-  { value: 'V', label: 'Vestibular (V)' },
-  { value: 'L', label: 'Lingual (L)' },
-  { value: 'full', label: 'Dente Inteiro' },
+const conditionOptions: Array<{ value: ToothCondition['condition']; label: string; requiresAllSurface?: boolean }> = [
+  { value: 'caries', label: 'Cárie' },
+  { value: 'restoration', label: 'Restauração' },
+  { value: 'sealant', label: 'Selante' },
+  { value: 'crown', label: 'Coroa', requiresAllSurface: true },
+  { value: 'endodontic', label: 'Tratamento de Canal', requiresAllSurface: true },
+  { value: 'extraction', label: 'Extração Indicada', requiresAllSurface: true },
+  { value: 'absent', label: 'Ausente', requiresAllSurface: true },
+  { value: 'implant', label: 'Implante', requiresAllSurface: true },
 ];
 
-export const ToothConditionPanel = ({
+export const ToothConditionPanel: React.FC<ToothConditionPanelProps> = ({
   toothNumber,
   conditions,
   onAddCondition,
   onRemoveCondition,
   onClearAll,
   onClose,
-}: ToothConditionPanelProps) => {
-  if (toothNumber === null) {
+}) => {
+  const [selectedSurface, setSelectedSurface] = React.useState<ToothCondition['surface']>('oclusal');
+
+  if (!toothNumber) {
     return (
-      <Card className="h-full">
-        <CardContent className="flex items-center justify-center h-full text-muted-foreground">
-          <p>Selecione um dente para editar</p>
+      <Card className="h-fit">
+        <CardContent className="pt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p className="text-sm">Clique em um dente para visualizar e editar suas condições</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  const handleConditionSelect = (condition: ToothCondition['condition'], surface: ToothCondition['surface']) => {
-    onAddCondition({ surface, condition });
+  const getQuadrantName = (tooth: number) => {
+    const quadrant = Math.floor(tooth / 10);
+    const names: Record<number, string> = {
+      1: 'Superior Direito',
+      2: 'Superior Esquerdo',
+      3: 'Inferior Esquerdo',
+      4: 'Inferior Direito',
+    };
+    return names[quadrant] || '';
+  };
+
+  const getToothTypeName = (tooth: number) => {
+    const unit = tooth % 10;
+    if (unit === 1 || unit === 2) return 'Incisivo';
+    if (unit === 3) return 'Canino';
+    if (unit === 4 || unit === 5) return 'Pré-molar';
+    return 'Molar';
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-fit sticky top-4">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Dente {toothNumber}</CardTitle>
+          <div>
+            <CardTitle className="text-lg">Dente {toothNumber}</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              {getToothTypeName(toothNumber)} • {getQuadrantName(toothNumber)}
+            </p>
+          </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Current conditions */}
+        {/* Condições atuais */}
         {conditions.length > 0 && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Condições atuais:</Label>
-            <div className="flex flex-wrap gap-2">
-              {conditions.map((c, idx) => {
-                const opt = conditionOptions.find((o) => o.value === c.condition);
-                return (
-                  <Badge
-                    key={idx}
-                    variant="outline"
-                    className="cursor-pointer hover:bg-destructive/10"
-                    onClick={() => onRemoveCondition(c.surface)}
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Condições Atuais</Label>
+            <div className="space-y-2">
+              {conditions.map((condition, idx) => (
+                <div 
+                  key={idx}
+                  className="flex items-center justify-between p-2 rounded-lg border"
+                  style={{ borderColor: conditionColors[condition.condition] }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: conditionColors[condition.condition] }}
+                    />
+                    <span className="text-sm">{conditionLabels[condition.condition]}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {surfaceOptions.find(s => s.value === condition.surface)?.label}
+                    </Badge>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6"
+                    onClick={() => onRemoveCondition(condition.surface)}
                   >
-                    {c.surface}: {opt?.label}
-                    <X className="h-3 w-3 ml-1" />
-                  </Badge>
-                );
-              })}
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
             </div>
-            <Button variant="ghost" size="sm" onClick={onClearAll} className="text-destructive">
-              Limpar todas
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full mt-2"
+              onClick={onClearAll}
+            >
+              <Trash2 className="h-3 w-3 mr-2" />
+              Limpar Todas
             </Button>
           </div>
         )}
 
-        {/* Add condition */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Adicionar condição:</Label>
+        {/* Adicionar condição */}
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Adicionar Condição</Label>
           
-          <div className="grid grid-cols-2 gap-2">
-            {conditionOptions.map((opt) => (
-              <div key={opt.value} className="space-y-1">
+          {/* Seleção de superfície */}
+          <div className="mb-3">
+            <label className="text-xs text-muted-foreground mb-1 block">Superfície</label>
+            <div className="flex flex-wrap gap-1">
+              {surfaceOptions.map(surface => (
                 <Button
-                  variant="outline"
+                  key={surface.value}
+                  variant={selectedSurface === surface.value ? 'default' : 'outline'}
                   size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => {
-                    // Quick add to full tooth
-                    handleConditionSelect(opt.value, 'full');
-                  }}
+                  className="text-xs h-7"
+                  onClick={() => setSelectedSurface(surface.value)}
                 >
-                  <div className={`w-3 h-3 rounded-full ${opt.color}`} />
-                  {opt.label}
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-2 border-t">
-            <Label className="text-sm font-medium mb-2 block">Por superfície:</Label>
-            <div className="grid grid-cols-3 gap-1">
-              {surfaceOptions.slice(0, -1).map((surf) => (
-                <Button
-                  key={surf.value}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  onClick={() => {
-                    const activeCondition = conditions.length > 0 ? conditions[0].condition : 'caries';
-                    handleConditionSelect(activeCondition, surf.value);
-                  }}
-                >
-                  {surf.label}
+                  {surface.label}
                 </Button>
               ))}
             </div>
           </div>
+
+          {/* Botões de condição */}
+          <div className="grid grid-cols-2 gap-2">
+            {conditionOptions.map(option => {
+              const isDisabled = option.requiresAllSurface && selectedSurface !== 'all';
+              return (
+                <Button
+                  key={option.value}
+                  variant="outline"
+                  size="sm"
+                  className="justify-start text-xs h-9"
+                  disabled={isDisabled}
+                  onClick={() => {
+                    const surface = option.requiresAllSurface ? 'all' : selectedSurface;
+                    onAddCondition(surface, option.value);
+                  }}
+                  title={isDisabled ? 'Esta condição requer selecionar "Dente Inteiro"' : undefined}
+                >
+                  <div 
+                    className="w-3 h-3 rounded mr-2 flex-shrink-0"
+                    style={{ backgroundColor: conditionColors[option.value] }}
+                  />
+                  <span className="truncate">{option.label}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Legend */}
+        {/* Dica */}
         <div className="pt-3 border-t">
-          <Label className="text-sm font-medium mb-2 block">Legenda:</Label>
-          <div className="grid grid-cols-2 gap-1 text-xs">
-            {conditionOptions.map((opt) => (
-              <div key={opt.value} className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${opt.color}`} />
-                <span className="text-muted-foreground">{opt.label}</span>
-              </div>
-            ))}
-          </div>
+          <p className="text-xs text-muted-foreground">
+            💡 Condições como Coroa, Canal, Extração, Ausente e Implante são aplicadas ao dente inteiro automaticamente.
+          </p>
         </div>
       </CardContent>
     </Card>
