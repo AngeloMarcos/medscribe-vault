@@ -115,15 +115,15 @@ export function AddTreatmentItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Adicionar Procedimento ao Plano</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 pr-2 sm:pr-4">
           <div className="space-y-4 py-4">
-            {/* Dente */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Dente e Urgência */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Dente (opcional)</Label>
                 <Input
@@ -160,7 +160,7 @@ export function AddTreatmentItemDialog({
             {dente && (
               <div className="space-y-2">
                 <Label>Superfícies</Label>
-                <div className="flex flex-wrap gap-3">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
                   {superficies.map(sup => (
                     <div key={sup} className="flex items-center space-x-2">
                       <Checkbox
@@ -249,7 +249,7 @@ export function AddTreatmentItemDialog({
 
             {/* Valores */}
             {procedimento && (
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="space-y-2">
                   <Label>Valor Unitário</Label>
                   <Input

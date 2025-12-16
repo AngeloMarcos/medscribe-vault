@@ -60,7 +60,7 @@ export function MiniOdontograma({ teethStatus, className }: MiniOdontogramaProps
   };
 
   return (
-    <div className={cn("", className)}>
+    <div className={cn("min-w-[200px]", className)}>
       <svg viewBox="0 0 260 50" className="w-full h-auto">
         {/* Upper arch */}
         {upperTeeth.map((tooth, index) => renderTooth(tooth, index, true))}
@@ -68,19 +68,19 @@ export function MiniOdontograma({ teethStatus, className }: MiniOdontogramaProps
         {lowerTeeth.map((tooth, index) => renderTooth(tooth, index, false))}
       </svg>
       
-      {/* Legend */}
-      <div className="flex flex-wrap gap-2 mt-2 text-xs">
+      {/* Legend - 2 columns on mobile */}
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-3 gap-y-1 sm:gap-2 mt-2 text-xs">
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-blue-400 border border-blue-600" />
-          <span className="text-muted-foreground">Planejado</span>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-blue-400 border border-blue-600 flex-shrink-0" />
+          <span className="text-muted-foreground text-[10px] sm:text-xs">Planejado</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-amber-400 border border-amber-600" />
-          <span className="text-muted-foreground">Em andamento</span>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-amber-400 border border-amber-600 flex-shrink-0" />
+          <span className="text-muted-foreground text-[10px] sm:text-xs">Em andamento</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-emerald-400 border border-emerald-600" />
-          <span className="text-muted-foreground">Concluído</span>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-400 border border-emerald-600 flex-shrink-0" />
+          <span className="text-muted-foreground text-[10px] sm:text-xs">Concluído</span>
         </div>
       </div>
     </div>
