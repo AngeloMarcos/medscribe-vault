@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ const PatientDetail = () => {
   const [isExamRequestDialogOpen, setIsExamRequestDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
-  const { data: patient } = useQuery({
+  const { data: patient, isLoading: isLoadingPatient } = useQuery({
     queryKey: ["patient", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -57,7 +58,7 @@ const PatientDetail = () => {
     },
   });
 
-  const { data: evolutions, refetch: refetchEvolutions } = useQuery({
+  const { data: evolutions } = useQuery({
     queryKey: ["patient-evolutions", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -109,7 +110,24 @@ const PatientDetail = () => {
     },
   });
 
-  if (!patient) return <div>Carregando...</div>;
+  // Loading state
+  if (isLoadingPatient) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <Skeleton className="h-48 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
+      </div>
+    );
+  }
+
+  if (!patient) return <div>Paciente não encontrado</div>;
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
@@ -125,29 +143,31 @@ const PatientDetail = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-4 md:space-y-6">
+      {/* Header com stacking responsivo */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Link to="/patients">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground truncate">
             {patient.name}
           </h2>
-          <p className="text-muted-foreground">Detalhes do paciente</p>
+          <p className="text-muted-foreground text-sm">Detalhes do paciente</p>
         </div>
       </div>
 
+      {/* Informações Pessoais */}
       <Card>
-        <CardHeader>
-          <CardTitle>Informações Pessoais</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-card-title">Informações Pessoais</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
+        <CardContent className="grid gap-4 grid-cols-1 sm:grid-cols-2">
           <div>
             <p className="text-sm text-muted-foreground">CPF</p>
-            <p className="font-medium">{patient.cpf}</p>
+            <p className="font-medium truncate">{patient.cpf}</p>
           </div>
           {patient.birth_date && (
             <div>
@@ -178,20 +198,35 @@ const PatientDetail = () => {
         </CardContent>
       </Card>
 
+      {/* Tabs com scroll horizontal em mobile */}
       <Tabs defaultValue="appointments" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="appointments">Consultas</TabsTrigger>
-          <TabsTrigger value="vitals">Sinais Vitais</TabsTrigger>
-          <TabsTrigger value="evolutions">Evoluções</TabsTrigger>
-          <TabsTrigger value="procedures">Procedimentos</TabsTrigger>
-          <TabsTrigger value="exams">Exames</TabsTrigger>
-          <TabsTrigger value="reports">Relatórios</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin scrollbar-thumb-muted">
+          <TabsList className="inline-flex w-max min-w-full sm:w-full sm:grid sm:grid-cols-6 h-auto">
+            <TabsTrigger value="appointments" className="whitespace-nowrap px-3 py-2">
+              Consultas
+            </TabsTrigger>
+            <TabsTrigger value="vitals" className="whitespace-nowrap px-3 py-2">
+              Sinais Vitais
+            </TabsTrigger>
+            <TabsTrigger value="evolutions" className="whitespace-nowrap px-3 py-2">
+              Evoluções
+            </TabsTrigger>
+            <TabsTrigger value="procedures" className="whitespace-nowrap px-3 py-2">
+              Procedimentos
+            </TabsTrigger>
+            <TabsTrigger value="exams" className="whitespace-nowrap px-3 py-2">
+              Exames
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="whitespace-nowrap px-3 py-2">
+              Relatórios
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="appointments" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Histórico de Consultas</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-card-title">Histórico de Consultas</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -199,9 +234,9 @@ const PatientDetail = () => {
                   appointments.map((appointment) => (
                     <div
                       key={appointment.id}
-                      className="flex items-center justify-between rounded-lg border border-border p-4"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-border p-4"
                     >
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-0">
                         <p className="font-medium">
                           {appointment.type === "consulta" ? "Consulta" : "Procedimento"}
                         </p>
@@ -209,7 +244,7 @@ const PatientDetail = () => {
                           {new Date(appointment.date_time).toLocaleString("pt-BR")}
                         </p>
                         {appointment.description && (
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground truncate">
                             {appointment.description}
                           </p>
                         )}
@@ -218,7 +253,7 @@ const PatientDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-muted-foreground py-8">
                     Nenhuma consulta encontrada
                   </p>
                 )}
@@ -229,8 +264,8 @@ const PatientDetail = () => {
 
         <TabsContent value="vitals" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Sinais Vitais</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-card-title">Sinais Vitais</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -243,7 +278,7 @@ const PatientDetail = () => {
                       <p className="text-sm text-muted-foreground">
                         {new Date(vital.created_at).toLocaleString("pt-BR")}
                       </p>
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
                         {vital.blood_pressure && (
                           <div>
                             <p className="text-xs text-muted-foreground">PA</p>
@@ -278,7 +313,7 @@ const PatientDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-muted-foreground py-8">
                     Nenhum registro de sinais vitais
                   </p>
                 )}
@@ -289,8 +324,8 @@ const PatientDetail = () => {
 
         <TabsContent value="evolutions" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Evoluções</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-card-title">Evoluções</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -300,7 +335,7 @@ const PatientDetail = () => {
                       key={evolution.id}
                       className="rounded-lg border border-border p-4 space-y-2"
                     >
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                         <p className="font-medium">
                           {new Date(evolution.date).toLocaleDateString("pt-BR")}
                         </p>
@@ -322,7 +357,7 @@ const PatientDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-muted-foreground py-8">
                     Nenhuma evolução registrada
                   </p>
                 )}
@@ -333,9 +368,14 @@ const PatientDetail = () => {
 
         <TabsContent value="procedures" className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Procedimentos</CardTitle>
-              <Button onClick={() => setIsProcedureDialogOpen(true)} size="sm" className="gap-2">
+            {/* CardHeader responsivo */}
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3">
+              <CardTitle className="text-card-title">Procedimentos</CardTitle>
+              <Button 
+                onClick={() => setIsProcedureDialogOpen(true)} 
+                size="sm" 
+                className="w-full sm:w-auto gap-2"
+              >
                 <Plus className="h-4 w-4" />
                 Novo Procedimento
               </Button>
@@ -348,7 +388,7 @@ const PatientDetail = () => {
                       key={procedure.id}
                       className="rounded-lg border border-border p-4 space-y-2"
                     >
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                         <p className="font-medium">{procedure.description}</p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(procedure.date_time).toLocaleString("pt-BR")}
@@ -368,7 +408,7 @@ const PatientDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-muted-foreground py-8">
                     Nenhum procedimento registrado
                   </p>
                 )}
@@ -379,9 +419,13 @@ const PatientDetail = () => {
 
         <TabsContent value="exams" className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Solicitações de Exames</CardTitle>
-              <Button onClick={() => setIsExamRequestDialogOpen(true)} size="sm" className="gap-2">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3">
+              <CardTitle className="text-card-title">Solicitações de Exames</CardTitle>
+              <Button 
+                onClick={() => setIsExamRequestDialogOpen(true)} 
+                size="sm" 
+                className="w-full sm:w-auto gap-2"
+              >
                 <Plus className="h-4 w-4" />
                 Nova Solicitação
               </Button>
@@ -412,7 +456,7 @@ const PatientDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-muted-foreground py-8">
                     Nenhuma solicitação de exames
                   </p>
                 )}
@@ -423,9 +467,13 @@ const PatientDetail = () => {
 
         <TabsContent value="reports" className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Relatórios e Documentos</CardTitle>
-              <Button onClick={() => setIsReportDialogOpen(true)} size="sm" className="gap-2">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3">
+              <CardTitle className="text-card-title">Relatórios e Documentos</CardTitle>
+              <Button 
+                onClick={() => setIsReportDialogOpen(true)} 
+                size="sm" 
+                className="w-full sm:w-auto gap-2"
+              >
                 <Plus className="h-4 w-4" />
                 Novo Relatório
               </Button>
@@ -438,7 +486,7 @@ const PatientDetail = () => {
                       key={report.id}
                       className="rounded-lg border border-border p-4 space-y-2"
                     >
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                         <Badge variant="secondary">
                           {report.type === "atestado"
                             ? "Atestado"
@@ -454,8 +502,8 @@ const PatientDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground">
-                    Nenhum relatório gerado
+                  <p className="text-center text-muted-foreground py-8">
+                    Nenhum relatório ou documento
                   </p>
                 )}
               </div>
@@ -464,23 +512,24 @@ const PatientDetail = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Dialogs */}
       <AddProcedureDialog
         open={isProcedureDialogOpen}
         onOpenChange={setIsProcedureDialogOpen}
+        patientId={id || ""}
         onSuccess={refetchProcedures}
-        patientId={id!}
       />
       <AddExamRequestDialog
         open={isExamRequestDialogOpen}
         onOpenChange={setIsExamRequestDialogOpen}
+        patientId={id || ""}
         onSuccess={refetchExamRequests}
-        patientId={id!}
       />
       <AddReportDialog
         open={isReportDialogOpen}
         onOpenChange={setIsReportDialogOpen}
+        patientId={id || ""}
         onSuccess={refetchReports}
-        patientId={id!}
       />
     </div>
   );

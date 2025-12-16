@@ -216,47 +216,58 @@ export default function NewDashboard() {
                 ))}
               </div>
             ) : upcomingConsultas.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {upcomingConsultas.map((consulta) => {
                   const statusBadge = getStatusBadge(consulta.status);
                   return (
                     <div
                       key={consulta.id}
-                      className="grid grid-cols-[1fr_auto_auto_auto] gap-4 lg:gap-6 items-center p-4 lg:p-5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 border border-transparent hover:border-border"
+                      className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_auto_auto] gap-3 sm:gap-4 lg:gap-6 sm:items-center p-4 lg:p-5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 border border-transparent hover:border-border"
                     >
-                      {/* Paciente */}
-                      <div className="flex items-center gap-4">
-                        <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <UserRound className="h-5 w-5 text-secondary" />
+                      {/* Paciente + Badge mobile */}
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <UserRound className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="text-label truncate">{consulta.patients?.name || "Paciente"}</p>
                           <p className="text-caption truncate">
                             {consulta.especialidades?.nome || "Consulta"} • Sala {consulta.salas?.numero || "-"}
                           </p>
                         </div>
-                      </div>
-                      
-                      {/* Horário */}
-                      <div className="text-center">
-                        <p className="text-lg font-semibold text-foreground">{consulta.hora_inicio?.slice(0, 5)}</p>
-                      </div>
-                      
-                      {/* Profissional */}
-                      <div className="hidden md:block text-right min-w-0">
-                        <p className="text-body text-muted-foreground truncate max-w-[140px]">
-                          {consulta.profissionais?.nome || "—"}
-                        </p>
-                      </div>
-                      
-                      {/* Status com Badge colorido */}
-                      <div className="text-right">
+                        {/* Badge visível apenas em mobile */}
                         <Badge
                           variant="outline"
-                          className={`text-xs font-medium border ${statusBadge.className}`}
+                          className={`sm:hidden text-xs font-medium border shrink-0 ${statusBadge.className}`}
                         >
                           {statusBadge.label}
                         </Badge>
+                      </div>
+                      
+                      {/* Info row mobile / grid items desktop */}
+                      <div className="flex items-center justify-between sm:contents pl-13 sm:pl-0">
+                        {/* Horário */}
+                        <div className="flex items-center gap-2 sm:block sm:text-center">
+                          <span className="text-xs text-muted-foreground sm:hidden">Horário:</span>
+                          <p className="text-base sm:text-lg font-semibold text-foreground">{consulta.hora_inicio?.slice(0, 5)}</p>
+                        </div>
+                        
+                        {/* Profissional - hidden mobile */}
+                        <div className="hidden md:block text-right min-w-0">
+                          <p className="text-body text-muted-foreground truncate max-w-[140px]">
+                            {consulta.profissionais?.nome || "—"}
+                          </p>
+                        </div>
+                        
+                        {/* Status - hidden mobile (já mostrado acima) */}
+                        <div className="hidden sm:block text-right">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs font-medium border ${statusBadge.className}`}
+                          >
+                            {statusBadge.label}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   );
