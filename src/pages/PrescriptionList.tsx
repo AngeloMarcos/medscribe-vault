@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { useResponsive } from "@/hooks/useResponsive";
 
 type SortField = "local" | "name" | "age" | "record" | "responsible" | "date" | "stay";
 type SortDirection = "asc" | "desc";
@@ -43,8 +44,68 @@ interface PatientData {
   hasAllergy: boolean;
 }
 
+// Componente PatientCard para visualização mobile
+const PatientCard = ({ 
+  patient, 
+  onPrescribe,
+  calculateAge,
+  calculateStayDays 
+}: { 
+  patient: PatientData;
+  onPrescribe: () => void;
+  calculateAge: (birthDate: string | null) => string;
+  calculateStayDays: (arrivalTime: string | null) => number;
+}) => (
+  <Card className="hover:shadow-md transition-shadow">
+    <CardContent className="p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold truncate">{patient.name}</p>
+          <p className="text-sm text-muted-foreground truncate">{patient.local}</p>
+        </div>
+        {patient.hasAllergy && (
+          <Badge variant="destructive" className="shrink-0 gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            Alergia
+          </Badge>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div>
+          <span className="text-muted-foreground">Idade: </span>
+          <span className="font-medium">{calculateAge(patient.birthDate)}</span>
+        </div>
+        <div>
+          <span className="text-muted-foreground">Pront.: </span>
+          <span className="font-medium">{patient.medicalRecord || "-"}</span>
+        </div>
+        <div>
+          <span className="text-muted-foreground">Data: </span>
+          <span className="font-medium">
+            {format(new Date(patient.attendanceDate), "dd/MM/yy", { locale: ptBR })}
+          </span>
+        </div>
+        <div>
+          <span className="text-muted-foreground">Perm.: </span>
+          <span className="font-medium">{calculateStayDays(patient.arrivalTime)}d</span>
+        </div>
+      </div>
+      {patient.responsible && (
+        <p className="text-sm text-muted-foreground truncate">
+          Resp.: {patient.responsible}
+        </p>
+      )}
+      <Button className="w-full gap-2" onClick={onPrescribe}>
+        <FileText className="h-4 w-4" />
+        Prescrever
+      </Button>
+    </CardContent>
+  </Card>
+);
+
 const PrescriptionList = () => {
   const navigate = useNavigate();
+  const { isMobile, isTablet } = useResponsive();
   const [search, setSearch] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField | null>(null);
@@ -90,7 +151,7 @@ const PrescriptionList = () => {
         responsible: consulta.profissionais?.nome || null,
         attendanceDate: consulta.data_consulta,
         arrivalTime: consulta.hora_chegada,
-        hasAllergy: false, // TODO: Verificar tabela de alergias quando disponível
+        hasAllergy: false,
       }));
     },
   });
@@ -185,20 +246,22 @@ const PrescriptionList = () => {
     </TableHead>
   );
 
+  const showMobileView = isMobile || isTablet;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Card>
-        <CardHeader className="bg-primary/5 border-b">
-          <CardTitle className="text-2xl text-primary">
+        <CardHeader className="bg-primary/5 border-b pb-4">
+          <CardTitle className="text-xl md:text-2xl text-primary">
             Prescrição Médica - Lista de Pacientes
           </CardTitle>
           <CardDescription>
             Selecione o paciente para iniciar a prescrição
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 md:pt-6">
           {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 md:mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -221,39 +284,64 @@ const PrescriptionList = () => {
             </Select>
           </div>
 
-          {/* Tabela - Scrollable horizontalmente em mobile */}
-          <div className="rounded-md border overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <Table className="min-w-[900px]">
-              <TableHeader>
-                <TableRow>
-                  <SortableHeader field="local">Local</SortableHeader>
-                  <SortableHeader field="name">Nome</SortableHeader>
-                  <SortableHeader field="age">Idade</SortableHeader>
-                  <SortableHeader field="record">Prontuário</SortableHeader>
-                  <SortableHeader field="responsible">Responsável</SortableHeader>
-                  <SortableHeader field="date">Dt. Atend.</SortableHeader>
-                  <SortableHeader field="stay">Perm.</SortableHeader>
-                  <TableHead>Alergias</TableHead>
-                  <TableHead className="text-right">Ação</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell colSpan={9}>
-                        <Skeleton className="h-12 w-full" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : filteredAndSortedPatients.length === 0 ? (
+          {/* Loading State */}
+          {isLoading && (
+            showMobileView ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-48 rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Empty State */}
+          {!isLoading && filteredAndSortedPatients.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              Nenhum paciente encontrado com os critérios de busca
+            </div>
+          )}
+
+          {/* Mobile/Tablet: Card View */}
+          {!isLoading && showMobileView && filteredAndSortedPatients.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {filteredAndSortedPatients.map((patient) => (
+                <PatientCard
+                  key={patient.consultaId}
+                  patient={patient}
+                  onPrescribe={() => navigate(`/prescription/create/${patient.id}`)}
+                  calculateAge={calculateAge}
+                  calculateStayDays={calculateStayDays}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Desktop: Table View */}
+          {!isLoading && !showMobileView && filteredAndSortedPatients.length > 0 && (
+            <div className="rounded-md border overflow-x-auto">
+              <Table className="min-w-[900px]">
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      Nenhum paciente encontrado com os critérios de busca
-                    </TableCell>
+                    <SortableHeader field="local">Local</SortableHeader>
+                    <SortableHeader field="name">Nome</SortableHeader>
+                    <SortableHeader field="age">Idade</SortableHeader>
+                    <SortableHeader field="record">Prontuário</SortableHeader>
+                    <SortableHeader field="responsible">Responsável</SortableHeader>
+                    <SortableHeader field="date">Dt. Atend.</SortableHeader>
+                    <SortableHeader field="stay">Perm.</SortableHeader>
+                    <TableHead>Alergias</TableHead>
+                    <TableHead className="text-right">Ação</TableHead>
                   </TableRow>
-                ) : (
-                  filteredAndSortedPatients.map((patient) => (
+                </TableHeader>
+                <TableBody>
+                  {filteredAndSortedPatients.map((patient) => (
                     <TableRow key={patient.consultaId} className="hover:bg-muted/30">
                       <TableCell className="font-medium">{patient.local}</TableCell>
                       <TableCell>{patient.name}</TableCell>
@@ -289,11 +377,11 @@ const PrescriptionList = () => {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
           {/* Rodapé com contagem */}
           {!isLoading && (

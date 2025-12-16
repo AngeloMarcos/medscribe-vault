@@ -14,8 +14,7 @@ import {
   FileText,
   ClipboardList
 } from "lucide-react";
-import { differenceInYears, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { differenceInYears } from "date-fns";
 import { PrescriptionBreadcrumb } from "@/components/prescription/PrescriptionBreadcrumb";
 
 export default function CreatePrescription() {
@@ -72,7 +71,7 @@ export default function CreatePrescription() {
   const isLoading = isLoadingPatient || isLoadingConsultation;
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-4 md:py-6 px-4 md:px-6 space-y-4 md:space-y-6">
       {/* Breadcrumb */}
       <PrescriptionBreadcrumb 
         items={[
@@ -80,16 +79,17 @@ export default function CreatePrescription() {
         ]} 
       />
 
-      {/* Header */}
-      <div className="flex items-center gap-4">
+      {/* Header com stacking responsivo */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate("/prescription")}
+          className="self-start"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-xl md:text-2xl font-bold text-foreground">
           Prescrição Médica - Elaborar
         </h1>
       </div>
@@ -115,10 +115,10 @@ export default function CreatePrescription() {
               </div>
             </div>
           ) : patient ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Column 1 */}
               <div className="space-y-2">
-                <p className="text-xl font-semibold text-foreground">
+                <p className="text-lg md:text-xl font-semibold text-foreground truncate">
                   {patient.name}
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -186,7 +186,7 @@ export default function CreatePrescription() {
 
           <Button
             size="lg"
-            className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => navigate(`/prescription/maintain/${patientId}`)}
           >
             <Plus className="h-5 w-5 mr-2" />
@@ -197,21 +197,21 @@ export default function CreatePrescription() {
 
       <Separator />
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3">
-        <Button variant="outline" className="gap-2">
+      {/* Action Buttons - Empilhados em mobile */}
+      <div className="flex flex-col xs:flex-row flex-wrap gap-2 sm:gap-3">
+        <Button variant="outline" className="flex-1 xs:flex-none gap-2 justify-center">
           <LogOut className="h-4 w-4" />
           Alta
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="flex-1 xs:flex-none gap-2 justify-center">
           <Skull className="h-4 w-4" />
           Óbito
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="flex-1 xs:flex-none gap-2 justify-center">
           <FileSearch className="h-4 w-4" />
           Solicitar Exames
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="flex-1 xs:flex-none gap-2 justify-center">
           <FileText className="h-4 w-4" />
           Anamnese/Evolução
         </Button>

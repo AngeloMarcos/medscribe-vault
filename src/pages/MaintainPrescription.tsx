@@ -250,7 +250,7 @@ export default function MaintainPrescription() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 space-y-6">
+      <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
         {/* Breadcrumb */}
         <PrescriptionBreadcrumb 
           items={[
@@ -259,16 +259,17 @@ export default function MaintainPrescription() {
           ]} 
         />
 
-        {/* Header */}
-        <div className="flex items-center gap-4">
+        {/* Header com stacking responsivo */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(`/prescription/create/${patientId}`)}
+            className="self-start"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
             {prescriptionId ? "Editar Prescrição Médica" : "Manter Prescrição Médica"}
           </h1>
         </div>
@@ -279,7 +280,7 @@ export default function MaintainPrescription() {
             {isLoading ? (
               <PatientHeaderSkeleton />
             ) : patient ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Patient Info */}
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-foreground">{patient.name}</p>
@@ -388,11 +389,11 @@ export default function MaintainPrescription() {
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-1" role="group" aria-label="Ações do item">
+                          <div className="flex items-center gap-0.5 md:gap-1 shrink-0" role="group" aria-label="Ações do item">
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8"
+                              className="h-9 w-9 md:h-8 md:w-8"
                               aria-label="Editar item"
                             >
                               <Edit className="h-4 w-4" aria-hidden="true" />
@@ -400,7 +401,7 @@ export default function MaintainPrescription() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-9 w-9 md:h-8 md:w-8"
                               onClick={() => handleCopyItem(item)}
                               aria-label="Duplicar item"
                             >
@@ -409,7 +410,7 @@ export default function MaintainPrescription() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-9 w-9 md:h-8 md:w-8"
                               onClick={() => handleSuspendItem(item.id)}
                               aria-label={item.suspended ? "Reativar item" : "Suspender item"}
                             >
@@ -418,7 +419,7 @@ export default function MaintainPrescription() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              className="h-9 w-9 md:h-8 md:w-8 text-destructive hover:text-destructive"
                               onClick={() => setDeleteConfirmId(item.id)}
                               aria-label="Excluir item"
                             >
@@ -436,10 +437,10 @@ export default function MaintainPrescription() {
           </CardContent>
         </Card>
 
-        {/* Footer Actions */}
-        <div className="flex flex-wrap gap-3" role="group" aria-label="Ações da prescrição">
+        {/* Footer Actions - responsivo com stacking */}
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3" role="group" aria-label="Ações da prescrição">
           <LoadingButton 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
             isLoading={isSaving}
             loadingText="Salvando..."
             onClick={handleConfirmPrescription}
@@ -449,7 +450,7 @@ export default function MaintainPrescription() {
           </LoadingButton>
           <LoadingButton 
             variant="outline" 
-            className="gap-2"
+            className="w-full sm:w-auto gap-2"
             isLoading={isPending}
             loadingText="Salvando..."
             onClick={handlePendingPrescription}
@@ -457,13 +458,13 @@ export default function MaintainPrescription() {
             <Clock className="h-4 w-4" aria-hidden="true" />
             Deixar Pendente
           </LoadingButton>
-          <Button variant="outline" className="gap-2" aria-label="Visualizar prescrição">
+          <Button variant="outline" className="w-full sm:w-auto gap-2" aria-label="Visualizar prescrição">
             <Eye className="h-4 w-4" aria-hidden="true" />
             Visualizar
           </Button>
           <Button 
             variant="outline" 
-            className="gap-2 text-destructive border-destructive hover:bg-destructive/10"
+            className="w-full sm:w-auto gap-2 text-destructive border-destructive hover:bg-destructive/10"
             onClick={() => navigate(`/prescription/create/${patientId}`)}
             aria-label="Cancelar e voltar"
           >
