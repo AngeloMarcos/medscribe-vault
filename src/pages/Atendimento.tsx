@@ -11,9 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { DocumentGenerator } from "@/components/atendimento/DocumentGenerator";
 import { FinishAttendanceModal } from "@/components/atendimento/FinishAttendanceModal";
 import { useToast } from "@/hooks/use-toast";
+import { useResponsive } from "@/hooks/useResponsive";
 import { format, differenceInYears, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { atendimentoSchema, vitalsSchema } from "@/lib/validationSchemas";
@@ -31,12 +33,15 @@ import {
   ArrowLeft,
   Loader2,
   Search,
+  Menu,
 } from "lucide-react";
 
 export default function Atendimento() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isMobile, isTablet } = useResponsive();
+  const showDrawer = isMobile || isTablet;
   
   const [anamnese, setAnamnese] = useState("");
   const [evolucao, setEvolucao] = useState("");
@@ -44,6 +49,7 @@ export default function Atendimento() {
   const [cidSearch, setCidSearch] = useState("");
   const [prescricao, setPrescricao] = useState("");
   const [finishModalOpen, setFinishModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Vitals state
   const [vitals, setVitals] = useState({
@@ -190,13 +196,11 @@ export default function Atendimento() {
   }) => {
     if (!consulta?.patients?.id || !id) return;
 
-    // Validate clinical data before saving
     const clinicalValidation = atendimentoSchema.safeParse({ anamnese, evolucao, prescricao });
     if (!clinicalValidation.success) {
       throw new Error(clinicalValidation.error.errors[0]?.message || "Dados clínicos inválidos");
     }
 
-    // Upsert atendimento record
     const atendimentoData = {
       consulta_id: id,
       paciente_id: consulta.patients.id,
@@ -217,7 +221,6 @@ export default function Atendimento() {
 
     if (atendimentoError) throw atendimentoError;
 
-    // Update consulta status
     const { error: consultaError } = await supabase
       .from("consultas")
       .update({
@@ -228,7 +231,6 @@ export default function Atendimento() {
 
     if (consultaError) throw consultaError;
 
-    // Navigate back to patient list
     navigate("/lista-pacientes");
   };
 
@@ -263,165 +265,205 @@ export default function Atendimento() {
     ? differenceInYears(new Date(), parseISO(patient.birth_date))
     : null;
 
-  return (
-    <div className="flex h-[calc(100vh-80px)]">
-      {/* Left Sidebar - Patient Summary */}
-      <div className="w-80 border-r border-border bg-card p-6 flex flex-col">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-fit mb-4"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
+  // Patient Sidebar Content
+  const PatientSidebarContent = () => (
+    <div className="flex flex-col h-full">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-fit mb-4"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Voltar
+      </Button>
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="h-8 w-8 text-primary" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-lg">{patient.name}</h2>
-            {idade !== null && (
-              <p className="text-muted-foreground">{idade} anos</p>
-            )}
-          </div>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="h-12 w-12 lg:h-16 lg:w-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <User className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
         </div>
-
-        <Separator className="mb-4" />
-
-        <div className="space-y-3 text-sm">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-            <span>CPF: {patient.cpf}</span>
-          </div>
-          {patient.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <span>{patient.phone}</span>
-            </div>
+        <div className="min-w-0">
+          <h2 className="font-semibold text-base lg:text-lg truncate">{patient.name}</h2>
+          {idade !== null && (
+            <p className="text-muted-foreground text-sm">{idade} anos</p>
           )}
-          {patient.medical_record_number && (
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span>Prontuário: {patient.medical_record_number}</span>
-            </div>
-          )}
-          {patient.insurance && (
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-              <span>{patient.insurance}</span>
-            </div>
-          )}
-        </div>
-
-        <Separator className="my-4" />
-
-        <div className="text-sm space-y-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>
-              {format(parseISO(consulta.data_consulta), "dd/MM/yyyy", { locale: ptBR })}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{consulta.hora_inicio}</span>
-          </div>
-          {consulta.tipo_consulta && (
-            <Badge variant="secondary" className="mt-2">
-              {consulta.tipo_consulta}
-            </Badge>
-          )}
-        </div>
-
-        {/* CIDs Selected */}
-        {selectedCids.length > 0 && (
-          <>
-            <Separator className="my-4" />
-            <div>
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                CIDs Selecionados
-              </Label>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {selectedCids.map((cid) => (
-                  <Badge key={cid} variant="outline" className="text-xs">
-                    {cid}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Finish Button */}
-        <div className="mt-auto pt-6">
-          <Button
-            className="w-full bg-success hover:bg-success/90"
-            size="lg"
-            onClick={() => setFinishModalOpen(true)}
-          >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            Finalizar Atendimento
-          </Button>
         </div>
       </div>
 
+      <Separator className="mb-4" />
+
+      <div className="space-y-3 text-sm">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="truncate">CPF: {patient.cpf}</span>
+        </div>
+        {patient.phone && (
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="truncate">{patient.phone}</span>
+          </div>
+        )}
+        {patient.medical_record_number && (
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="truncate">Prontuário: {patient.medical_record_number}</span>
+          </div>
+        )}
+        {patient.insurance && (
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="truncate">{patient.insurance}</span>
+          </div>
+        )}
+      </div>
+
+      <Separator className="my-4" />
+
+      <div className="text-sm space-y-2">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span>
+            {format(parseISO(consulta.data_consulta), "dd/MM/yyyy", { locale: ptBR })}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <span>{consulta.hora_inicio}</span>
+        </div>
+        {consulta.tipo_consulta && (
+          <Badge variant="secondary" className="mt-2">
+            {consulta.tipo_consulta}
+          </Badge>
+        )}
+      </div>
+
+      {selectedCids.length > 0 && (
+        <>
+          <Separator className="my-4" />
+          <div>
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+              CIDs Selecionados
+            </Label>
+            <div className="flex flex-wrap gap-1 mt-2">
+              {selectedCids.map((cid) => (
+                <Badge key={cid} variant="outline" className="text-xs">
+                  {cid}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="mt-auto pt-6">
+        <Button
+          className="w-full bg-success hover:bg-success/90"
+          size="lg"
+          onClick={() => {
+            setSidebarOpen(false);
+            setFinishModalOpen(true);
+          }}
+        >
+          <CheckCircle className="h-5 w-5 mr-2" />
+          Finalizar
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
+      {/* Mobile Header with Patient Button */}
+      {showDrawer && (
+        <div className="flex items-center gap-2 p-3 border-b border-border bg-card lg:hidden">
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Menu className="h-4 w-4" />
+                Ver Paciente
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] p-4">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Dados do Paciente</SheetTitle>
+              </SheetHeader>
+              <PatientSidebarContent />
+            </SheetContent>
+          </Sheet>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium truncate">{patient.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {idade} anos • {patient.medical_record_number}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      {!showDrawer && (
+        <div className="w-80 border-r border-border bg-card p-6 flex flex-col">
+          <PatientSidebarContent />
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden flex flex-col">
         <Tabs defaultValue="resumo" className="h-full flex flex-col">
-          <div className="border-b border-border px-6 pt-4">
-            <TabsList>
-              <TabsTrigger value="resumo" className="gap-2">
-                <Clock className="h-4 w-4" />
-                Resumo
-              </TabsTrigger>
-              <TabsTrigger value="anamnese" className="gap-2">
-                <Stethoscope className="h-4 w-4" />
-                Anamnese
-              </TabsTrigger>
-              <TabsTrigger value="vitais" className="gap-2">
-                <Activity className="h-4 w-4" />
-                Sinais Vitais
-              </TabsTrigger>
-              <TabsTrigger value="cid" className="gap-2">
-                <Search className="h-4 w-4" />
-                CID-10
-              </TabsTrigger>
-              <TabsTrigger value="prescricao" className="gap-2">
-                <Pill className="h-4 w-4" />
-                Prescrição
-              </TabsTrigger>
-              <TabsTrigger value="documentos" className="gap-2">
-                <FileText className="h-4 w-4" />
-                Documentos
-              </TabsTrigger>
-            </TabsList>
+          <div className="border-b border-border px-3 lg:px-6 pt-2 lg:pt-4 overflow-x-auto">
+            <ScrollArea orientation="horizontal" className="w-full">
+              <TabsList className="inline-flex w-max min-w-full lg:w-auto">
+                <TabsTrigger value="resumo" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <Clock className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">Resumo</span>
+                </TabsTrigger>
+                <TabsTrigger value="anamnese" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <Stethoscope className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">Anamnese</span>
+                </TabsTrigger>
+                <TabsTrigger value="vitais" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <Activity className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">Vitais</span>
+                </TabsTrigger>
+                <TabsTrigger value="cid" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <Search className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">CID-10</span>
+                </TabsTrigger>
+                <TabsTrigger value="prescricao" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <Pill className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">Prescrição</span>
+                </TabsTrigger>
+                <TabsTrigger value="documentos" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">Docs</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-6">
+            <div className="p-3 lg:p-6">
               {/* Resumo Tab */}
               <TabsContent value="resumo" className="mt-0">
                 <Card className="card-neumorphic">
-                  <CardHeader>
-                    <CardTitle>Histórico de Atendimentos</CardTitle>
+                  <CardHeader className="p-4 lg:p-6">
+                    <CardTitle className="text-base lg:text-lg">Histórico de Atendimentos</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4 lg:p-6 pt-0">
                     {previousEvolutions && previousEvolutions.length > 0 ? (
-                      <div className="space-y-4">
+                      <div className="space-y-3 lg:space-y-4">
                         {previousEvolutions.map((ev) => (
                           <div
                             key={ev.id}
-                            className="p-4 rounded-lg bg-muted/50 border-l-4 border-primary"
+                            className="p-3 lg:p-4 rounded-lg bg-muted/50 border-l-4 border-primary"
                           >
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="font-medium">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 mb-2">
+                              <span className="font-medium text-sm lg:text-base">
                                 {format(parseISO(ev.date), "dd/MM/yyyy")}
                               </span>
                               {ev.professional && (
-                                <Badge variant="outline">{ev.professional}</Badge>
+                                <Badge variant="outline" className="w-fit text-xs">
+                                  {ev.professional}
+                                </Badge>
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground">
@@ -431,7 +473,7 @@ export default function Atendimento() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground text-center py-8">
+                      <p className="text-muted-foreground text-center py-8 text-sm">
                         Nenhum atendimento anterior registrado.
                       </p>
                     )}
@@ -440,31 +482,31 @@ export default function Atendimento() {
               </TabsContent>
 
               {/* Anamnese Tab */}
-              <TabsContent value="anamnese" className="mt-0 space-y-6">
+              <TabsContent value="anamnese" className="mt-0 space-y-4 lg:space-y-6">
                 <Card className="card-neumorphic">
-                  <CardHeader>
-                    <CardTitle>Anamnese e Evolução</CardTitle>
+                  <CardHeader className="p-4 lg:p-6">
+                    <CardTitle className="text-base lg:text-lg">Anamnese e Evolução</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="p-4 lg:p-6 pt-0 space-y-4">
                     <div>
-                      <Label htmlFor="anamnese">Anamnese / Queixa Principal</Label>
+                      <Label htmlFor="anamnese" className="text-sm">Anamnese / Queixa Principal</Label>
                       <Textarea
                         id="anamnese"
                         value={anamnese}
                         onChange={(e) => setAnamnese(e.target.value)}
-                        placeholder="Descreva a queixa principal, história da doença atual..."
-                        rows={6}
+                        placeholder="Descreva a queixa principal..."
+                        rows={isMobile ? 4 : 6}
                         className="mt-2"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="evolucao">Evolução</Label>
+                      <Label htmlFor="evolucao" className="text-sm">Evolução</Label>
                       <Textarea
                         id="evolucao"
                         value={evolucao}
                         onChange={(e) => setEvolucao(e.target.value)}
-                        placeholder="Descreva a evolução do quadro clínico..."
-                        rows={6}
+                        placeholder="Descreva a evolução..."
+                        rows={isMobile ? 4 : 6}
                         className="mt-2"
                       />
                     </div>
@@ -475,13 +517,13 @@ export default function Atendimento() {
               {/* Sinais Vitais Tab */}
               <TabsContent value="vitais" className="mt-0">
                 <Card className="card-neumorphic">
-                  <CardHeader>
-                    <CardTitle>Sinais Vitais</CardTitle>
+                  <CardHeader className="p-4 lg:p-6">
+                    <CardTitle className="text-base lg:text-lg">Sinais Vitais</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <CardContent className="p-4 lg:p-6 pt-0">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
                       <div>
-                        <Label htmlFor="pa">Pressão Arterial (mmHg)</Label>
+                        <Label htmlFor="pa" className="text-xs lg:text-sm">PA (mmHg)</Label>
                         <Input
                           id="pa"
                           value={vitals.blood_pressure}
@@ -493,7 +535,7 @@ export default function Atendimento() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="fc">Freq. Cardíaca (bpm)</Label>
+                        <Label htmlFor="fc" className="text-xs lg:text-sm">FC (bpm)</Label>
                         <Input
                           id="fc"
                           value={vitals.heart_rate}
@@ -505,7 +547,7 @@ export default function Atendimento() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="fr">Freq. Respiratória (ipm)</Label>
+                        <Label htmlFor="fr" className="text-xs lg:text-sm">FR (ipm)</Label>
                         <Input
                           id="fr"
                           value={vitals.respiratory_rate}
@@ -517,7 +559,7 @@ export default function Atendimento() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="temp">Temperatura (°C)</Label>
+                        <Label htmlFor="temp" className="text-xs lg:text-sm">Temp (°C)</Label>
                         <Input
                           id="temp"
                           value={vitals.temperature}
@@ -529,7 +571,7 @@ export default function Atendimento() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="spo2">SpO2 (%)</Label>
+                        <Label htmlFor="spo2" className="text-xs lg:text-sm">SpO2 (%)</Label>
                         <Input
                           id="spo2"
                           value={vitals.o2_sat}
@@ -541,7 +583,7 @@ export default function Atendimento() {
                         />
                       </div>
                     </div>
-                    <Button onClick={handleSaveVitals} className="mt-6">
+                    <Button onClick={handleSaveVitals} className="mt-4 lg:mt-6 w-full sm:w-auto">
                       Salvar Sinais Vitais
                     </Button>
                   </CardContent>
@@ -551,12 +593,12 @@ export default function Atendimento() {
               {/* CID Tab */}
               <TabsContent value="cid" className="mt-0">
                 <Card className="card-neumorphic">
-                  <CardHeader>
-                    <CardTitle>Diagnóstico - CID-10</CardTitle>
+                  <CardHeader className="p-4 lg:p-6">
+                    <CardTitle className="text-base lg:text-lg">Diagnóstico - CID-10</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="p-4 lg:p-6 pt-0 space-y-4">
                     <div>
-                      <Label htmlFor="cid-search">Buscar CID</Label>
+                      <Label htmlFor="cid-search" className="text-sm">Buscar CID</Label>
                       <Input
                         id="cid-search"
                         value={cidSearch}
@@ -567,27 +609,25 @@ export default function Atendimento() {
                     </div>
 
                     {cids && cids.length > 0 && (
-                      <div className="border rounded-lg divide-y">
+                      <div className="border rounded-lg divide-y max-h-48 overflow-y-auto">
                         {cids.map((cid) => (
                           <button
                             key={cid.codigo}
-                            className="w-full p-3 text-left hover:bg-muted/50 transition-colors flex justify-between items-center"
+                            className="w-full p-3 text-left hover:bg-muted/50 transition-colors"
                             onClick={() => handleAddCid(cid.codigo)}
                           >
-                            <div>
-                              <span className="font-medium">{cid.codigo}</span>
-                              <span className="text-muted-foreground ml-2">
-                                {cid.descricao}
-                              </span>
-                            </div>
+                            <span className="font-medium text-sm">{cid.codigo}</span>
+                            <span className="text-muted-foreground ml-2 text-sm">
+                              {cid.descricao}
+                            </span>
                           </button>
                         ))}
                       </div>
                     )}
 
                     {selectedCids.length > 0 && (
-                      <div className="mt-6">
-                        <Label>CIDs Selecionados</Label>
+                      <div className="mt-4 lg:mt-6">
+                        <Label className="text-sm">CIDs Selecionados</Label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {selectedCids.map((cid, index) => (
                             <Badge
@@ -611,16 +651,16 @@ export default function Atendimento() {
               {/* Prescrição Tab */}
               <TabsContent value="prescricao" className="mt-0">
                 <Card className="card-neumorphic">
-                  <CardHeader>
-                    <CardTitle>Prescrição Médica</CardTitle>
+                  <CardHeader className="p-4 lg:p-6">
+                    <CardTitle className="text-base lg:text-lg">Prescrição Médica</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4 lg:p-6 pt-0">
                     <Textarea
                       value={prescricao}
                       onChange={(e) => setPrescricao(e.target.value)}
                       placeholder="1. Medicamento - Dose - Posologia&#10;2. Medicamento - Dose - Posologia&#10;..."
-                      rows={12}
-                      className="font-mono"
+                      rows={isMobile ? 8 : 12}
+                      className="font-mono text-sm"
                     />
                   </CardContent>
                 </Card>
