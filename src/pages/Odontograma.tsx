@@ -176,7 +176,7 @@ const Odontograma: React.FC = () => {
       )}
 
       {/* Área principal: Odontograma + Painel de condições */}
-      <div className={cn('grid gap-6', isMobile ? 'grid-cols-1' : 'grid-cols-[1fr_320px]')}>
+      <div className={cn('grid gap-4 md:gap-6', isMobile ? 'grid-cols-1' : 'grid-cols-[1fr_320px]')}>
         {/* Odontograma */}
         <Card className="print:shadow-none print:border-0">
           <CardHeader className="pb-2">
@@ -185,9 +185,9 @@ const Odontograma: React.FC = () => {
               Arcada Dentária
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto pb-4">
-              <div className="min-w-[720px] flex justify-center py-4">
+          <CardContent className="px-2 sm:px-6">
+            <div className="overflow-x-auto pb-4 -mx-2 px-2">
+              <div className="flex justify-center py-2 md:py-4">
                 <DentalArch
                   teethConditions={teethConditions}
                   selectedTooth={selectedTooth}
@@ -197,16 +197,16 @@ const Odontograma: React.FC = () => {
             </div>
 
             {/* Legenda */}
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-4 md:mt-6 pt-4 border-t">
               <h3 className="text-sm font-medium mb-3">Legenda</h3>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
                 {Object.entries(conditionLabels).map(([key, label]) => (
                   <div key={key} className="flex items-center gap-2">
                     <div 
-                      className="w-4 h-4 rounded border"
+                      className="w-3 h-3 sm:w-4 sm:h-4 rounded border flex-shrink-0"
                       style={{ backgroundColor: conditionColors[key as keyof typeof conditionColors] }}
                     />
-                    <span className="text-xs text-muted-foreground">{label}</span>
+                    <span className="text-xs text-muted-foreground truncate">{label}</span>
                   </div>
                 ))}
               </div>
@@ -221,6 +221,7 @@ const Odontograma: React.FC = () => {
                     <Badge 
                       key={condition} 
                       variant="secondary"
+                      className="text-xs"
                       style={{ 
                         backgroundColor: `${conditionColors[condition as keyof typeof conditionColors]}20`,
                         borderColor: conditionColors[condition as keyof typeof conditionColors],
@@ -235,18 +236,32 @@ const Odontograma: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Painel de condições */}
-        <div className={cn('print:hidden', isMobile && 'order-first')}>
-          <ToothConditionPanel
-            toothNumber={selectedTooth}
-            conditions={selectedTooth ? teethConditions[selectedTooth] || [] : []}
-            onAddCondition={handleAddCondition}
-            onRemoveCondition={handleRemoveCondition}
-            onClearAll={handleClearAll}
-            onClose={() => setSelectedTooth(null)}
-          />
-        </div>
+        {/* Painel de condições - Desktop only as Card, Mobile uses Sheet inside the component */}
+        {!isMobile && (
+          <div className="print:hidden">
+            <ToothConditionPanel
+              toothNumber={selectedTooth}
+              conditions={selectedTooth ? teethConditions[selectedTooth] || [] : []}
+              onAddCondition={handleAddCondition}
+              onRemoveCondition={handleRemoveCondition}
+              onClearAll={handleClearAll}
+              onClose={() => setSelectedTooth(null)}
+            />
+          </div>
+        )}
       </div>
+
+      {/* Mobile Panel - Sheet */}
+      {isMobile && (
+        <ToothConditionPanel
+          toothNumber={selectedTooth}
+          conditions={selectedTooth ? teethConditions[selectedTooth] || [] : []}
+          onAddCondition={handleAddCondition}
+          onRemoveCondition={handleRemoveCondition}
+          onClearAll={handleClearAll}
+          onClose={() => setSelectedTooth(null)}
+        />
+      )}
     </div>
   );
 };

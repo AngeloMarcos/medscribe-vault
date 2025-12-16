@@ -42,21 +42,21 @@ export function TreatmentSummaryCard({ plano, onApprove, onPrint }: TreatmentSum
         </div>
 
         {/* Status dos itens */}
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-2">
-            <CheckCircle className="h-4 w-4 text-emerald-600 mx-auto mb-1" />
-            <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-400">{concluidos}</div>
-            <div className="text-xs text-muted-foreground">Concluídos</div>
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-1.5 sm:p-2">
+            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600 mx-auto mb-0.5 sm:mb-1" />
+            <div className="text-base sm:text-lg font-semibold text-emerald-700 dark:text-emerald-400">{concluidos}</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground">Concluídos</div>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2">
-            <Clock className="h-4 w-4 text-amber-600 mx-auto mb-1" />
-            <div className="text-lg font-semibold text-amber-700 dark:text-amber-400">{emAndamento}</div>
-            <div className="text-xs text-muted-foreground">Em andamento</div>
+          <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-1.5 sm:p-2">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600 mx-auto mb-0.5 sm:mb-1" />
+            <div className="text-base sm:text-lg font-semibold text-amber-700 dark:text-amber-400">{emAndamento}</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground">Em andamento</div>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-2">
-            <div className="h-4 w-4 rounded-full bg-blue-500 mx-auto mb-1" />
-            <div className="text-lg font-semibold text-blue-700 dark:text-blue-400">{pendentes}</div>
-            <div className="text-xs text-muted-foreground">Pendentes</div>
+          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-1.5 sm:p-2">
+            <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-blue-500 mx-auto mb-0.5 sm:mb-1" />
+            <div className="text-base sm:text-lg font-semibold text-blue-700 dark:text-blue-400">{pendentes}</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground">Pendentes</div>
           </div>
         </div>
 

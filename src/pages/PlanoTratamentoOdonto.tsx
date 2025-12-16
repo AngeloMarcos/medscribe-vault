@@ -4,7 +4,6 @@ import {
   Plus, 
   Search,
   Trash2,
-  Edit,
   Calendar,
   MoreHorizontal,
   CheckCircle,
@@ -17,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -46,6 +45,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { toast } from "sonner";
+import { useResponsive } from "@/hooks/useResponsive";
 import { 
   planosTratamentoMock, 
   pacientesOdontoMock,
@@ -74,12 +74,14 @@ const urgenciaConfig: Record<UrgenciaTratamento, { label: string; color: string 
 };
 
 export default function PlanoTratamentoOdonto() {
+  const { isMobile } = useResponsive();
   const [selectedPacienteId, setSelectedPacienteId] = useState<string>(pacientesOdontoMock[0].id);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [planos, setPlanos] = useState<PlanoTratamento[]>(planosTratamentoMock);
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
   const selectedPaciente = pacientesOdontoMock.find(p => p.id === selectedPacienteId);
   const planoAtual = planos.find(p => p.paciente.id === selectedPacienteId) || null;
@@ -284,42 +286,42 @@ export default function PlanoTratamentoOdonto() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">Total de Itens</p>
+          <CardContent className="pt-3 sm:pt-4">
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Total de Itens</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-emerald-600">{stats.concluidos}</div>
-            <p className="text-xs text-muted-foreground">Concluídos</p>
+          <CardContent className="pt-3 sm:pt-4">
+            <div className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.concluidos}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Concluídos</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.pendentes}</div>
-            <p className="text-xs text-muted-foreground">Pendentes</p>
+          <CardContent className="pt-3 sm:pt-4">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.pendentes}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Pendentes</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-primary">
+          <CardContent className="pt-3 sm:pt-4">
+            <div className="text-lg sm:text-2xl font-bold text-primary">
               R$ {stats.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className="text-xs text-muted-foreground">Valor Total</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Valor Total</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Table Section */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-3">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar procedimento ou dente..."
@@ -328,13 +330,13 @@ export default function PlanoTratamentoOdonto() {
                 className="pl-9"
               />
             </div>
-            <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
-              <TabsList className="grid grid-cols-5 w-full sm:w-auto">
-                <TabsTrigger value="all" className="text-xs">Todos</TabsTrigger>
-                <TabsTrigger value="planejado" className="text-xs">Planejados</TabsTrigger>
-                <TabsTrigger value="em_andamento" className="text-xs">Em andamento</TabsTrigger>
-                <TabsTrigger value="concluido" className="text-xs">Concluídos</TabsTrigger>
-                <TabsTrigger value="cancelado" className="text-xs">Cancelados</TabsTrigger>
+            <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
+              <TabsList className="w-full h-auto p-1 flex overflow-x-auto scrollbar-hide">
+                <TabsTrigger value="all" className="text-xs flex-shrink-0">Todos</TabsTrigger>
+                <TabsTrigger value="planejado" className="text-xs flex-shrink-0">Planejados</TabsTrigger>
+                <TabsTrigger value="em_andamento" className="text-xs flex-shrink-0 whitespace-nowrap">Em andamento</TabsTrigger>
+                <TabsTrigger value="concluido" className="text-xs flex-shrink-0">Concluídos</TabsTrigger>
+                <TabsTrigger value="cancelado" className="text-xs flex-shrink-0">Cancelados</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -451,21 +453,35 @@ export default function PlanoTratamentoOdonto() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar - Collapsible on mobile */}
         <div className="space-y-4">
-          {/* Mini Odontograma */}
-          <Card className="print:hidden">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Dentes no Plano</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MiniOdontograma teethStatus={teethStatus} />
-            </CardContent>
-          </Card>
+          {/* Mobile toggle for sidebar content */}
+          {isMobile && (
+            <Button 
+              variant="outline" 
+              className="w-full justify-between"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              Odontograma e Resumo
+              <ChevronDown className={`h-4 w-4 transition-transform ${isSidebarOpen ? 'rotate-180' : ''}`} />
+            </Button>
+          )}
+
+          {(isSidebarOpen || !isMobile) && (
+            <>
+              {/* Mini Odontograma */}
+              <Card className="print:hidden">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-sm sm:text-base">Dentes no Plano</CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 sm:px-6">
+                  <MiniOdontograma teethStatus={teethStatus} />
+                </CardContent>
+              </Card>
 
           {/* Summary Card */}
           {planoAtual && (
-            <Collapsible open={isSummaryOpen} onOpenChange={setIsSummaryOpen} className="lg:block">
+            <Collapsible open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
               <CollapsibleTrigger asChild className="lg:hidden">
                 <Button variant="outline" className="w-full justify-between mb-2">
                   Resumo Financeiro
@@ -480,6 +496,8 @@ export default function PlanoTratamentoOdonto() {
                 />
               </CollapsibleContent>
             </Collapsible>
+          )}
+            </>
           )}
         </div>
       </div>
