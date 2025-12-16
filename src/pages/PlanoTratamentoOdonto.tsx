@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
   ClipboardList, 
   Plus, 
@@ -11,6 +11,7 @@ import {
   XCircle,
   AlertCircle,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,18 +45,31 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
-  planosTratamentoMock, 
-  pacientesOdontoMock,
-  PlanoTratamento,
-  ItemPlanoTratamento,
-  StatusItemTratamento,
-  ProcedimentoOdontologico,
-  Dentista,
+  usePlanosByPatient,
+  usePlanoComItens,
+  useCreatePlano,
+  useAddItem,
+  useUpdateItemStatus,
+  useDeleteItem,
+  useUpdatePlanoStatus,
+  useProcedimentosByCategoria,
+  useDentistas,
+} from "@/hooks/usePlanoTratamento";
+import type { 
+  StatusItemTratamento, 
   UrgenciaTratamento,
-} from "@/data/dentalMockData";
+  ProcedimentoOdonto,
+  PlanoTratamentoOdonto,
+  ItemPlanoTratamento,
+} from "@/types/dental";
 import { MiniOdontograma } from "@/components/odonto/MiniOdontograma";
 import { AddTreatmentItemDialog } from "@/components/odonto/AddTreatmentItemDialog";
 import { TreatmentSummaryCard } from "@/components/odonto/TreatmentSummaryCard";
@@ -75,23 +89,70 @@ const urgenciaConfig: Record<UrgenciaTratamento, { label: string; color: string 
 
 export default function PlanoTratamentoOdonto() {
   const { isMobile } = useResponsive();
-  const [selectedPacienteId, setSelectedPacienteId] = useState<string>(pacientesOdontoMock[0].id);
+  const { tenant } = useTenant();
+  const { user } = useAuth();
+  const [selectedPacienteId, setSelectedPacienteId] = useState<string | null>(null);
+  const [selectedPlanoId, setSelectedPlanoId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [planos, setPlanos] = useState<PlanoTratamento[]>(planosTratamentoMock);
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
 
-  const selectedPaciente = pacientesOdontoMock.find(p => p.id === selectedPacienteId);
-  const planoAtual = planos.find(p => p.paciente.id === selectedPacienteId) || null;
+  // Fetch patients
+  const { data: patients, isLoading: loadingPatients } = useQuery({
+    queryKey: ['patients-odonto', tenant?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, name, cpf, birth_date, medical_record_number')
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch planos for selected patient
+  const { data: planos, isLoading: loadingPlanos } = usePlanosByPatient(selectedPacienteId);
+  
+  // Fetch selected plan with items
+  const { data: planoAtual, isLoading: loadingPlano } = usePlanoComItens(selectedPlanoId);
+
+  // Mutations
+  const createPlano = useCreatePlano();
+  const addItem = useAddItem();
+  const updateItemStatus = useUpdateItemStatus();
+  const deleteItem = useDeleteItem();
+  const updatePlanoStatus = useUpdatePlanoStatus();
+
+  // Auto-select first patient
+  useEffect(() => {
+    if (patients?.length && !selectedPacienteId) {
+      setSelectedPacienteId(patients[0].id);
+    }
+  }, [patients, selectedPacienteId]);
+
+  // Auto-select active/most recent plan when patient changes
+  useEffect(() => {
+    if (planos?.length) {
+      const activePlano = planos.find(p => ['orcamento', 'aprovado', 'em_andamento'].includes(p.status));
+      setSelectedPlanoId(activePlano?.id || planos[0]?.id || null);
+    } else {
+      setSelectedPlanoId(null);
+    }
+  }, [planos]);
+
+  const selectedPaciente = patients?.find(p => p.id === selectedPacienteId);
+  const selectedPacienteAge = selectedPaciente?.birth_date 
+    ? Math.floor((new Date().getTime() - new Date(selectedPaciente.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    : null;
 
   const filteredItens = useMemo(() => {
-    if (!planoAtual) return [];
+    if (!planoAtual?.itens) return [];
     
     return planoAtual.itens.filter(item => {
       const matchesSearch = searchTerm === '' || 
-        item.procedimento.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.procedimento?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.dente?.toString().includes(searchTerm));
       
       const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
@@ -101,132 +162,103 @@ export default function PlanoTratamentoOdonto() {
   }, [planoAtual, searchTerm, statusFilter]);
 
   const stats = useMemo(() => {
-    if (!planoAtual) return { total: 0, concluidos: 0, pendentes: 0, valor: 0 };
+    if (!planoAtual?.itens) return { total: 0, concluidos: 0, pendentes: 0, valor: 0 };
     
     return {
       total: planoAtual.itens.length,
       concluidos: planoAtual.itens.filter(i => i.status === 'concluido').length,
       pendentes: planoAtual.itens.filter(i => i.status === 'planejado').length,
-      valor: planoAtual.itens.reduce((acc, i) => acc + i.valorFinal, 0),
+      valor: planoAtual.itens.reduce((acc, i) => acc + Number(i.valor_final), 0),
     };
   }, [planoAtual]);
 
   const teethStatus = useMemo(() => {
-    if (!planoAtual) return [];
+    if (!planoAtual?.itens) return [];
     return planoAtual.itens
-      .filter(i => i.dente !== null)
+      .filter(i => i.dente !== null && i.dente !== undefined)
       .map(i => ({ dente: i.dente!, status: i.status }));
   }, [planoAtual]);
 
-  const handleAddItem = (item: {
+  const handleAddItem = async (item: {
     dente: number | null;
     superficie?: string;
-    procedimento: ProcedimentoOdontologico;
-    dentista?: Dentista;
+    procedimento: ProcedimentoOdonto;
+    profissionalId?: string;
     valorUnitario: number;
     desconto: number;
     valorFinal: number;
     urgencia: UrgenciaTratamento;
     observacoes?: string;
   }) => {
-    if (!planoAtual) {
-      // Create new plan
-      const newPlano: PlanoTratamento = {
-        id: `plan-${Date.now()}`,
-        paciente: selectedPaciente!,
-        dataInicio: new Date().toISOString().split('T')[0],
-        status: 'orcamento',
-        itens: [{
-          id: `item-${Date.now()}`,
-          ...item,
-          status: 'planejado',
-          ordemPrioridade: 1,
-        }],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setPlanos([...planos, newPlano]);
-    } else {
-      // Add to existing plan
-      const updatedPlanos = planos.map(p => {
-        if (p.id === planoAtual.id) {
-          return {
-            ...p,
-            itens: [...p.itens, {
-              id: `item-${Date.now()}`,
-              ...item,
-              status: 'planejado' as StatusItemTratamento,
-              ordemPrioridade: p.itens.length + 1,
-            }],
-            updatedAt: new Date().toISOString(),
-          };
-        }
-        return p;
-      });
-      setPlanos(updatedPlanos);
+    if (!selectedPacienteId) return;
+
+    let planoId = selectedPlanoId;
+
+    // Create new plan if needed
+    if (!planoId) {
+      try {
+        const newPlano = await createPlano.mutateAsync({
+          patient_id: selectedPacienteId,
+          created_by: user?.id,
+          status: 'orcamento',
+        });
+        planoId = newPlano.id;
+        setSelectedPlanoId(planoId);
+      } catch (error) {
+        return;
+      }
     }
-    toast.success('Procedimento adicionado ao plano');
+
+    // Add item to plan
+    const nextOrder = (planoAtual?.itens?.length || 0) + 1;
+    await addItem.mutateAsync({
+      plano_id: planoId,
+      procedimento_id: item.procedimento.id,
+      profissional_id: item.profissionalId,
+      dente: item.dente ?? undefined,
+      superficie: item.superficie,
+      valor_unitario: item.valorUnitario,
+      desconto_percentual: item.desconto,
+      valor_final: item.valorFinal,
+      urgencia: item.urgencia,
+      observacoes: item.observacoes,
+      ordem_prioridade: nextOrder,
+    });
   };
 
-  const handleStatusChange = (itemId: string, newStatus: StatusItemTratamento) => {
-    const updatedPlanos = planos.map(p => {
-      if (p.id === planoAtual?.id) {
-        return {
-          ...p,
-          itens: p.itens.map(i => {
-            if (i.id === itemId) {
-              return {
-                ...i,
-                status: newStatus,
-                dataRealizacao: newStatus === 'concluido' ? new Date().toISOString().split('T')[0] : i.dataRealizacao,
-              };
-            }
-            return i;
-          }),
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return p;
+  const handleStatusChange = async (itemId: string, newStatus: StatusItemTratamento) => {
+    if (!selectedPlanoId) return;
+    
+    await updateItemStatus.mutateAsync({
+      itemId,
+      planoId: selectedPlanoId,
+      updates: {
+        status: newStatus,
+        data_realizacao: newStatus === 'concluido' ? new Date().toISOString().split('T')[0] : undefined,
+      },
     });
-    setPlanos(updatedPlanos);
     toast.success(`Status alterado para ${statusConfig[newStatus].label}`);
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    const updatedPlanos = planos.map(p => {
-      if (p.id === planoAtual?.id) {
-        return {
-          ...p,
-          itens: p.itens.filter(i => i.id !== itemId),
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return p;
-    });
-    setPlanos(updatedPlanos);
-    toast.success('Procedimento removido do plano');
+  const handleDeleteItem = async (itemId: string) => {
+    if (!selectedPlanoId) return;
+    await deleteItem.mutateAsync({ itemId, planoId: selectedPlanoId });
   };
 
-  const handleApprove = () => {
-    if (!planoAtual) return;
-    
-    const updatedPlanos = planos.map(p => {
-      if (p.id === planoAtual.id) {
-        return {
-          ...p,
-          status: 'aprovado' as const,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return p;
+  const handleApprove = async () => {
+    if (!selectedPlanoId || !selectedPacienteId) return;
+    await updatePlanoStatus.mutateAsync({
+      planoId: selectedPlanoId,
+      patientId: selectedPacienteId,
+      status: 'aprovado',
     });
-    setPlanos(updatedPlanos);
-    toast.success('Orçamento aprovado com sucesso!');
   };
 
   const handlePrint = () => {
     window.print();
   };
+
+  const isLoading = loadingPatients || loadingPlanos || loadingPlano;
 
   return (
     <div className="p-4 md:p-6 space-y-6 print:p-0">
@@ -244,7 +276,10 @@ export default function PlanoTratamentoOdonto() {
           </div>
         </div>
         
-        <Button onClick={() => setIsAddDialogOpen(true)}>
+        <Button 
+          onClick={() => setIsAddDialogOpen(true)} 
+          disabled={!selectedPacienteId}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Procedimento
         </Button>
@@ -256,28 +291,34 @@ export default function PlanoTratamentoOdonto() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1.5 block">Paciente</label>
-              <Select value={selectedPacienteId} onValueChange={setSelectedPacienteId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o paciente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pacientesOdontoMock.map(p => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.nome} - {p.prontuario}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {loadingPatients ? (
+                <Skeleton className="h-10 w-full" />
+              ) : (
+                <Select value={selectedPacienteId || ''} onValueChange={setSelectedPacienteId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o paciente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients?.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} - {p.medical_record_number || p.cpf}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             {selectedPaciente && (
-              <div className="flex gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Idade:</span>{' '}
-                  <span className="font-medium">{selectedPaciente.idade} anos</span>
-                </div>
+              <div className="flex gap-4 text-sm items-center">
+                {selectedPacienteAge !== null && (
+                  <div>
+                    <span className="text-muted-foreground">Idade:</span>{' '}
+                    <span className="font-medium">{selectedPacienteAge} anos</span>
+                  </div>
+                )}
                 <div>
                   <span className="text-muted-foreground">Prontuário:</span>{' '}
-                  <span className="font-medium">{selectedPaciente.prontuario}</span>
+                  <span className="font-medium">{selectedPaciente.medical_record_number || '-'}</span>
                 </div>
               </div>
             )}
@@ -289,27 +330,43 @@ export default function PlanoTratamentoOdonto() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="pt-3 sm:pt-4">
-            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 mb-1" />
+            ) : (
+              <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+            )}
             <p className="text-[10px] sm:text-xs text-muted-foreground">Total de Itens</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-3 sm:pt-4">
-            <div className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.concluidos}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 mb-1" />
+            ) : (
+              <div className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.concluidos}</div>
+            )}
             <p className="text-[10px] sm:text-xs text-muted-foreground">Concluídos</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-3 sm:pt-4">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.pendentes}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 mb-1" />
+            ) : (
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.pendentes}</div>
+            )}
             <p className="text-[10px] sm:text-xs text-muted-foreground">Pendentes</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-3 sm:pt-4">
-            <div className="text-lg sm:text-2xl font-bold text-primary">
-              R$ {stats.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20 mb-1" />
+            ) : (
+              <div className="text-lg sm:text-2xl font-bold text-primary">
+                R$ {stats.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </div>
+            )}
             <p className="text-[10px] sm:text-xs text-muted-foreground">Valor Total</p>
           </CardContent>
         </Card>
@@ -356,12 +413,23 @@ export default function PlanoTratamentoOdonto() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItens.length === 0 ? (
+                  {loadingPlano ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-6" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : filteredItens.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                         {planoAtual 
                           ? 'Nenhum procedimento encontrado'
-                          : 'Nenhum plano de tratamento para este paciente'}
+                          : 'Nenhum plano de tratamento para este paciente. Adicione um procedimento para criar.'}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -384,10 +452,10 @@ export default function PlanoTratamentoOdonto() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <span className="font-medium">{item.procedimento.nome}</span>
-                            {item.dentista && (
+                            <span className="font-medium">{item.procedimento?.nome}</span>
+                            {item.profissional && (
                               <span className="text-xs text-muted-foreground block">
-                                {item.dentista.nome}
+                                {item.profissional.nome}
                               </span>
                             )}
                           </div>
@@ -395,11 +463,11 @@ export default function PlanoTratamentoOdonto() {
                         <TableCell className="text-right">
                           <div>
                             <span className="font-medium">
-                              R$ {item.valorFinal.toFixed(2)}
+                              R$ {Number(item.valor_final).toFixed(2)}
                             </span>
-                            {item.desconto > 0 && (
+                            {Number(item.desconto_percentual) > 0 && (
                               <span className="text-xs text-emerald-600 block">
-                                -{item.desconto}% desc.
+                                -{item.desconto_percentual}% desc.
                               </span>
                             )}
                           </div>
@@ -479,24 +547,24 @@ export default function PlanoTratamentoOdonto() {
                 </CardContent>
               </Card>
 
-          {/* Summary Card */}
-          {planoAtual && (
-            <Collapsible open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
-              <CollapsibleTrigger asChild className="lg:hidden">
-                <Button variant="outline" className="w-full justify-between mb-2">
-                  Resumo Financeiro
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isSummaryOpen ? 'rotate-180' : ''}`} />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="lg:block">
-                <TreatmentSummaryCard 
-                  plano={planoAtual}
-                  onApprove={planoAtual.status === 'orcamento' ? handleApprove : undefined}
-                  onPrint={handlePrint}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-          )}
+              {/* Summary Card */}
+              {planoAtual && (
+                <Collapsible open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+                  <CollapsibleTrigger asChild className="lg:hidden">
+                    <Button variant="outline" className="w-full justify-between mb-2">
+                      Resumo Financeiro
+                      <ChevronDown className={`h-4 w-4 transition-transform ${isSummaryOpen ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="lg:block">
+                    <TreatmentSummaryCard 
+                      plano={planoAtual}
+                      onApprove={planoAtual.status === 'orcamento' ? handleApprove : undefined}
+                      onPrint={handlePrint}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
             </>
           )}
         </div>

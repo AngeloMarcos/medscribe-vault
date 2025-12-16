@@ -663,6 +663,95 @@ export type Database = {
           },
         ]
       }
+      itens_plano_tratamento: {
+        Row: {
+          created_at: string | null
+          data_realizacao: string | null
+          dente: number | null
+          desconto_percentual: number | null
+          id: string
+          observacoes: string | null
+          ordem_prioridade: number | null
+          plano_id: string
+          procedimento_id: string
+          profissional_id: string | null
+          status: string | null
+          superficie: string | null
+          tenant_id: string | null
+          updated_at: string | null
+          urgencia: string | null
+          valor_final: number
+          valor_unitario: number
+        }
+        Insert: {
+          created_at?: string | null
+          data_realizacao?: string | null
+          dente?: number | null
+          desconto_percentual?: number | null
+          id?: string
+          observacoes?: string | null
+          ordem_prioridade?: number | null
+          plano_id: string
+          procedimento_id: string
+          profissional_id?: string | null
+          status?: string | null
+          superficie?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          urgencia?: string | null
+          valor_final: number
+          valor_unitario: number
+        }
+        Update: {
+          created_at?: string | null
+          data_realizacao?: string | null
+          dente?: number | null
+          desconto_percentual?: number | null
+          id?: string
+          observacoes?: string | null
+          ordem_prioridade?: number | null
+          plano_id?: string
+          procedimento_id?: string
+          profissional_id?: string | null
+          status?: string | null
+          superficie?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          urgencia?: string | null
+          valor_final?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_plano_tratamento_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_tratamento_odonto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_plano_tratamento_procedimento_id_fkey"
+            columns: ["procedimento_id"]
+            isOneToOne: false
+            referencedRelation: "procedimentos_odonto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_plano_tratamento_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_plano_tratamento_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_administrations: {
         Row: {
           administered_at: string | null
@@ -902,6 +991,70 @@ export type Database = {
           },
         ]
       }
+      planos_tratamento_odonto: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          data_inicio: string
+          data_previsao_fim: string | null
+          id: string
+          observacoes_gerais: string | null
+          patient_id: string
+          profissional_id: string | null
+          status: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          data_inicio?: string
+          data_previsao_fim?: string | null
+          id?: string
+          observacoes_gerais?: string | null
+          patient_id: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          data_inicio?: string
+          data_previsao_fim?: string | null
+          id?: string
+          observacoes_gerais?: string | null
+          patient_id?: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planos_tratamento_odonto_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planos_tratamento_odonto_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planos_tratamento_odonto_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_items: {
         Row: {
           created_at: string | null
@@ -1031,6 +1184,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      procedimentos_odonto: {
+        Row: {
+          ativo: boolean | null
+          categoria: string
+          codigo: string
+          created_at: string | null
+          descricao: string | null
+          duracao_minutos: number | null
+          id: string
+          nome: string
+          preco_padrao: number | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria: string
+          codigo: string
+          created_at?: string | null
+          descricao?: string | null
+          duracao_minutos?: number | null
+          id?: string
+          nome: string
+          preco_padrao?: number | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string
+          codigo?: string
+          created_at?: string | null
+          descricao?: string | null
+          duracao_minutos?: number | null
+          id?: string
+          nome?: string
+          preco_padrao?: number | null
+        }
+        Relationships: []
       }
       procedures: {
         Row: {

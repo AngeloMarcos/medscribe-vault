@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { StatusItemTratamento } from "@/data/dentalMockData";
+import type { StatusItemTratamento } from "@/types/dental";
 
 interface ToothStatus {
   dente: number;
