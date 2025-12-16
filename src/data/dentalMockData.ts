@@ -1,7 +1,7 @@
 export interface ProcedimentoOdontologico {
   id: string;
   nome: string;
-  duracao: number; // em minutos
+  duracao: number;
   codigo: string;
 }
 
@@ -123,7 +123,7 @@ export interface AgendamentoOdonto {
 
 export const cadeirasOdonto = ['Cadeira 1', 'Cadeira 2', 'Cadeira 3', 'Cadeira 4'];
 
-const pacientesOdontoMock: PacienteOdonto[] = [
+export const pacientesOdontoMock: PacienteOdonto[] = [
   { id: 'p1', nome: 'Maria Silva Santos', prontuario: '2025000101', idade: 34, telefone: '(21) 99999-1111', cpf: '111.222.333-44' },
   { id: 'p2', nome: 'João Carlos Oliveira', prontuario: '2025000102', idade: 45, telefone: '(21) 99999-2222', cpf: '222.333.444-55' },
   { id: 'p3', nome: 'Ana Paula Ferreira', prontuario: '2025000103', idade: 28, telefone: '(21) 99999-3333', cpf: '333.444.555-66' },
@@ -252,3 +252,211 @@ export const agendamentosOdontoMock: AgendamentoOdonto[] = [
     observacoes: 'Paciente solicitou cancelamento',
   },
 ];
+
+// ============= PLANO DE TRATAMENTO =============
+
+export type StatusItemTratamento = 'planejado' | 'em_andamento' | 'concluido' | 'cancelado';
+export type StatusPlanoTratamento = 'orcamento' | 'aprovado' | 'em_andamento' | 'concluido' | 'cancelado';
+export type UrgenciaTratamento = 'baixa' | 'media' | 'alta';
+
+export interface ItemPlanoTratamento {
+  id: string;
+  dente: number | null;
+  superficie?: string;
+  procedimento: ProcedimentoOdontologico;
+  dentista?: Dentista;
+  valorUnitario: number;
+  desconto: number;
+  valorFinal: number;
+  status: StatusItemTratamento;
+  dataRealizacao?: string;
+  observacoes?: string;
+  urgencia: UrgenciaTratamento;
+  ordemPrioridade: number;
+}
+
+export interface PlanoTratamento {
+  id: string;
+  paciente: PacienteOdonto;
+  dataInicio: string;
+  dataPrevisaoFim?: string;
+  status: StatusPlanoTratamento;
+  itens: ItemPlanoTratamento[];
+  observacoesGerais?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const precosOdontologicos: Record<string, number> = {
+  'aval-1': 150,
+  'aval-2': 200,
+  'aval-3': 180,
+  'aval-4': 80,
+  'prev-1': 180,
+  'prev-2': 100,
+  'prev-3': 120,
+  'prev-4': 80,
+  'rest-1': 250,
+  'rest-2': 320,
+  'rest-3': 400,
+  'rest-4': 200,
+  'rest-5': 350,
+  'endo-1': 800,
+  'endo-2': 1000,
+  'endo-3': 1200,
+  'endo-4': 1400,
+  'perio-1': 200,
+  'perio-2': 300,
+  'perio-3': 1500,
+  'perio-4': 1200,
+  'cir-1': 300,
+  'cir-2': 800,
+  'cir-3': 500,
+  'cir-4': 600,
+  'cir-5': 400,
+  'prot-1': 2500,
+  'prot-2': 1800,
+  'prot-3': 1500,
+  'prot-4': 1800,
+  'prot-5': 3500,
+  'orto-1': 3000,
+  'orto-2': 200,
+  'orto-3': 5000,
+  'orto-4': 300,
+  'orto-5': 400,
+};
+
+export const planosTratamentoMock: PlanoTratamento[] = [
+  {
+    id: 'plan-1',
+    paciente: pacientesOdontoMock[0],
+    dataInicio: '2025-01-10',
+    dataPrevisaoFim: '2025-03-15',
+    status: 'em_andamento',
+    observacoesGerais: 'Paciente com sensibilidade nos molares superiores',
+    createdAt: '2025-01-10T10:00:00Z',
+    updatedAt: '2025-01-15T14:30:00Z',
+    itens: [
+      {
+        id: 'item-1',
+        dente: 16,
+        superficie: 'Oclusal',
+        procedimento: procedimentosOdontologicos.restauradores[0],
+        dentista: dentistas[0],
+        valorUnitario: 250,
+        desconto: 10,
+        valorFinal: 225,
+        status: 'concluido',
+        dataRealizacao: '2025-01-12',
+        urgencia: 'media',
+        ordemPrioridade: 1,
+      },
+      {
+        id: 'item-2',
+        dente: 26,
+        superficie: 'Mesial, Oclusal',
+        procedimento: procedimentosOdontologicos.endodontia[2],
+        dentista: dentistas[1],
+        valorUnitario: 1200,
+        desconto: 0,
+        valorFinal: 1200,
+        status: 'em_andamento',
+        urgencia: 'alta',
+        ordemPrioridade: 2,
+      },
+      {
+        id: 'item-3',
+        dente: 18,
+        procedimento: procedimentosOdontologicos.cirurgia[1],
+        dentista: dentistas[4],
+        valorUnitario: 800,
+        desconto: 0,
+        valorFinal: 800,
+        status: 'planejado',
+        urgencia: 'baixa',
+        ordemPrioridade: 3,
+        observacoes: 'Siso parcialmente incluso',
+      },
+      {
+        id: 'item-4',
+        dente: null,
+        procedimento: procedimentosOdontologicos.preventivos[0],
+        dentista: dentistas[0],
+        valorUnitario: 180,
+        desconto: 0,
+        valorFinal: 180,
+        status: 'planejado',
+        urgencia: 'baixa',
+        ordemPrioridade: 4,
+      },
+    ],
+  },
+  {
+    id: 'plan-2',
+    paciente: pacientesOdontoMock[1],
+    dataInicio: '2025-01-08',
+    status: 'orcamento',
+    createdAt: '2025-01-08T09:00:00Z',
+    updatedAt: '2025-01-08T09:00:00Z',
+    itens: [
+      {
+        id: 'item-5',
+        dente: 36,
+        superficie: 'Oclusal, Distal',
+        procedimento: procedimentosOdontologicos.restauradores[1],
+        valorUnitario: 320,
+        desconto: 15,
+        valorFinal: 272,
+        status: 'planejado',
+        urgencia: 'media',
+        ordemPrioridade: 1,
+      },
+      {
+        id: 'item-6',
+        dente: 46,
+        superficie: 'Oclusal',
+        procedimento: procedimentosOdontologicos.restauradores[0],
+        valorUnitario: 250,
+        desconto: 15,
+        valorFinal: 212.50,
+        status: 'planejado',
+        urgencia: 'media',
+        ordemPrioridade: 2,
+      },
+    ],
+  },
+  {
+    id: 'plan-3',
+    paciente: pacientesOdontoMock[2],
+    dataInicio: '2024-12-01',
+    dataPrevisaoFim: '2024-12-20',
+    status: 'concluido',
+    createdAt: '2024-12-01T08:00:00Z',
+    updatedAt: '2024-12-18T16:00:00Z',
+    itens: [
+      {
+        id: 'item-7',
+        dente: 11,
+        superficie: 'Vestibular',
+        procedimento: procedimentosOdontologicos.protese[3],
+        dentista: dentistas[5],
+        valorUnitario: 1800,
+        desconto: 0,
+        valorFinal: 1800,
+        status: 'concluido',
+        dataRealizacao: '2024-12-18',
+        urgencia: 'alta',
+        ordemPrioridade: 1,
+        observacoes: 'Faceta estética',
+      },
+    ],
+  },
+];
+
+export const getPreco = (procedimentoId: string): number => {
+  return precosOdontologicos[procedimentoId] || 0;
+};
+
+export const getAllProcedimentos = (): ProcedimentoOdontologico[] => {
+  return Object.values(procedimentosOdontologicos).flat();
+};
