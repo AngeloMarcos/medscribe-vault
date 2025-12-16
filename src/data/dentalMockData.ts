@@ -97,3 +97,158 @@ export const horariosDisponiveis = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
 ];
+
+export interface PacienteOdonto {
+  id: string;
+  nome: string;
+  prontuario: string;
+  idade: number;
+  telefone?: string;
+  cpf: string;
+}
+
+export interface AgendamentoOdonto {
+  id: string;
+  paciente: PacienteOdonto;
+  dentista: Dentista;
+  procedimentos: ProcedimentoOdontologico[];
+  data: string;
+  hora: string;
+  duracao: number;
+  cadeira: string;
+  status: 'agendado' | 'aguardando' | 'em_atendimento' | 'atendido' | 'ausente' | 'cancelado';
+  horaChegada?: string;
+  observacoes?: string;
+}
+
+export const cadeirasOdonto = ['Cadeira 1', 'Cadeira 2', 'Cadeira 3', 'Cadeira 4'];
+
+const pacientesOdontoMock: PacienteOdonto[] = [
+  { id: 'p1', nome: 'Maria Silva Santos', prontuario: '2025000101', idade: 34, telefone: '(21) 99999-1111', cpf: '111.222.333-44' },
+  { id: 'p2', nome: 'João Carlos Oliveira', prontuario: '2025000102', idade: 45, telefone: '(21) 99999-2222', cpf: '222.333.444-55' },
+  { id: 'p3', nome: 'Ana Paula Ferreira', prontuario: '2025000103', idade: 28, telefone: '(21) 99999-3333', cpf: '333.444.555-66' },
+  { id: 'p4', nome: 'Pedro Henrique Costa', prontuario: '2025000104', idade: 52, telefone: '(21) 99999-4444', cpf: '444.555.666-77' },
+  { id: 'p5', nome: 'Carla Beatriz Lima', prontuario: '2025000105', idade: 19, telefone: '(21) 99999-5555', cpf: '555.666.777-88' },
+  { id: 'p6', nome: 'Ricardo Almeida Souza', prontuario: '2025000106', idade: 67, telefone: '(21) 99999-6666', cpf: '666.777.888-99' },
+  { id: 'p7', nome: 'Fernanda Rodrigues', prontuario: '2025000107', idade: 41, telefone: '(21) 99999-7777', cpf: '777.888.999-00' },
+  { id: 'p8', nome: 'Lucas Gabriel Martins', prontuario: '2025000108', idade: 8, telefone: '(21) 99999-8888', cpf: '888.999.000-11' },
+];
+
+const hoje = new Date().toISOString().split('T')[0];
+
+export const agendamentosOdontoMock: AgendamentoOdonto[] = [
+  {
+    id: 'ag1',
+    paciente: pacientesOdontoMock[0],
+    dentista: dentistas[0],
+    procedimentos: [procedimentosOdontologicos.preventivos[0], procedimentosOdontologicos.preventivos[1]],
+    data: hoje,
+    hora: '08:00',
+    duracao: 45,
+    cadeira: 'Cadeira 1',
+    status: 'atendido',
+    horaChegada: '07:52',
+  },
+  {
+    id: 'ag2',
+    paciente: pacientesOdontoMock[1],
+    dentista: dentistas[1],
+    procedimentos: [procedimentosOdontologicos.endodontia[0]],
+    data: hoje,
+    hora: '08:30',
+    duracao: 60,
+    cadeira: 'Cadeira 2',
+    status: 'em_atendimento',
+    horaChegada: '08:25',
+  },
+  {
+    id: 'ag3',
+    paciente: pacientesOdontoMock[2],
+    dentista: dentistas[2],
+    procedimentos: [procedimentosOdontologicos.ortodontia[1]],
+    data: hoje,
+    hora: '09:00',
+    duracao: 30,
+    cadeira: 'Cadeira 3',
+    status: 'aguardando',
+    horaChegada: '08:55',
+  },
+  {
+    id: 'ag4',
+    paciente: pacientesOdontoMock[3],
+    dentista: dentistas[0],
+    procedimentos: [procedimentosOdontologicos.restauradores[1], procedimentosOdontologicos.restauradores[2]],
+    data: hoje,
+    hora: '09:30',
+    duracao: 110,
+    cadeira: 'Cadeira 1',
+    status: 'agendado',
+  },
+  {
+    id: 'ag5',
+    paciente: pacientesOdontoMock[4],
+    dentista: dentistas[4],
+    procedimentos: [procedimentosOdontologicos.cirurgia[0]],
+    data: hoje,
+    hora: '10:00',
+    duracao: 30,
+    cadeira: 'Cadeira 4',
+    status: 'agendado',
+  },
+  {
+    id: 'ag6',
+    paciente: pacientesOdontoMock[5],
+    dentista: dentistas[5],
+    procedimentos: [procedimentosOdontologicos.protese[2]],
+    data: hoje,
+    hora: '10:30',
+    duracao: 60,
+    cadeira: 'Cadeira 2',
+    status: 'agendado',
+  },
+  {
+    id: 'ag7',
+    paciente: pacientesOdontoMock[6],
+    dentista: dentistas[3],
+    procedimentos: [procedimentosOdontologicos.periodontia[0], procedimentosOdontologicos.periodontia[1]],
+    data: hoje,
+    hora: '11:00',
+    duracao: 75,
+    cadeira: 'Cadeira 3',
+    status: 'agendado',
+  },
+  {
+    id: 'ag8',
+    paciente: pacientesOdontoMock[7],
+    dentista: dentistas[0],
+    procedimentos: [procedimentosOdontologicos.avaliacaoInicial[0]],
+    data: hoje,
+    hora: '14:00',
+    duracao: 30,
+    cadeira: 'Cadeira 1',
+    status: 'agendado',
+  },
+  {
+    id: 'ag9',
+    paciente: pacientesOdontoMock[0],
+    dentista: dentistas[1],
+    procedimentos: [procedimentosOdontologicos.endodontia[2]],
+    data: hoje,
+    hora: '14:30',
+    duracao: 120,
+    cadeira: 'Cadeira 2',
+    status: 'ausente',
+  },
+  {
+    id: 'ag10',
+    paciente: pacientesOdontoMock[2],
+    dentista: dentistas[2],
+    procedimentos: [procedimentosOdontologicos.ortodontia[0]],
+    data: hoje,
+    hora: '15:00',
+    duracao: 60,
+    cadeira: 'Cadeira 3',
+    status: 'cancelado',
+    observacoes: 'Paciente solicitou cancelamento',
+  },
+];
