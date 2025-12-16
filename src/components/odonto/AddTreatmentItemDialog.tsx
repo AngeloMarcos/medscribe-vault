@@ -20,15 +20,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  procedimentosOdontologicos,
-  categoriasOdontologicas,
-  dentistas,
-  getPreco,
-  ProcedimentoOdontologico,
-  Dentista,
-  UrgenciaTratamento,
-} from "@/data/dentalMockData";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProcedimentosByCategoria, useDentistas } from "@/hooks/usePlanoTratamento";
+import type { ProcedimentoOdonto, UrgenciaTratamento } from "@/types/dental";
+import { categoriasOdontoConfig } from "@/types/dental";
 
 interface AddTreatmentItemDialogProps {
   open: boolean;
@@ -36,8 +31,8 @@ interface AddTreatmentItemDialogProps {
   onAdd: (item: {
     dente: number | null;
     superficie?: string;
-    procedimento: ProcedimentoOdontologico;
-    dentista?: Dentista;
+    procedimento: ProcedimentoOdonto;
+    profissionalId?: string;
     valorUnitario: number;
     desconto: number;
     valorFinal: number;
@@ -60,20 +55,33 @@ export function AddTreatmentItemDialog({
   onAdd,
 }: AddTreatmentItemDialogProps) {
   const [categoria, setCategoria] = useState<string>('');
-  const [procedimento, setProcedimento] = useState<ProcedimentoOdontologico | null>(null);
+  const [procedimento, setProcedimento] = useState<ProcedimentoOdonto | null>(null);
   const [dente, setDente] = useState<string>('');
   const [superficiesSelecionadas, setSuperficiesSelecionadas] = useState<string[]>([]);
-  const [dentistaId, setDentistaId] = useState<string>('');
+  const [profissionalId, setProfissionalId] = useState<string>('');
   const [desconto, setDesconto] = useState<number>(0);
   const [urgencia, setUrgencia] = useState<UrgenciaTratamento>('baixa');
   const [observacoes, setObservacoes] = useState('');
 
-  const procedimentosCategoria = useMemo(() => {
-    if (!categoria) return [];
-    return procedimentosOdontologicos[categoria] || [];
-  }, [categoria]);
+  // Fetch data from Supabase
+  const { data: procedimentosGrouped, isLoading: loadingProcedimentos } = useProcedimentosByCategoria();
+  const { data: profissionais, isLoading: loadingProfissionais } = useDentistas();
 
-  const valorUnitario = procedimento ? getPreco(procedimento.id) : 0;
+  const procedimentosCategoria = useMemo(() => {
+    if (!categoria || !procedimentosGrouped) return [];
+    return procedimentosGrouped[categoria] || [];
+  }, [categoria, procedimentosGrouped]);
+
+  const categorias = useMemo(() => {
+    if (!procedimentosGrouped) return [];
+    return Object.keys(procedimentosGrouped).map(key => ({
+      id: key,
+      nome: categoriasOdontoConfig[key]?.nome || key,
+      cor: categoriasOdontoConfig[key]?.cor || 'bg-gray-500',
+    }));
+  }, [procedimentosGrouped]);
+
+  const valorUnitario = procedimento?.preco_padrao || 0;
   const valorFinal = valorUnitario - (valorUnitario * desconto / 100);
 
   const handleSuperificieChange = (superficie: string, checked: boolean) => {
@@ -86,14 +94,12 @@ export function AddTreatmentItemDialog({
 
   const handleSubmit = () => {
     if (!procedimento) return;
-
-    const dentista = dentistaId ? dentistas.find(d => d.id === dentistaId) : undefined;
     
     onAdd({
       dente: dente ? parseInt(dente) : null,
       superficie: superficiesSelecionadas.length > 0 ? superficiesSelecionadas.join(', ') : undefined,
       procedimento,
-      dentista,
+      profissionalId: profissionalId || undefined,
       valorUnitario,
       desconto,
       valorFinal,
@@ -106,7 +112,7 @@ export function AddTreatmentItemDialog({
     setProcedimento(null);
     setDente('');
     setSuperficiesSelecionadas([]);
-    setDentistaId('');
+    setProfissionalId('');
     setDesconto(0);
     setUrgencia('baixa');
     setObservacoes('');
@@ -180,24 +186,28 @@ export function AddTreatmentItemDialog({
             {/* Categoria */}
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <Select value={categoria} onValueChange={(v) => {
-                setCategoria(v);
-                setProcedimento(null);
-              }}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoriasOdontologicas.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${cat.cor}`} />
-                        {cat.nome}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {loadingProcedimentos ? (
+                <Skeleton className="h-10 w-full" />
+              ) : (
+                <Select value={categoria} onValueChange={(v) => {
+                  setCategoria(v);
+                  setProcedimento(null);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categorias.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${cat.cor}`} />
+                          {cat.nome}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             {/* Procedimento */}
@@ -220,7 +230,7 @@ export function AddTreatmentItemDialog({
                         <div className="flex justify-between items-center w-full gap-4">
                           <span>{proc.nome}</span>
                           <Badge variant="outline" className="ml-2">
-                            R$ {getPreco(proc.id).toFixed(2)}
+                            R$ {Number(proc.preco_padrao).toFixed(2)}
                           </Badge>
                         </div>
                       </SelectItem>
@@ -233,18 +243,22 @@ export function AddTreatmentItemDialog({
             {/* Dentista */}
             <div className="space-y-2">
               <Label>Dentista Responsável (opcional)</Label>
-              <Select value={dentistaId} onValueChange={setDentistaId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o dentista" />
-                </SelectTrigger>
-                <SelectContent>
-                  {dentistas.map(d => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.nome} - {d.especialidade}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {loadingProfissionais ? (
+                <Skeleton className="h-10 w-full" />
+              ) : (
+                <Select value={profissionalId} onValueChange={setProfissionalId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o dentista" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profissionais?.map(d => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.nome} - {d.registro_profissional}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             {/* Valores */}
@@ -253,7 +267,7 @@ export function AddTreatmentItemDialog({
                 <div className="space-y-2">
                   <Label>Valor Unitário</Label>
                   <Input
-                    value={`R$ ${valorUnitario.toFixed(2)}`}
+                    value={`R$ ${Number(valorUnitario).toFixed(2)}`}
                     disabled
                     className="bg-muted"
                   />

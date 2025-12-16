@@ -3,23 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Clock, Printer, FileText } from "lucide-react";
-import { PlanoTratamento } from "@/data/dentalMockData";
+import type { PlanoTratamentoOdonto } from "@/types/dental";
 
 interface TreatmentSummaryCardProps {
-  plano: PlanoTratamento;
+  plano: PlanoTratamentoOdonto;
   onApprove?: () => void;
   onPrint?: () => void;
 }
 
 export function TreatmentSummaryCard({ plano, onApprove, onPrint }: TreatmentSummaryCardProps) {
-  const totalItens = plano.itens.length;
-  const concluidos = plano.itens.filter(i => i.status === 'concluido').length;
-  const emAndamento = plano.itens.filter(i => i.status === 'em_andamento').length;
-  const pendentes = plano.itens.filter(i => i.status === 'planejado').length;
+  const itens = plano.itens || [];
+  const totalItens = itens.length;
+  const concluidos = itens.filter(i => i.status === 'concluido').length;
+  const emAndamento = itens.filter(i => i.status === 'em_andamento').length;
+  const pendentes = itens.filter(i => i.status === 'planejado').length;
   
-  const subtotal = plano.itens.reduce((acc, item) => acc + item.valorUnitario, 0);
-  const descontoTotal = plano.itens.reduce((acc, item) => acc + (item.valorUnitario - item.valorFinal), 0);
-  const total = plano.itens.reduce((acc, item) => acc + item.valorFinal, 0);
+  const subtotal = itens.reduce((acc, item) => acc + Number(item.valor_unitario), 0);
+  const descontoTotal = itens.reduce((acc, item) => acc + (Number(item.valor_unitario) - Number(item.valor_final)), 0);
+  const total = itens.reduce((acc, item) => acc + Number(item.valor_final), 0);
   
   const progresso = totalItens > 0 ? (concluidos / totalItens) * 100 : 0;
 
