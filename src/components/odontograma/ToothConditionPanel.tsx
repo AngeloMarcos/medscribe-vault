@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import { X, Trash2 } from 'lucide-react';
 import { 
   ToothCondition, 
   conditionColors, 
   conditionLabels 
 } from './teeth/toothUtils';
+import { ToothHistory } from './ToothHistory';
+import { useHistoricoByDente } from '@/hooks/useOdontograma';
 import { useResponsive } from '@/hooks/useResponsive';
 
 interface ToothConditionPanelProps {
@@ -19,6 +22,7 @@ interface ToothConditionPanelProps {
   onRemoveCondition: (surface: ToothCondition['surface']) => void;
   onClearAll: () => void;
   onClose: () => void;
+  patientId?: string;
 }
 
 const surfaceOptions: Array<{ value: ToothCondition['surface']; label: string }> = [
@@ -48,9 +52,13 @@ export const ToothConditionPanel: React.FC<ToothConditionPanelProps> = ({
   onRemoveCondition,
   onClearAll,
   onClose,
+  patientId,
 }) => {
   const { isMobile } = useResponsive();
   const [selectedSurface, setSelectedSurface] = React.useState<ToothCondition['surface']>('oclusal');
+
+  // Fetch history for selected tooth
+  const { data: toothHistory = [], isLoading: historyLoading } = useHistoricoByDente(patientId, toothNumber);
 
   const getQuadrantName = (tooth: number) => {
     const quadrant = Math.floor(tooth / 10);
@@ -166,6 +174,18 @@ export const ToothConditionPanel: React.FC<ToothConditionPanelProps> = ({
           })}
         </div>
       </div>
+
+      {/* Histórico do dente */}
+      {patientId && toothHistory.length > 0 && (
+        <>
+          <Separator />
+          <ToothHistory 
+            historico={toothHistory} 
+            isLoading={historyLoading}
+            maxItems={5}
+          />
+        </>
+      )}
 
       {/* Dica */}
       <div className="pt-3 border-t">
