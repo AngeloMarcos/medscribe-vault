@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Search, Clock, Check } from "lucide-react";
+import { CalendarIcon, Search, Clock, Check, ChevronDown, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,9 +34,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { especialidades, zonas, turnos, salas } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { useResponsive } from "@/hooks/useResponsive";
 
 const diasSemana = [
   'Segunda',
@@ -52,6 +59,7 @@ const mockResults = [
 
 export default function MarcarConsulta() {
   const { toast } = useToast();
+  const { isMobile } = useResponsive();
   const [especialidade, setEspecialidade] = useState("");
   const [equipe, setEquipe] = useState("");
   const [profissional, setProfissional] = useState("");
@@ -69,6 +77,7 @@ export default function MarcarConsulta() {
   const [apenasDisponiveis, setApenasDisponiveis] = useState(false);
   const [searched, setSearched] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
 
   const handleSearch = () => {
     setSearched(true);
@@ -102,7 +111,7 @@ export default function MarcarConsulta() {
     if (!selectedSlot) {
       toast({
         title: "Selecione um horário",
-        description: "Por favor, selecione um horário disponível para agendar.",
+        description: "Por favor, selecione um horário disponível.",
         variant: "destructive",
       });
       return;
@@ -114,36 +123,83 @@ export default function MarcarConsulta() {
     setSelectedSlot(null);
   };
 
+  // Mobile Result Card
+  const ResultCard = ({ result }: { result: typeof mockResults[0] }) => (
+    <div
+      className={cn(
+        "p-3 rounded-lg border border-border cursor-pointer transition-all",
+        selectedSlot === result.id ? "bg-primary/10 border-primary" : "hover:bg-muted/50"
+      )}
+      onClick={() => setSelectedSlot(result.id)}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+              selectedSlot === result.id ? "border-primary bg-primary" : "border-muted-foreground"
+            )}
+          >
+            {selectedSlot === result.id && (
+              <Check className="h-3 w-3 text-primary-foreground" />
+            )}
+          </div>
+          <div>
+            <p className="font-medium text-sm">{result.data} às {result.hora}</p>
+            <p className="text-xs text-muted-foreground">{result.profissional}</p>
+          </div>
+        </div>
+        <Badge
+          variant="secondary"
+          className={cn(
+            "text-xs shrink-0",
+            result.vagas <= 2 ? "bg-warning/20 text-warning" : "bg-success/20 text-success"
+          )}
+        >
+          {result.vagas} vaga{result.vagas !== 1 && "s"}
+        </Badge>
+      </div>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground ml-7">
+        <Badge variant="outline" className="text-xs">{result.especialidade}</Badge>
+        <span>Sala {result.sala}</span>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Marcar Consulta</h1>
-        <p className="text-muted-foreground mt-1">
-          Pesquisar disponibilidade de horários por grade/consulta
+        <h1 className="text-page-title">Marcar Consulta</h1>
+        <p className="text-caption mt-1">
+          Pesquisar disponibilidade de horários
         </p>
       </div>
 
       {/* Filters Card */}
       <Card className="card-neumorphic">
-        <CardHeader>
-          <CardTitle className="text-lg">Filtros de Busca</CardTitle>
-          <CardDescription>
-            Preencha os campos abaixo para buscar horários disponíveis
+        <CardHeader className="pb-2 lg:pb-4">
+          <CardTitle className="text-card-title flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Filtros de Busca
+          </CardTitle>
+          <CardDescription className="text-xs lg:text-sm">
+            Preencha os campos para buscar horários
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Essential Filters (always visible) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {/* Especialidade/Agenda */}
-            <div className="space-y-2 lg:col-span-2">
-              <Label>Especialidade/Agenda</Label>
+            <div className="space-y-2 col-span-2">
+              <Label className="text-xs lg:text-sm">Especialidade/Agenda</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 lg:h-4 lg:w-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar especialidade..."
                   value={especialidade}
                   onChange={(e) => setEspecialidade(e.target.value)}
-                  className="pl-10"
+                  className="pl-8 lg:pl-10 h-9 lg:h-10 text-xs lg:text-sm"
                   list="especialidades"
                 />
                 <datalist id="especialidades">
@@ -154,41 +210,21 @@ export default function MarcarConsulta() {
               </div>
             </div>
 
-            {/* Equipe */}
-            <div className="space-y-2">
-              <Label>Equipe</Label>
-              <Input
-                placeholder="Buscar equipe..."
-                value={equipe}
-                onChange={(e) => setEquipe(e.target.value)}
-              />
-            </div>
-
-            {/* Profissional */}
-            <div className="space-y-2">
-              <Label>Profissional</Label>
-              <Input
-                placeholder="Buscar profissional..."
-                value={profissional}
-                onChange={(e) => setProfissional(e.target.value)}
-              />
-            </div>
-
             {/* Data da Consulta */}
             <div className="space-y-2">
-              <Label>Data da Consulta</Label>
+              <Label className="text-xs lg:text-sm">Data</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal",
+                      "w-full justify-start text-left font-normal h-9 lg:h-10 text-xs lg:text-sm",
                       !dataConsulta && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                     {dataConsulta
-                      ? format(dataConsulta, "dd/MM/yyyy", { locale: ptBR })
+                      ? format(dataConsulta, "dd/MM/yy", { locale: ptBR })
                       : "Selecione"}
                   </Button>
                 </PopoverTrigger>
@@ -204,90 +240,11 @@ export default function MarcarConsulta() {
               </Popover>
             </div>
 
-            {/* Hora */}
-            <div className="space-y-2">
-              <Label>Hora</Label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="time"
-                  value={hora}
-                  onChange={(e) => setHora(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Mês Inicial */}
-            <div className="space-y-2">
-              <Label>Mês Inicial</Label>
-              <Input
-                type="month"
-                value={mesInicial}
-                onChange={(e) => setMesInicial(e.target.value)}
-              />
-            </div>
-
-            {/* Mês Final */}
-            <div className="space-y-2">
-              <Label>Mês Final</Label>
-              <Input
-                type="month"
-                value={mesFinal}
-                onChange={(e) => setMesFinal(e.target.value)}
-              />
-            </div>
-
-            {/* Dia da Semana */}
-            <div className="space-y-2">
-              <Label>Dia da Semana</Label>
-              <Select value={diaSemana} onValueChange={setDiaSemana}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {diasSemana.map((dia) => (
-                    <SelectItem key={dia} value={dia}>{dia}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Zona */}
-            <div className="space-y-2">
-              <Label>Zona</Label>
-              <Select value={zona} onValueChange={setZona}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {zonas.map((z) => (
-                    <SelectItem key={z} value={z}>{z}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Sala */}
-            <div className="space-y-2">
-              <Label>Sala</Label>
-              <Select value={sala} onValueChange={setSala}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {salas.slice(0, 15).map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Turno */}
             <div className="space-y-2">
-              <Label>Turno</Label>
+              <Label className="text-xs lg:text-sm">Turno</Label>
               <Select value={turno} onValueChange={setTurno}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 lg:h-10 text-xs lg:text-sm">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
@@ -297,71 +254,155 @@ export default function MarcarConsulta() {
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Pagador */}
-            <div className="space-y-2">
-              <Label>Pagador</Label>
-              <Select value={pagador} onValueChange={setPagador}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sus">SUS</SelectItem>
-                  <SelectItem value="particular">Particular</SelectItem>
-                  <SelectItem value="convenio">Convênio</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Autorização */}
-            <div className="space-y-2">
-              <Label>Autorização</Label>
-              <Input
-                placeholder="Número da autorização"
-                value={autorizacao}
-                onChange={(e) => setAutorizacao(e.target.value)}
-              />
-            </div>
-
-            {/* Condição Atendimento */}
-            <div className="space-y-2">
-              <Label>Condição Atendimento</Label>
-              <Select value={condicaoAtendimento} onValueChange={setCondicaoAtendimento}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="urgente">Urgente</SelectItem>
-                  <SelectItem value="retorno">Retorno</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Apenas grades com disponibilidade */}
-            <div className="space-y-2 flex items-end">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="disponiveis"
-                  checked={apenasDisponiveis}
-                  onCheckedChange={(checked) => setApenasDisponiveis(!!checked)}
-                />
-                <label
-                  htmlFor="disponiveis"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Apenas grades com disponibilidade
-                </label>
-              </div>
-            </div>
           </div>
 
-          <div className="flex gap-3 mt-6">
-            <Button onClick={handleSearch} className="gap-2">
-              <Search className="h-4 w-4" />
+          {/* Advanced Filters (collapsible) */}
+          <Collapsible open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="mt-3 lg:mt-4 gap-2 text-xs lg:text-sm">
+                <ChevronDown className={cn("h-3 w-3 lg:h-4 lg:w-4 transition-transform", advancedFiltersOpen && "rotate-180")} />
+                {advancedFiltersOpen ? "Menos filtros" : "Mais filtros"}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mt-3 lg:mt-4 pt-3 lg:pt-4 border-t border-border">
+                {/* Equipe */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Equipe</Label>
+                  <Input
+                    placeholder="Buscar..."
+                    value={equipe}
+                    onChange={(e) => setEquipe(e.target.value)}
+                    className="h-9 lg:h-10 text-xs lg:text-sm"
+                  />
+                </div>
+
+                {/* Profissional */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Profissional</Label>
+                  <Input
+                    placeholder="Buscar..."
+                    value={profissional}
+                    onChange={(e) => setProfissional(e.target.value)}
+                    className="h-9 lg:h-10 text-xs lg:text-sm"
+                  />
+                </div>
+
+                {/* Hora */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Hora</Label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 lg:h-4 lg:w-4 text-muted-foreground" />
+                    <Input
+                      type="time"
+                      value={hora}
+                      onChange={(e) => setHora(e.target.value)}
+                      className="pl-8 lg:pl-10 h-9 lg:h-10 text-xs lg:text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Dia da Semana */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Dia da Semana</Label>
+                  <Select value={diaSemana} onValueChange={setDiaSemana}>
+                    <SelectTrigger className="h-9 lg:h-10 text-xs lg:text-sm">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {diasSemana.map((dia) => (
+                        <SelectItem key={dia} value={dia}>{dia}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Zona */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Zona</Label>
+                  <Select value={zona} onValueChange={setZona}>
+                    <SelectTrigger className="h-9 lg:h-10 text-xs lg:text-sm">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {zonas.map((z) => (
+                        <SelectItem key={z} value={z}>{z}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Sala */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Sala</Label>
+                  <Select value={sala} onValueChange={setSala}>
+                    <SelectTrigger className="h-9 lg:h-10 text-xs lg:text-sm">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salas.slice(0, 15).map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Pagador */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Pagador</Label>
+                  <Select value={pagador} onValueChange={setPagador}>
+                    <SelectTrigger className="h-9 lg:h-10 text-xs lg:text-sm">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sus">SUS</SelectItem>
+                      <SelectItem value="particular">Particular</SelectItem>
+                      <SelectItem value="convenio">Convênio</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Condição */}
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">Condição</Label>
+                  <Select value={condicaoAtendimento} onValueChange={setCondicaoAtendimento}>
+                    <SelectTrigger className="h-9 lg:h-10 text-xs lg:text-sm">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                      <SelectItem value="retorno">Retorno</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Checkbox */}
+                <div className="space-y-2 col-span-2 flex items-end">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="disponiveis"
+                      checked={apenasDisponiveis}
+                      onCheckedChange={(checked) => setApenasDisponiveis(!!checked)}
+                    />
+                    <label
+                      htmlFor="disponiveis"
+                      className="text-xs lg:text-sm font-medium leading-none"
+                    >
+                      Apenas com disponibilidade
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <div className="flex gap-2 lg:gap-3 mt-4 lg:mt-6">
+            <Button onClick={handleSearch} className="gap-2 h-9 lg:h-10 text-xs lg:text-sm">
+              <Search className="h-3 w-3 lg:h-4 lg:w-4" />
               Pesquisar
             </Button>
-            <Button variant="outline" onClick={handleClear}>
+            <Button variant="outline" onClick={handleClear} className="h-9 lg:h-10 text-xs lg:text-sm">
               Limpar
             </Button>
           </div>
@@ -371,75 +412,88 @@ export default function MarcarConsulta() {
       {/* Results */}
       {searched && (
         <Card className="card-neumorphic overflow-hidden animate-fade-in">
-          <CardHeader>
-            <CardTitle className="text-lg">Horários Disponíveis</CardTitle>
-            <CardDescription>
-              Selecione um horário para agendar a consulta
+          <CardHeader className="pb-2 lg:pb-4">
+            <CardTitle className="text-card-title">Horários Disponíveis</CardTitle>
+            <CardDescription className="text-xs lg:text-sm">
+              Selecione um horário para agendar
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Hora</TableHead>
-                  <TableHead>Especialidade</TableHead>
-                  <TableHead>Profissional</TableHead>
-                  <TableHead>Sala</TableHead>
-                  <TableHead>Vagas</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <CardContent className="p-0 lg:p-0">
+            {/* Mobile: Card View */}
+            {isMobile ? (
+              <div className="p-3 space-y-2">
                 {mockResults.map((result) => (
-                  <TableRow
-                    key={result.id}
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedSlot === result.id && "bg-primary/10"
-                    )}
-                    onClick={() => setSelectedSlot(result.id)}
-                  >
-                    <TableCell>
-                      <div
-                        className={cn(
-                          "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
-                          selectedSlot === result.id
-                            ? "border-primary bg-primary"
-                            : "border-muted-foreground"
-                        )}
-                      >
-                        {selectedSlot === result.id && (
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{result.data}</TableCell>
-                    <TableCell>{result.hora}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{result.especialidade}</Badge>
-                    </TableCell>
-                    <TableCell>{result.profissional}</TableCell>
-                    <TableCell>{result.sala}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          result.vagas <= 2
-                            ? "bg-warning/20 text-warning"
-                            : "bg-success/20 text-success"
-                        )}
-                      >
-                        {result.vagas} vaga{result.vagas !== 1 && "s"}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
+                  <ResultCard key={result.id} result={result} />
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            ) : (
+              /* Desktop: Table View */
+              <ScrollArea className="w-full">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-12"></TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Hora</TableHead>
+                      <TableHead>Especialidade</TableHead>
+                      <TableHead>Profissional</TableHead>
+                      <TableHead>Sala</TableHead>
+                      <TableHead>Vagas</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockResults.map((result) => (
+                      <TableRow
+                        key={result.id}
+                        className={cn(
+                          "cursor-pointer transition-colors",
+                          selectedSlot === result.id && "bg-primary/10"
+                        )}
+                        onClick={() => setSelectedSlot(result.id)}
+                      >
+                        <TableCell>
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
+                              selectedSlot === result.id
+                                ? "border-primary bg-primary"
+                                : "border-muted-foreground"
+                            )}
+                          >
+                            {selectedSlot === result.id && (
+                              <Check className="h-3 w-3 text-primary-foreground" />
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">{result.data}</TableCell>
+                        <TableCell>{result.hora}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{result.especialidade}</Badge>
+                        </TableCell>
+                        <TableCell>{result.profissional}</TableCell>
+                        <TableCell>{result.sala}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              result.vagas <= 2
+                                ? "bg-warning/20 text-warning"
+                                : "bg-success/20 text-success"
+                            )}
+                          >
+                            {result.vagas} vaga{result.vagas !== 1 && "s"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            )}
           </CardContent>
-          <div className="p-4 border-t border-border flex justify-end">
-            <Button onClick={handleSchedule} disabled={!selectedSlot}>
+          <div className="p-3 lg:p-4 border-t border-border flex justify-end">
+            <Button onClick={handleSchedule} disabled={!selectedSlot} className="h-9 lg:h-10 text-xs lg:text-sm">
               Agendar Consulta
             </Button>
           </div>

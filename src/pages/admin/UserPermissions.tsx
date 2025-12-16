@@ -23,25 +23,23 @@ import {
 import { PERMISSIONS, ROLE_PERMISSIONS, ROLE_LABELS, AppRole, Permission } from '@/types/auth';
 import type { TenantUserPermissions } from '@/types/tenantPermissions';
 
-// Labels para permissões
 const PERMISSION_LABELS: Record<string, string> = {
   all: 'Acesso Total',
-  prescribe: 'Prescrever Medicamentos',
-  view_patients: 'Visualizar Pacientes',
-  clinical_docs: 'Documentos Clínicos',
+  prescribe: 'Prescrever',
+  view_patients: 'Ver Pacientes',
+  clinical_docs: 'Docs Clínicos',
   request_exams: 'Solicitar Exames',
-  administer_meds: 'Administrar Medicamentos',
-  view_prescriptions: 'Visualizar Prescrições',
+  administer_meds: 'Administrar Med.',
+  view_prescriptions: 'Ver Prescrições',
   vital_signs: 'Sinais Vitais',
-  nursing_notes: 'Anotações de Enfermagem',
-  dispense: 'Dispensar Medicamentos',
-  stock_control: 'Controle de Estoque',
-  patient_registration: 'Cadastro de Pacientes',
+  nursing_notes: 'Anotações Enf.',
+  dispense: 'Dispensar Med.',
+  stock_control: 'Controle Estoque',
+  patient_registration: 'Cadastro Pac.',
   scheduling: 'Agendamento',
-  view_own_data: 'Visualizar Próprios Dados',
+  view_own_data: 'Ver Próprios Dados',
 };
 
-// Categorias de permissões
 const PERMISSION_CATEGORIES = {
   clinical: {
     label: 'Clínico',
@@ -77,13 +75,11 @@ export default function UserPermissions() {
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<Record<string, { granted: string[], denied: string[] }>>({});
 
-  // Buscar usuários do tenant com suas permissões
   const { data: users, isLoading } = useQuery({
     queryKey: ['tenant-users-permissions', tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return [];
 
-      // Buscar usuários do tenant
       const { data: tenantUsers, error: tuError } = await supabase
         .from('tenant_users')
         .select('user_id')
@@ -95,7 +91,6 @@ export default function UserPermissions() {
 
       const userIds = tenantUsers.map(tu => tu.user_id);
 
-      // Buscar profiles
       const { data: profiles, error: pError } = await supabase
         .from('profiles')
         .select('id, email, full_name')
@@ -103,7 +98,6 @@ export default function UserPermissions() {
 
       if (pError) throw pError;
 
-      // Buscar roles
       const { data: roles, error: rError } = await supabase
         .from('user_roles')
         .select('user_id, role')
@@ -111,7 +105,6 @@ export default function UserPermissions() {
 
       if (rError) throw rError;
 
-      // Buscar permissões do tenant
       const { data: permissions, error: permError } = await supabase
         .from('tenant_user_permissions')
         .select('*')
@@ -120,7 +113,6 @@ export default function UserPermissions() {
 
       if (permError) throw permError;
 
-      // Montar array de usuários
       return profiles?.map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
         const userPermissions = permissions?.find(p => p.user_id === profile.id);
@@ -137,7 +129,6 @@ export default function UserPermissions() {
     enabled: !!tenant?.id,
   });
 
-  // Mutation para salvar permissões
   const saveMutation = useMutation({
     mutationFn: async ({ userId, userName, granted, denied, oldGranted, oldDenied }: { 
       userId: string; 
@@ -180,7 +171,6 @@ export default function UserPermissions() {
         if (error) throw error;
       }
 
-      // Log da alteração
       await logPermissionChange({
         action: 'update',
         targetUserId: userId,
@@ -191,7 +181,7 @@ export default function UserPermissions() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-users-permissions'] });
-      toast.success('Permissões salvas com sucesso');
+      toast.success('Permissões salvas');
     },
     onError: (error) => {
       console.error('Error saving permissions:', error);
@@ -199,13 +189,11 @@ export default function UserPermissions() {
     },
   });
 
-  // Obter permissões base do role
   const getBasePermissions = (role: AppRole | null): string[] => {
     if (!role) return [];
     return ROLE_PERMISSIONS[role] || [];
   };
 
-  // Obter estado atual de uma permissão
   const getPermissionState = (user: UserPermissionRow, permission: string): 'base' | 'granted' | 'denied' | 'none' => {
     const changes = pendingChanges[user.userId];
     const granted = changes?.granted || user.tenantPermissions?.granted_permissions || [];
@@ -218,7 +206,6 @@ export default function UserPermissions() {
     return 'none';
   };
 
-  // Toggle permissão
   const togglePermission = (user: UserPermissionRow, permission: string) => {
     const currentState = getPermissionState(user, permission);
     const base = getBasePermissions(user.role);
@@ -233,13 +220,11 @@ export default function UserPermissions() {
     let newDenied = [...currentChanges.denied];
 
     if (currentState === 'none' || currentState === 'denied') {
-      // Ativar: adicionar em granted, remover de denied
       newDenied = newDenied.filter(p => p !== permission);
       if (!isBasePermission && !newGranted.includes(permission)) {
         newGranted.push(permission);
       }
     } else {
-      // Desativar: adicionar em denied, remover de granted
       newGranted = newGranted.filter(p => p !== permission);
       if (!newDenied.includes(permission)) {
         newDenied.push(permission);
@@ -252,7 +237,6 @@ export default function UserPermissions() {
     }));
   };
 
-  // Salvar alterações de um usuário
   const handleSave = (userId: string) => {
     const changes = pendingChanges[userId];
     if (!changes) return;
@@ -270,7 +254,6 @@ export default function UserPermissions() {
       oldDenied,
     });
 
-    // Limpar pending changes após salvar
     setPendingChanges(prev => {
       const next = { ...prev };
       delete next[userId];
@@ -278,7 +261,6 @@ export default function UserPermissions() {
     });
   };
 
-  // Resetar alterações de um usuário
   const handleReset = (userId: string) => {
     setPendingChanges(prev => {
       const next = { ...prev };
@@ -287,76 +269,75 @@ export default function UserPermissions() {
     });
   };
 
-  // Verificar se tem alterações pendentes
   const hasPendingChanges = (userId: string) => {
     return !!pendingChanges[userId];
   };
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
+      <div className="p-4 lg:p-6 space-y-4">
+        <Skeleton className="h-8 w-48 lg:w-64" />
+        <Skeleton className="h-24 lg:h-32 w-full" />
+        <Skeleton className="h-24 lg:h-32 w-full" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Permissões por Usuário</h1>
-        <p className="text-muted-foreground">
-          Customize permissões individuais para usuários deste tenant
+        <h1 className="text-xl lg:text-2xl font-bold text-foreground">Permissões por Usuário</h1>
+        <p className="text-xs lg:text-sm text-muted-foreground">
+          Customize permissões individuais
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 lg:space-y-4">
         {users?.map(user => (
           <Card key={user.userId} className="overflow-hidden">
             <CardHeader 
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              className="cursor-pointer hover:bg-muted/50 transition-colors p-3 lg:p-6"
               onClick={() => setExpandedUser(expandedUser === user.userId ? null : user.userId)}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 lg:gap-3 min-w-0">
+                  <div className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <User className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
                   </div>
-                  <div>
-                    <CardTitle className="text-base">{user.fullName}</CardTitle>
-                    <CardDescription>{user.email}</CardDescription>
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm lg:text-base truncate">{user.fullName}</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm truncate">{user.email}</CardDescription>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 lg:gap-3 shrink-0">
                   {user.role && (
-                    <Badge variant="outline">
+                    <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                       {ROLE_LABELS[user.role] || user.role}
                     </Badge>
                   )}
                   {hasPendingChanges(user.userId) && (
-                    <Badge variant="secondary" className="bg-warning/20 text-warning">
-                      Alterações pendentes
+                    <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">
+                      Pendente
                     </Badge>
                   )}
                   {expandedUser === user.userId ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    <ChevronUp className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
                   )}
                 </div>
               </div>
             </CardHeader>
 
             {expandedUser === user.userId && (
-              <CardContent className="border-t">
-                <div className="py-4 space-y-6">
+              <CardContent className="border-t p-3 lg:p-6">
+                <div className="space-y-4 lg:space-y-6">
                   {Object.entries(PERMISSION_CATEGORIES).map(([categoryKey, category]) => (
                     <div key={categoryKey}>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                      <h4 className="text-xs lg:text-sm font-medium text-muted-foreground mb-2 lg:mb-3">
                         {category.label}
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-3">
                         {category.permissions.map(permission => {
                           const state = getPermissionState(user, permission);
                           const isActive = state === 'base' || state === 'granted';
@@ -365,7 +346,7 @@ export default function UserPermissions() {
                           return (
                             <div
                               key={permission}
-                              className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                              className={`flex items-center justify-between p-2 lg:p-3 rounded-lg border transition-colors ${
                                 isOverride 
                                   ? state === 'granted' 
                                     ? 'border-success/30 bg-success/5' 
@@ -373,34 +354,20 @@ export default function UserPermissions() {
                                   : 'border-border'
                               }`}
                             >
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5 lg:gap-2 min-w-0">
                                 {isActive ? (
-                                  <ShieldCheck className="h-4 w-4 text-success" />
+                                  <ShieldCheck className="h-3 w-3 lg:h-4 lg:w-4 text-success shrink-0" />
                                 ) : (
-                                  <ShieldX className="h-4 w-4 text-muted-foreground" />
+                                  <ShieldX className="h-3 w-3 lg:h-4 lg:w-4 text-muted-foreground shrink-0" />
                                 )}
-                                <span className="text-sm">
+                                <span className="text-xs lg:text-sm truncate">
                                   {PERMISSION_LABELS[permission] || permission}
                                 </span>
-                                {state === 'base' && (
-                                  <Badge variant="outline" className="text-xs">
-                                    Do perfil
-                                  </Badge>
-                                )}
-                                {state === 'granted' && (
-                                  <Badge variant="outline" className="text-xs border-success/50 text-success">
-                                    Concedida
-                                  </Badge>
-                                )}
-                                {state === 'denied' && (
-                                  <Badge variant="outline" className="text-xs border-destructive/50 text-destructive">
-                                    Negada
-                                  </Badge>
-                                )}
                               </div>
                               <Switch
                                 checked={isActive}
                                 onCheckedChange={() => togglePermission(user, permission)}
+                                className="shrink-0"
                               />
                             </div>
                           );
@@ -412,22 +379,24 @@ export default function UserPermissions() {
                   {hasPendingChanges(user.userId) && (
                     <>
                       <Separator />
-                      <div className="flex justify-end gap-2">
+                      <div className="flex flex-col sm:flex-row justify-end gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleReset(user.userId)}
+                          className="h-8 lg:h-9 text-xs lg:text-sm"
                         >
-                          <RotateCcw className="h-4 w-4 mr-2" />
+                          <RotateCcw className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
                           Descartar
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleSave(user.userId)}
                           disabled={saveMutation.isPending}
+                          className="h-8 lg:h-9 text-xs lg:text-sm"
                         >
-                          <Save className="h-4 w-4 mr-2" />
-                          Salvar Alterações
+                          <Save className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                          Salvar
                         </Button>
                       </div>
                     </>
@@ -440,8 +409,8 @@ export default function UserPermissions() {
 
         {(!users || users.length === 0) && (
           <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Nenhum usuário encontrado neste tenant
+            <CardContent className="py-8 text-center text-muted-foreground text-sm">
+              Nenhum usuário encontrado
             </CardContent>
           </Card>
         )}

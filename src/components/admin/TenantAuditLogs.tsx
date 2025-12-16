@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,7 +24,7 @@ const ENTITY_LABELS: Record<AuditEntityType, { label: string; icon: React.Elemen
   permission: { label: 'Permissão', icon: Shield },
   module: { label: 'Módulo', icon: Blocks },
   user: { label: 'Usuário', icon: User },
-  tenant_settings: { label: 'Configurações', icon: Settings },
+  tenant_settings: { label: 'Config.', icon: Settings },
 };
 
 const ACTION_LABELS: Record<AuditAction, { label: string; color: string }> = {
@@ -61,7 +61,6 @@ export function TenantAuditLogs() {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Buscar nomes dos usuários
       const userIds = [...new Set([
         ...(data?.map(log => log.user_id) || []),
         ...(data?.filter(log => log.target_user_id).map(log => log.target_user_id) || [])
@@ -100,45 +99,45 @@ export function TenantAuditLogs() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
+      <div className="space-y-3 lg:space-y-4">
+        <Skeleton className="h-9 lg:h-10 w-full" />
+        <Skeleton className="h-16 lg:h-20 w-full" />
+        <Skeleton className="h-16 lg:h-20 w-full" />
+        <Skeleton className="h-16 lg:h-20 w-full" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3">
+    <div className="space-y-3 lg:space-y-4">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 lg:h-4 lg:w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar nos logs..."
+            placeholder="Buscar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-8 lg:pl-9 h-9 lg:h-10 text-xs lg:text-sm"
           />
         </div>
         <Select value={entityFilter} onValueChange={setEntityFilter}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Tipo de entidade" />
+          <SelectTrigger className="w-full sm:w-36 lg:w-48 h-9 lg:h-10 text-xs lg:text-sm">
+            <SelectValue placeholder="Tipo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="permission">Permissões</SelectItem>
             <SelectItem value="module">Módulos</SelectItem>
             <SelectItem value="user">Usuários</SelectItem>
-            <SelectItem value="tenant_settings">Configurações</SelectItem>
+            <SelectItem value="tenant_settings">Config.</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Lista de Logs */}
-      <ScrollArea className="h-[600px]">
-        <div className="space-y-3">
+      {/* Logs List */}
+      <ScrollArea className="h-[400px] lg:h-[600px]">
+        <div className="space-y-2 lg:space-y-3">
           {filteredLogs?.map(log => {
             const entityConfig = ENTITY_LABELS[log.entity_type as AuditEntityType];
             const actionConfig = ACTION_LABELS[log.action as AuditAction];
@@ -146,34 +145,36 @@ export function TenantAuditLogs() {
 
             return (
               <Card key={log.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <EntityIcon className="h-5 w-5 text-muted-foreground" />
+                <CardContent className="p-3 lg:p-4">
+                  <div className="flex items-start gap-2 lg:gap-4">
+                    <div className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <EntityIcon className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <Badge variant="outline" className="text-xs">
+                      <div className="flex items-center gap-1 lg:gap-2 flex-wrap mb-1">
+                        <Badge variant="outline" className="text-[10px] lg:text-xs">
                           {entityConfig?.label || log.entity_type}
                         </Badge>
-                        <Badge className={`text-xs ${actionConfig?.color || ''}`}>
+                        <Badge className={`text-[10px] lg:text-xs ${actionConfig?.color || ''}`}>
                           {actionConfig?.label || log.action}
                         </Badge>
                       </div>
-                      <p className="text-sm text-foreground">
+                      <p className="text-xs lg:text-sm text-foreground line-clamp-2">
                         {log.description || 'Sem descrição'}
                       </p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 lg:gap-4 mt-1.5 lg:mt-2 text-[10px] lg:text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {log.user_name || 'Usuário desconhecido'}
+                          <User className="h-2.5 w-2.5 lg:h-3 lg:w-3" />
+                          <span className="truncate max-w-[120px] lg:max-w-none">
+                            {log.user_name || 'Desconhecido'}
+                          </span>
                         </span>
                         {log.target_user_name && (
-                          <span>→ {log.target_user_name}</span>
+                          <span className="truncate">→ {log.target_user_name}</span>
                         )}
                         <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {format(new Date(log.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          <Clock className="h-2.5 w-2.5 lg:h-3 lg:w-3" />
+                          {format(new Date(log.created_at), "dd/MM HH:mm", { locale: ptBR })}
                         </span>
                       </div>
                     </div>
@@ -185,8 +186,8 @@ export function TenantAuditLogs() {
 
           {(!filteredLogs || filteredLogs.length === 0) && (
             <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Nenhum registro de auditoria encontrado
+              <CardContent className="py-6 lg:py-8 text-center text-muted-foreground text-xs lg:text-sm">
+                Nenhum registro encontrado
               </CardContent>
             </Card>
           )}
