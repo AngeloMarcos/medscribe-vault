@@ -23,6 +23,7 @@ import EstornarConsulta from "./pages/EstornarConsulta";
 import Appointments from "./pages/Appointments";
 import AgendarOdonto from "./pages/AgendarOdonto";
 import ListaPacientesOdonto from "./pages/ListaPacientesOdonto";
+import Odontograma from "./pages/Odontograma";
 import AdminUserManagement from "./pages/admin/UserManagement";
 import UserPermissions from "./pages/admin/UserPermissions";
 import AuditLogs from "./pages/admin/AuditLogs";
@@ -70,7 +71,7 @@ const App = () => {
                     {/* Odontologia Routes */}
                     <Route path="odonto/agendar" element={<AgendarOdonto />} />
                     <Route path="odonto/pacientes" element={<ListaPacientesOdonto />} />
-                    <Route path="odonto/odontograma" element={<UnderConstruction title="Odontograma" />} />
+                    <Route path="odonto/odontograma" element={<Odontograma />} />
                     <Route path="odonto/tratamento" element={<UnderConstruction title="Plano de Tratamento Odontológico" />} />
 
                     {/* Prescription Routes - Protected for medical staff */}
