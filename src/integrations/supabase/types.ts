@@ -944,6 +944,135 @@ export type Database = {
           },
         ]
       }
+      odontograma_historico: {
+        Row: {
+          acao: string
+          condicao: string
+          created_at: string | null
+          created_by: string | null
+          dente: number
+          id: string
+          observacao: string | null
+          odontograma_id: string
+          patient_id: string
+          profissional_id: string | null
+          superficie: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          acao: string
+          condicao: string
+          created_at?: string | null
+          created_by?: string | null
+          dente: number
+          id?: string
+          observacao?: string | null
+          odontograma_id: string
+          patient_id: string
+          profissional_id?: string | null
+          superficie?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          acao?: string
+          condicao?: string
+          created_at?: string | null
+          created_by?: string | null
+          dente?: number
+          id?: string
+          observacao?: string | null
+          odontograma_id?: string
+          patient_id?: string
+          profissional_id?: string | null
+          superficie?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "odontograma_historico_odontograma_id_fkey"
+            columns: ["odontograma_id"]
+            isOneToOne: false
+            referencedRelation: "odontogramas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "odontograma_historico_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "odontograma_historico_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "odontograma_historico_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      odontogramas: {
+        Row: {
+          created_at: string | null
+          dados: Json
+          id: string
+          observacoes: string | null
+          patient_id: string
+          profissional_id: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dados?: Json
+          id?: string
+          observacoes?: string | null
+          patient_id: string
+          profissional_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dados?: Json
+          id?: string
+          observacoes?: string | null
+          patient_id?: string
+          profissional_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "odontogramas_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "odontogramas_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "odontogramas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           birth_date: string | null

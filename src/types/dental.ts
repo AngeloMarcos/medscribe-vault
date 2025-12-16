@@ -1,6 +1,39 @@
 // Types for dental treatment plan module
+import { ToothCondition } from '@/components/odontograma/teeth/toothUtils';
 
 export type StatusItemTratamento = 'planejado' | 'em_andamento' | 'concluido' | 'cancelado';
+
+// ==================== ODONTOGRAMA TYPES ====================
+
+export interface Odontograma {
+  id: string;
+  patient_id: string;
+  profissional_id?: string;
+  tenant_id?: string;
+  dados: Record<number, ToothCondition[]>;
+  observacoes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OdontogramaHistorico {
+  id: string;
+  odontograma_id: string;
+  patient_id: string;
+  profissional_id?: string;
+  tenant_id?: string;
+  dente: number;
+  superficie?: string;
+  condicao: string;
+  acao: 'add' | 'remove';
+  observacao?: string;
+  created_at: string;
+  created_by?: string;
+  // Relations
+  profissional?: { nome: string };
+}
+
+// ==================== TREATMENT PLAN TYPES ====================
 export type StatusPlanoTratamento = 'orcamento' | 'aprovado' | 'em_andamento' | 'concluido' | 'cancelado';
 export type UrgenciaTratamento = 'baixa' | 'media' | 'alta';
 
