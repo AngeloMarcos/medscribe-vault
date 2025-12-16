@@ -409,8 +409,8 @@ export default function Atendimento() {
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden flex flex-col">
         <Tabs defaultValue="resumo" className="h-full flex flex-col">
-          <div className="border-b border-border px-3 lg:px-6 pt-2 lg:pt-4 overflow-x-auto">
-            <ScrollArea orientation="horizontal" className="w-full">
+          <div className="border-b border-border px-3 lg:px-6 pt-2 lg:pt-4">
+            <div className="overflow-x-auto scrollbar-thin">
               <TabsList className="inline-flex w-max min-w-full lg:w-auto">
                 <TabsTrigger value="resumo" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
                   <Clock className="h-3 w-3 lg:h-4 lg:w-4" />
