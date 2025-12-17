@@ -25,6 +25,7 @@ import {
   Smile,
   Grid3X3,
   FileText,
+  MonitorPlay,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,7 @@ const menuItems: MenuItem[] = [
     ],
   },
   { name: "Enfermagem", href: "/enfermagem", icon: Syringe, permission: PERMISSIONS.ADMINISTER_MEDS, moduleKey: "enfermagem" },
+  { name: "Painel Chamador", href: "/painel-chamador", icon: MonitorPlay },
   { name: "Farmácia", href: "/farmacia", icon: Pill, permission: PERMISSIONS.DISPENSE, moduleKey: "farmacia" },
   { name: "Importar SISREG", href: "/importar-sisreg", icon: FileUp, moduleKey: "sisreg" },
   { name: "Estornar Consulta", href: "/estornar", icon: RotateCcw, moduleKey: "ambulatorio" },

@@ -1497,6 +1497,111 @@ export type Database = {
           },
         ]
       }
+      queue_call_history: {
+        Row: {
+          called_at: string | null
+          guiche: string
+          id: string
+          tenant_id: string | null
+          ticket_id: string | null
+          ticket_number: string
+        }
+        Insert: {
+          called_at?: string | null
+          guiche: string
+          id?: string
+          tenant_id?: string | null
+          ticket_id?: string | null
+          ticket_number: string
+        }
+        Update: {
+          called_at?: string | null
+          guiche?: string
+          id?: string
+          tenant_id?: string | null
+          ticket_id?: string | null
+          ticket_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_call_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_call_history_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "queue_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_tickets: {
+        Row: {
+          called_at: string | null
+          called_by: string | null
+          completed_at: string | null
+          created_at: string | null
+          guiche: string | null
+          id: string
+          patient_id: string | null
+          patient_name: string | null
+          sector: string
+          status: string
+          tenant_id: string | null
+          ticket_number: string
+          ticket_type: string
+        }
+        Insert: {
+          called_at?: string | null
+          called_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          guiche?: string | null
+          id?: string
+          patient_id?: string | null
+          patient_name?: string | null
+          sector?: string
+          status?: string
+          tenant_id?: string | null
+          ticket_number: string
+          ticket_type?: string
+        }
+        Update: {
+          called_at?: string | null
+          called_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          guiche?: string | null
+          id?: string
+          patient_id?: string | null
+          patient_name?: string | null
+          sector?: string
+          status?: string
+          tenant_id?: string | null
+          ticket_number?: string
+          ticket_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_tickets_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string

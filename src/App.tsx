@@ -33,6 +33,7 @@ import PrescriptionList from "./pages/PrescriptionList";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Enfermagem from "./pages/Enfermagem";
+import PainelChamador from "./pages/PainelChamador";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,7 @@ const App = () => {
                     <Route path="prescricao" element={<Navigate to="/prescription" replace />} />
 
                     <Route path="enfermagem" element={<Enfermagem />} />
+                    <Route path="painel-chamador" element={<PainelChamador />} />
                     <Route path="farmacia" element={<UnderConstruction title="Farmácia" />} />
                     <Route path="importar-sisreg" element={<UnderConstruction title="Importar SISREG" />} />
                     <Route path="estornar" element={<EstornarConsulta />} />
