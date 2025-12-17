@@ -370,6 +370,101 @@ export type Database = {
           },
         ]
       }
+      encaminhamentos: {
+        Row: {
+          cid_principal: string | null
+          consulta_id: string | null
+          created_at: string | null
+          data_encaminhamento: string | null
+          especialidade_destino: string | null
+          hipotese_diagnostica: string | null
+          id: string
+          justificativa: string
+          observacoes: string | null
+          paciente_id: string
+          profissional_destino: string | null
+          profissional_id: string | null
+          status: string
+          tenant_id: string | null
+          tipo: string
+          transporte: string | null
+          unidade_destino: string | null
+          updated_at: string | null
+          urgencia: string
+        }
+        Insert: {
+          cid_principal?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          data_encaminhamento?: string | null
+          especialidade_destino?: string | null
+          hipotese_diagnostica?: string | null
+          id?: string
+          justificativa: string
+          observacoes?: string | null
+          paciente_id: string
+          profissional_destino?: string | null
+          profissional_id?: string | null
+          status?: string
+          tenant_id?: string | null
+          tipo: string
+          transporte?: string | null
+          unidade_destino?: string | null
+          updated_at?: string | null
+          urgencia?: string
+        }
+        Update: {
+          cid_principal?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          data_encaminhamento?: string | null
+          especialidade_destino?: string | null
+          hipotese_diagnostica?: string | null
+          id?: string
+          justificativa?: string
+          observacoes?: string | null
+          paciente_id?: string
+          profissional_destino?: string | null
+          profissional_id?: string | null
+          status?: string
+          tenant_id?: string | null
+          tipo?: string
+          transporte?: string | null
+          unidade_destino?: string | null
+          updated_at?: string | null
+          urgencia?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encaminhamentos_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encaminhamentos_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encaminhamentos_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encaminhamentos_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipes: {
         Row: {
           ativo: boolean | null
