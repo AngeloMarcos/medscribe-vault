@@ -14,6 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { DocumentGenerator } from "@/components/atendimento/DocumentGenerator";
 import { FinishAttendanceModal } from "@/components/atendimento/FinishAttendanceModal";
+import { ReferralDialog } from "@/components/atendimento/ReferralDialog";
+import { ReferralList } from "@/components/atendimento/ReferralList";
 import { useToast } from "@/hooks/use-toast";
 import { useResponsive } from "@/hooks/useResponsive";
 import { format, differenceInYears, parseISO } from "date-fns";
@@ -34,6 +36,7 @@ import {
   Loader2,
   Search,
   Menu,
+  Send,
 } from "lucide-react";
 
 export default function Atendimento() {
@@ -432,6 +435,10 @@ export default function Atendimento() {
                   <Pill className="h-3 w-3 lg:h-4 lg:w-4" />
                   <span className="hidden sm:inline">Prescrição</span>
                 </TabsTrigger>
+                <TabsTrigger value="encaminhamento" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
+                  <Send className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="hidden sm:inline">Encam.</span>
+                </TabsTrigger>
                 <TabsTrigger value="documentos" className="gap-1 lg:gap-2 text-xs lg:text-sm px-2 lg:px-3">
                   <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
                   <span className="hidden sm:inline">Docs</span>
@@ -664,6 +671,24 @@ export default function Atendimento() {
                     />
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Encaminhamento Tab */}
+              <TabsContent value="encaminhamento" className="mt-0 space-y-4">
+                <div className="flex justify-end">
+                  <ReferralDialog
+                    consultaId={id!}
+                    pacienteId={patient.id}
+                    pacienteNome={patient.name}
+                    pacienteCpf={patient.cpf}
+                    pacienteIdade={idade || undefined}
+                    profissionalNome={profissional.nome}
+                    profissionalRegistro={profissional.registro_profissional}
+                    profissionalTipoRegistro={profissional.tipo_registro}
+                    selectedCids={selectedCids}
+                  />
+                </div>
+                <ReferralList pacienteId={patient.id} consultaId={id} />
               </TabsContent>
 
               {/* Documentos Tab */}
