@@ -14,6 +14,118 @@ export type Database = {
   }
   public: {
     Tables: {
+      agendamento_procedimentos: {
+        Row: {
+          agendamento_id: string
+          id: string
+          ordem: number | null
+          procedimento_id: string
+        }
+        Insert: {
+          agendamento_id: string
+          id?: string
+          ordem?: number | null
+          procedimento_id: string
+        }
+        Update: {
+          agendamento_id?: string
+          id?: string
+          ordem?: number | null
+          procedimento_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamento_procedimentos_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos_odonto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamento_procedimentos_procedimento_id_fkey"
+            columns: ["procedimento_id"]
+            isOneToOne: false
+            referencedRelation: "procedimentos_odonto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agendamentos_odonto: {
+        Row: {
+          cadeira: string | null
+          created_at: string | null
+          created_by: string | null
+          data: string
+          duracao_minutos: number | null
+          hora_chegada: string | null
+          hora_fim: string | null
+          hora_inicio: string
+          id: string
+          observacoes: string | null
+          paciente_id: string
+          profissional_id: string | null
+          status: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cadeira?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          data: string
+          duracao_minutos?: number | null
+          hora_chegada?: string | null
+          hora_fim?: string | null
+          hora_inicio: string
+          id?: string
+          observacoes?: string | null
+          paciente_id: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cadeira?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          data?: string
+          duracao_minutos?: number | null
+          hora_chegada?: string | null
+          hora_fim?: string | null
+          hora_inicio?: string
+          id?: string
+          observacoes?: string | null
+          paciente_id?: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_odonto_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_odonto_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_odonto_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anamneses: {
         Row: {
           created_at: string
@@ -651,6 +763,71 @@ export type Database = {
           },
           {
             foreignKeyName: "estornos_consultas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evolucoes_odonto: {
+        Row: {
+          agendamento_id: string | null
+          created_at: string | null
+          evolucao: string | null
+          id: string
+          paciente_id: string
+          procedimentos_realizados: Json | null
+          profissional_id: string | null
+          queixa_principal: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          agendamento_id?: string | null
+          created_at?: string | null
+          evolucao?: string | null
+          id?: string
+          paciente_id: string
+          procedimentos_realizados?: Json | null
+          profissional_id?: string | null
+          queixa_principal?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          agendamento_id?: string | null
+          created_at?: string | null
+          evolucao?: string | null
+          id?: string
+          paciente_id?: string
+          procedimentos_realizados?: Json | null
+          profissional_id?: string | null
+          queixa_principal?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evolucoes_odonto_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos_odonto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucoes_odonto_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucoes_odonto_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucoes_odonto_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
