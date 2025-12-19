@@ -704,6 +704,9 @@ export default function Atendimento() {
                     registro: profissional.registro_profissional,
                     tipo_registro: profissional.tipo_registro,
                   }}
+                  consultaId={id}
+                  profissionalId={consulta.profissional_id || undefined}
+                  selectedCids={selectedCids}
                   onDocumentSaved={(tipo, conteudo) => {
                     toast({
                       title: "Documento salvo",
