@@ -208,6 +208,86 @@ export type Database = {
           },
         ]
       }
+      atestados: {
+        Row: {
+          cid_codigo: string | null
+          consulta_id: string | null
+          created_at: string | null
+          data_emissao: string | null
+          data_fim: string
+          data_inicio: string
+          dias_afastamento: number
+          id: string
+          impresso: boolean | null
+          motivo: string | null
+          observacoes: string | null
+          paciente_id: string
+          profissional_id: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          cid_codigo?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          data_emissao?: string | null
+          data_fim: string
+          data_inicio: string
+          dias_afastamento: number
+          id?: string
+          impresso?: boolean | null
+          motivo?: string | null
+          observacoes?: string | null
+          paciente_id: string
+          profissional_id?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          cid_codigo?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          data_emissao?: string | null
+          data_fim?: string
+          data_inicio?: string
+          dias_afastamento?: number
+          id?: string
+          impresso?: boolean | null
+          motivo?: string | null
+          observacoes?: string | null
+          paciente_id?: string
+          profissional_id?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atestados_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atestados_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atestados_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atestados_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cids: {
         Row: {
           ativo: boolean | null
@@ -665,6 +745,45 @@ export type Database = {
           },
         ]
       }
+      exames_catalogo: {
+        Row: {
+          ativo: boolean | null
+          categoria: string | null
+          codigo: string
+          created_at: string | null
+          id: string
+          nome: string
+          prazo_resultado: string | null
+          preparo: string | null
+          requer_autorizacao: boolean | null
+          tipo: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          prazo_resultado?: string | null
+          preparo?: string | null
+          requer_autorizacao?: boolean | null
+          tipo?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          prazo_resultado?: string | null
+          preparo?: string | null
+          requer_autorizacao?: boolean | null
+          tipo?: string | null
+        }
+        Relationships: []
+      }
       grades_horarios: {
         Row: {
           ativo: boolean | null
@@ -846,6 +965,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      medicamentos_remume: {
+        Row: {
+          apresentacao: string
+          ativo: boolean | null
+          categoria: string | null
+          codigo: string
+          concentracao: string | null
+          controlado: boolean | null
+          created_at: string | null
+          forma_farmaceutica: string | null
+          id: string
+          nome_comercial: string | null
+          nome_generico: string
+          tipo_receita: string | null
+          unidade_medida: string | null
+          via_padrao: string | null
+        }
+        Insert: {
+          apresentacao: string
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo: string
+          concentracao?: string | null
+          controlado?: boolean | null
+          created_at?: string | null
+          forma_farmaceutica?: string | null
+          id?: string
+          nome_comercial?: string | null
+          nome_generico: string
+          tipo_receita?: string | null
+          unidade_medida?: string | null
+          via_padrao?: string | null
+        }
+        Update: {
+          apresentacao?: string
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo?: string
+          concentracao?: string | null
+          controlado?: boolean | null
+          created_at?: string | null
+          forma_farmaceutica?: string | null
+          id?: string
+          nome_comercial?: string | null
+          nome_generico?: string
+          tipo_receita?: string | null
+          unidade_medida?: string | null
+          via_padrao?: string | null
+        }
+        Relationships: []
       }
       medication_administrations: {
         Row: {
@@ -1697,6 +1867,137 @@ export type Database = {
           },
         ]
       }
+      receita_itens: {
+        Row: {
+          created_at: string | null
+          dose: string
+          duracao_dias: number | null
+          duracao_texto: string | null
+          frequencia: string
+          id: string
+          medicamento_id: string | null
+          medicamento_nome: string
+          ordem: number | null
+          orientacoes: string | null
+          quantidade_total: number | null
+          receita_id: string
+          unidade: string
+          via: string
+        }
+        Insert: {
+          created_at?: string | null
+          dose: string
+          duracao_dias?: number | null
+          duracao_texto?: string | null
+          frequencia: string
+          id?: string
+          medicamento_id?: string | null
+          medicamento_nome: string
+          ordem?: number | null
+          orientacoes?: string | null
+          quantidade_total?: number | null
+          receita_id: string
+          unidade: string
+          via: string
+        }
+        Update: {
+          created_at?: string | null
+          dose?: string
+          duracao_dias?: number | null
+          duracao_texto?: string | null
+          frequencia?: string
+          id?: string
+          medicamento_id?: string | null
+          medicamento_nome?: string
+          ordem?: number | null
+          orientacoes?: string | null
+          quantidade_total?: number | null
+          receita_id?: string
+          unidade?: string
+          via?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receita_itens_medicamento_id_fkey"
+            columns: ["medicamento_id"]
+            isOneToOne: false
+            referencedRelation: "medicamentos_remume"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receita_itens_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receitas: {
+        Row: {
+          consulta_id: string | null
+          created_at: string | null
+          data_emissao: string | null
+          id: string
+          paciente_id: string
+          profissional_id: string | null
+          status: string | null
+          tenant_id: string | null
+          tipo: string | null
+        }
+        Insert: {
+          consulta_id?: string | null
+          created_at?: string | null
+          data_emissao?: string | null
+          id?: string
+          paciente_id: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          tipo?: string | null
+        }
+        Update: {
+          consulta_id?: string | null
+          created_at?: string | null
+          data_emissao?: string | null
+          id?: string
+          paciente_id?: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          tipo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receitas_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receitas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receitas_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receitas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -1774,6 +2075,128 @@ export type Database = {
           tipo?: string | null
         }
         Relationships: []
+      }
+      solicitacao_exame_itens: {
+        Row: {
+          created_at: string | null
+          data_realizacao: string | null
+          exame_id: string | null
+          exame_nome: string
+          id: string
+          observacao: string | null
+          resultado: string | null
+          solicitacao_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_realizacao?: string | null
+          exame_id?: string | null
+          exame_nome: string
+          id?: string
+          observacao?: string | null
+          resultado?: string | null
+          solicitacao_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_realizacao?: string | null
+          exame_id?: string | null
+          exame_nome?: string
+          id?: string
+          observacao?: string | null
+          resultado?: string | null
+          solicitacao_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacao_exame_itens_exame_id_fkey"
+            columns: ["exame_id"]
+            isOneToOne: false
+            referencedRelation: "exames_catalogo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacao_exame_itens_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_exames"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitacoes_exames: {
+        Row: {
+          cid_justificativa: string | null
+          consulta_id: string | null
+          created_at: string | null
+          data_solicitacao: string | null
+          hipotese_diagnostica: string | null
+          id: string
+          paciente_id: string
+          profissional_id: string | null
+          status: string | null
+          tenant_id: string | null
+          urgencia: string | null
+        }
+        Insert: {
+          cid_justificativa?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          data_solicitacao?: string | null
+          hipotese_diagnostica?: string | null
+          id?: string
+          paciente_id: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          urgencia?: string | null
+        }
+        Update: {
+          cid_justificativa?: string | null
+          consulta_id?: string | null
+          created_at?: string | null
+          data_solicitacao?: string | null
+          hipotese_diagnostica?: string | null
+          id?: string
+          paciente_id?: string
+          profissional_id?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          urgencia?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_exames_consulta_id_fkey"
+            columns: ["consulta_id"]
+            isOneToOne: false
+            referencedRelation: "consultas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_exames_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_exames_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_exames_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenant_audit_log: {
         Row: {
