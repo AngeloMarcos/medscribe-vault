@@ -9,6 +9,7 @@ import {
   Users,
   TrendingUp,
   Stethoscope,
+  BarChart3,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { WeeklyChart, EspecialidadeChart, AttendanceGauge, TopCidsChart } from "@/components/dashboard/DashboardCharts";
 
 export default function NewDashboard() {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -147,14 +149,17 @@ export default function NewDashboard() {
           <p className="text-caption capitalize mt-1">Acompanhe os atendimentos do dia • {today}</p>
         </div>
         <div className="flex gap-3">
+          <Button variant="outline" asChild className="shadow-sm">
+            <Link to="/relatorios">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Relatórios
+            </Link>
+          </Button>
           <Button asChild className="shadow-sm">
             <Link to="/marcar-consulta">
               <CalendarHeart className="h-4 w-4 mr-2" />
               Nova Consulta
             </Link>
-          </Button>
-          <Button variant="outline" asChild className="shadow-sm">
-            <Link to="/lista-pacientes">Ver Pacientes</Link>
           </Button>
         </div>
       </div>
@@ -386,6 +391,17 @@ export default function NewDashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <WeeklyChart />
+        <EspecialidadeChart />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <AttendanceGauge />
+        <TopCidsChart />
       </div>
     </div>
   );

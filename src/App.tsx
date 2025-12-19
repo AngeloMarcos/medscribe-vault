@@ -34,7 +34,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Enfermagem from "./pages/Enfermagem";
 import PainelChamador from "./pages/PainelChamador";
-
+import Relatorios from "./pages/Relatorios";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -123,7 +123,7 @@ const App = () => {
                     <Route path="cadastros" element={<UnderConstruction title="Cadastros" />} />
                     <Route path="pesquisas" element={<UnderConstruction title="Pesquisas" />} />
                     <Route path="diaria" element={<UnderConstruction title="Diária" />} />
-                    <Route path="relatorios" element={<UnderConstruction title="Relatórios" />} />
+                    <Route path="relatorios" element={<Relatorios />} />
 
                     {/* Admin routes */}
                     <Route
