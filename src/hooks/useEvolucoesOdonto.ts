@@ -58,9 +58,9 @@ export function useEvolucoesOdontoByPatient(patientId: string | null) {
       
       return (data || []).map(item => ({
         ...item,
-        procedimentos_realizados: (Array.isArray(item.procedimentos_realizados) 
-          ? item.procedimentos_realizados 
-          : []) as ProcedimentoRealizado[],
+        procedimentos_realizados: Array.isArray(item.procedimentos_realizados) 
+          ? (item.procedimentos_realizados as unknown as ProcedimentoRealizado[])
+          : [],
       })) as EvolucaoOdonto[];
     },
     enabled: !!patientId,
@@ -87,9 +87,9 @@ export function useEvolucoesOdontoByAgendamento(agendamentoId: string | null) {
       
       return (data || []).map(item => ({
         ...item,
-        procedimentos_realizados: (Array.isArray(item.procedimentos_realizados) 
-          ? item.procedimentos_realizados 
-          : []) as ProcedimentoRealizado[],
+        procedimentos_realizados: Array.isArray(item.procedimentos_realizados) 
+          ? (item.procedimentos_realizados as unknown as ProcedimentoRealizado[])
+          : [],
       })) as EvolucaoOdonto[];
     },
     enabled: !!agendamentoId,

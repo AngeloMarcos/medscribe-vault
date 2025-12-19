@@ -72,21 +72,22 @@ export default function AtendimentoOdonto() {
     setSelectedTooth(prev => prev === toothNumber ? null : toothNumber);
   };
 
-  const handleAddCondition = (condition: ToothCondition) => {
+  const handleAddCondition = (surface: ToothCondition['surface'], condition: ToothCondition['condition']) => {
     if (!selectedTooth) return;
     const currentConditions = localConditions[selectedTooth] || [];
+    const newCondition: ToothCondition = { surface, condition };
     setLocalConditions(prev => ({
       ...prev,
-      [selectedTooth]: [...currentConditions, condition],
+      [selectedTooth]: [...currentConditions, newCondition],
     }));
   };
 
-  const handleRemoveCondition = (index: number) => {
+  const handleRemoveCondition = (surface: ToothCondition['surface']) => {
     if (!selectedTooth) return;
     const currentConditions = localConditions[selectedTooth] || [];
     setLocalConditions(prev => ({
       ...prev,
-      [selectedTooth]: currentConditions.filter((_, i) => i !== index),
+      [selectedTooth]: currentConditions.filter(c => c.surface !== surface),
     }));
   };
 
