@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Building2, 
@@ -24,6 +25,9 @@ import {
   Crown,
   Puzzle,
   Lock,
+  Database,
+  Play,
+  CheckCircle2,
 } from 'lucide-react';
 import { TENANT_TYPE_LABELS, TenantType } from '@/types/tenant';
 import { AVAILABLE_MODULES } from '@/config/modules';
@@ -82,6 +86,11 @@ export default function TenantSettings() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [togglingModules, setTogglingModules] = useState<Set<string>>(new Set());
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [seedResults, setSeedResults] = useState<Record<string, number> | null>(null);
+  const [selectedModules, setSelectedModules] = useState<string[]>([
+    'base', 'patients', 'ambulatorio', 'odontologia', 'enfermagem', 'documentos'
+  ]);
 
   // Load tenant data into form
   useEffect(() => {
@@ -285,6 +294,10 @@ export default function TenantSettings() {
               <TabsTrigger value="users" className="gap-2">
                 <Users className="h-4 w-4" />
                 Usuários
+              </TabsTrigger>
+              <TabsTrigger value="demo-data" className="gap-2">
+                <Database className="h-4 w-4" />
+                Dados Demo
               </TabsTrigger>
             </>
           )}
@@ -532,7 +545,6 @@ export default function TenantSettings() {
               </CardContent>
             </Card>
           </TabsContent>
-        )}
 
         {/* Users Management (Owner only) */}
         {isOwner && (
@@ -615,6 +627,147 @@ export default function TenantSettings() {
                         Nenhum usuário encontrado
                       </div>
                     )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Demo Data Tab (Owner only) */}
+        {isOwner && (
+          <TabsContent value="demo-data" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Gerar Dados de Demonstração
+                </CardTitle>
+                <CardDescription>
+                  Popule o sistema com dados fictícios para testes e demonstração.
+                  Isso criará pacientes, consultas, atendimentos e outros registros.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Selecione os módulos a popular:</Label>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {[
+                      { id: 'base', label: 'Profissionais', desc: '10 profissionais de saúde' },
+                      { id: 'patients', label: 'Pacientes', desc: '100 pacientes' },
+                      { id: 'ambulatorio', label: 'Ambulatório', desc: '200 consultas, atendimentos, sinais vitais' },
+                      { id: 'odontologia', label: 'Odontologia', desc: '80 agendamentos, odontogramas, planos' },
+                      { id: 'enfermagem', label: 'Enfermagem', desc: '30 itens na fila, 80 anotações' },
+                      { id: 'documentos', label: 'Documentos Clínicos', desc: 'Prescrições, receitas, atestados, exames' },
+                    ].map((module) => (
+                      <div
+                        key={module.id}
+                        className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                          selectedModules.includes(module.id) 
+                            ? 'bg-primary/5 border-primary/30' 
+                            : 'hover:bg-muted/50'
+                        }`}
+                        onClick={() => {
+                          setSelectedModules(prev => 
+                            prev.includes(module.id)
+                              ? prev.filter(m => m !== module.id)
+                              : [...prev, module.id]
+                          );
+                        }}
+                      >
+                        <Checkbox
+                          checked={selectedModules.includes(module.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedModules(prev => 
+                              checked
+                                ? [...prev, module.id]
+                                : prev.filter(m => m !== module.id)
+                            );
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{module.label}</p>
+                          <p className="text-xs text-muted-foreground">{module.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {selectedModules.length} módulo(s) selecionado(s)
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      if (!tenant?.id) return;
+                      setIsSeeding(true);
+                      setSeedResults(null);
+                      try {
+                        const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+                          body: { 
+                            tenant_id: tenant.id,
+                            modules: selectedModules.length === 6 ? undefined : selectedModules,
+                          }
+                        });
+                        
+                        if (error) throw error;
+                        
+                        if (data?.success) {
+                          setSeedResults(data.results);
+                          toast({
+                            title: 'Dados gerados com sucesso!',
+                            description: `${data.total} registros criados.`,
+                          });
+                        } else {
+                          throw new Error(data?.error || 'Erro desconhecido');
+                        }
+                      } catch (error: unknown) {
+                        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+                        toast({
+                          title: 'Erro ao gerar dados',
+                          description: errorMessage,
+                          variant: 'destructive',
+                        });
+                      } finally {
+                        setIsSeeding(false);
+                      }
+                    }}
+                    disabled={isSeeding || selectedModules.length === 0}
+                    size="lg"
+                  >
+                    {isSeeding ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Gerando dados...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4 mr-2" />
+                        Gerar Dados Demo
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {seedResults && (
+                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-green-700 dark:text-green-400">
+                        Dados gerados com sucesso!
+                      </span>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 text-sm">
+                      {Object.entries(seedResults).map(([key, value]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="text-muted-foreground">{key}:</span>
+                          <span className="font-medium">{value}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>
