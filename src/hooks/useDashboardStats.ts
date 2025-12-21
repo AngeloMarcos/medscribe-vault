@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, format } from "date-fns";
+import { startOfMonth, endOfMonth, subDays, format, differenceInMinutes, parseISO } from "date-fns";
 import { useTenant } from "@/hooks/useTenant";
 
 export interface DailyStats {
@@ -32,9 +32,21 @@ export interface ProfissionalStats {
   taxa_comparecimento: number;
 }
 
+export interface HourlyStats {
+  hora: string;
+  agendados: number;
+  atendidos: number;
+}
+
+export interface TrendData {
+  value: number;
+  direction: "up" | "down" | "neutral";
+}
+
 export function useDashboardStats() {
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
+  const yesterdayStr = format(subDays(today, 1), 'yyyy-MM-dd');
   const { tenant } = useTenant();
   
   // Stats dos últimos 7 dias
@@ -71,6 +83,157 @@ export function useDashboardStats() {
       return days;
     },
     enabled: !!tenant?.id,
+    staleTime: 30000, // 30 seconds
+  });
+
+  // Tendência vs ontem
+  const { data: trendData, isLoading: isLoadingTrend } = useQuery({
+    queryKey: ["dashboard-trend", tenant?.id, todayStr, yesterdayStr],
+    queryFn: async () => {
+      // Dados de hoje
+      let todayQuery = supabase
+        .from("consultas")
+        .select("id, status, faltou_paciente")
+        .eq("data_consulta", todayStr);
+      
+      if (tenant?.id) {
+        todayQuery = todayQuery.eq("tenant_id", tenant.id);
+      }
+      
+      const { data: todayData } = await todayQuery;
+      
+      // Dados de ontem
+      let yesterdayQuery = supabase
+        .from("consultas")
+        .select("id, status, faltou_paciente")
+        .eq("data_consulta", yesterdayStr);
+      
+      if (tenant?.id) {
+        yesterdayQuery = yesterdayQuery.eq("tenant_id", tenant.id);
+      }
+      
+      const { data: yesterdayData } = await yesterdayQuery;
+      
+      const todayTotal = todayData?.length || 0;
+      const yesterdayTotal = yesterdayData?.length || 0;
+      
+      const todayFinalizados = todayData?.filter(c => c.status === 'finalizado').length || 0;
+      const yesterdayFinalizados = yesterdayData?.filter(c => c.status === 'finalizado').length || 0;
+      
+      const todayAguardando = todayData?.filter(c => c.status === 'aguardando').length || 0;
+      const yesterdayAguardando = yesterdayData?.filter(c => c.status === 'aguardando').length || 0;
+      
+      const calcTrend = (current: number, previous: number): TrendData => {
+        if (previous === 0) {
+          return { value: current > 0 ? 100 : 0, direction: current > 0 ? "up" : "neutral" };
+        }
+        const diff = Math.round(((current - previous) / previous) * 100);
+        return {
+          value: Math.abs(diff),
+          direction: diff > 0 ? "up" : diff < 0 ? "down" : "neutral",
+        };
+      };
+      
+      return {
+        total: calcTrend(todayTotal, yesterdayTotal),
+        finalizados: calcTrend(todayFinalizados, yesterdayFinalizados),
+        aguardando: calcTrend(todayAguardando, yesterdayAguardando),
+      };
+    },
+    enabled: !!tenant?.id,
+    staleTime: 30000,
+  });
+
+  // Tempo médio de espera (hoje)
+  const { data: waitTimeData, isLoading: isLoadingWaitTime } = useQuery({
+    queryKey: ["dashboard-wait-time", tenant?.id, todayStr],
+    queryFn: async () => {
+      let query = supabase
+        .from("consultas")
+        .select("hora_chegada, hora_inicio_atendimento")
+        .eq("data_consulta", todayStr)
+        .not("hora_chegada", "is", null)
+        .not("hora_inicio_atendimento", "is", null);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        return { avgMinutes: 0, count: 0 };
+      }
+      
+      let totalMinutes = 0;
+      let validCount = 0;
+      
+      data.forEach((c) => {
+        try {
+          const chegada = parseISO(`${todayStr}T${c.hora_chegada}`);
+          const inicio = parseISO(`${todayStr}T${c.hora_inicio_atendimento}`);
+          const diff = differenceInMinutes(inicio, chegada);
+          if (diff >= 0 && diff < 240) { // Max 4 hours
+            totalMinutes += diff;
+            validCount++;
+          }
+        } catch {
+          // Skip invalid times
+        }
+      });
+      
+      return {
+        avgMinutes: validCount > 0 ? Math.round(totalMinutes / validCount) : 0,
+        count: validCount,
+      };
+    },
+    enabled: !!tenant?.id,
+    staleTime: 30000,
+  });
+
+  // Fluxo por hora (hoje)
+  const { data: hourlyStats, isLoading: isLoadingHourly } = useQuery({
+    queryKey: ["dashboard-hourly-stats", tenant?.id, todayStr],
+    queryFn: async () => {
+      let query = supabase
+        .from("consultas")
+        .select("hora_inicio, status")
+        .eq("data_consulta", todayStr);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      // Initialize hours from 7:00 to 19:00
+      const hours: Record<string, HourlyStats> = {};
+      for (let h = 7; h <= 19; h++) {
+        const hourStr = `${h.toString().padStart(2, '0')}:00`;
+        hours[hourStr] = { hora: hourStr, agendados: 0, atendidos: 0 };
+      }
+      
+      data?.forEach((c) => {
+        const hour = c.hora_inicio?.slice(0, 2);
+        if (hour) {
+          const hourKey = `${hour}:00`;
+          if (hours[hourKey]) {
+            hours[hourKey].agendados++;
+            if (c.status === 'finalizado') {
+              hours[hourKey].atendidos++;
+            }
+          }
+        }
+      });
+      
+      return Object.values(hours);
+    },
+    enabled: !!tenant?.id,
+    staleTime: 30000,
   });
 
   // Stats por especialidade (mês atual)
@@ -206,7 +369,13 @@ export function useDashboardStats() {
     especialidadeStats,
     cidStats,
     attendanceRate,
+    trendData,
+    waitTimeData,
+    hourlyStats,
     isLoading: isLoadingWeekly || isLoadingEspecialidade || isLoadingCids || isLoadingAttendance,
+    isLoadingTrend,
+    isLoadingWaitTime,
+    isLoadingHourly,
   };
 }
 
