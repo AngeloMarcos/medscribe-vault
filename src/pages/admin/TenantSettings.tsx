@@ -3,12 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/hooks/useTenant';
 import { useAuth } from '@/contexts/AuthContext';
+import { useModules } from '@/hooks/useModules';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -18,11 +20,14 @@ import {
   Palette,
   Save,
   Loader2,
-  UserPlus,
   Trash2,
   Crown,
+  Puzzle,
+  Lock,
 } from 'lucide-react';
 import { TENANT_TYPE_LABELS, TenantType } from '@/types/tenant';
+import { AVAILABLE_MODULES } from '@/config/modules';
+import type { ModuleKey } from '@/types/modules';
 import {
   Select,
   SelectContent,
@@ -54,11 +59,20 @@ interface TenantUserWithProfile {
   } | null;
 }
 
+const CATEGORY_LABELS = {
+  core: 'Essenciais',
+  clinical: 'Clínicos',
+  administrative: 'Administrativos',
+};
+
+const CATEGORY_ORDER: Array<'core' | 'clinical' | 'administrative'> = ['core', 'clinical', 'administrative'];
+
 export default function TenantSettings() {
   const { tenant, tenantUser, isOwner, refetchTenant } = useTenant();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { modules, isModuleEnabled, enableModule, disableModule, isLoading: isLoadingModules, refetchModules } = useModules();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -67,6 +81,7 @@ export default function TenantSettings() {
     primary_color: '#009688',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [togglingModules, setTogglingModules] = useState<Set<string>>(new Set());
 
   // Load tenant data into form
   useEffect(() => {
@@ -185,6 +200,41 @@ export default function TenantSettings() {
     }
   };
 
+  const handleModuleToggle = async (moduleKey: ModuleKey, enabled: boolean) => {
+    setTogglingModules(prev => new Set(prev).add(moduleKey));
+    try {
+      if (enabled) {
+        await enableModule(moduleKey);
+        toast({
+          title: 'Módulo habilitado',
+          description: `O módulo foi habilitado com sucesso.`,
+        });
+      } else {
+        await disableModule(moduleKey);
+        toast({
+          title: 'Módulo desabilitado',
+          description: `O módulo foi desabilitado com sucesso.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível alterar o módulo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setTogglingModules(prev => {
+        const next = new Set(prev);
+        next.delete(moduleKey);
+        return next;
+      });
+    }
+  };
+
+  const getModulesByCategory = (category: 'core' | 'clinical' | 'administrative') => {
+    return AVAILABLE_MODULES.filter(m => m.category === category);
+  };
+
   if (!tenant) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -227,10 +277,16 @@ export default function TenantSettings() {
             Aparência
           </TabsTrigger>
           {isOwner && (
-            <TabsTrigger value="users" className="gap-2">
-              <Users className="h-4 w-4" />
-              Usuários
-            </TabsTrigger>
+            <>
+              <TabsTrigger value="modules" className="gap-2">
+                <Puzzle className="h-4 w-4" />
+                Módulos
+              </TabsTrigger>
+              <TabsTrigger value="users" className="gap-2">
+                <Users className="h-4 w-4" />
+                Usuários
+              </TabsTrigger>
+            </>
           )}
         </TabsList>
 
@@ -381,6 +437,102 @@ export default function TenantSettings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Modules Management (Owner only) */}
+        {isOwner && (
+          <TabsContent value="modules" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gerenciamento de Módulos</CardTitle>
+                <CardDescription>
+                  Ative ou desative os módulos disponíveis para seu estabelecimento.
+                  Módulos marcados com cadeado são obrigatórios.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingModules ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    {CATEGORY_ORDER.map(category => {
+                      const categoryModules = getModulesByCategory(category);
+                      if (categoryModules.length === 0) return null;
+
+                      return (
+                        <div key={category} className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {CATEGORY_LABELS[category]}
+                            </h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {categoryModules.length} módulos
+                            </Badge>
+                          </div>
+                          <Separator />
+                          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {categoryModules.map(moduleConfig => {
+                              const IconComponent = moduleConfig.icon;
+                              const enabled = isModuleEnabled(moduleConfig.key);
+                              const isToggling = togglingModules.has(moduleConfig.key);
+                              const canDisable = moduleConfig.canDisable;
+
+                              return (
+                                <div
+                                  key={moduleConfig.key}
+                                  className={`relative p-4 border rounded-lg transition-colors ${
+                                    enabled 
+                                      ? 'bg-primary/5 border-primary/20' 
+                                      : 'bg-muted/30 border-border'
+                                  }`}
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-start gap-3 flex-1">
+                                      <div className={`p-2 rounded-lg ${
+                                        enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                                      }`}>
+                                        <IconComponent className="h-5 w-5" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <h4 className="font-medium text-foreground truncate">
+                                            {moduleConfig.name}
+                                          </h4>
+                                          {!canDisable && (
+                                            <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                          {moduleConfig.description}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                      {isToggling ? (
+                                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                      ) : (
+                                        <Switch
+                                          checked={enabled}
+                                          onCheckedChange={(checked) => handleModuleToggle(moduleConfig.key, checked)}
+                                          disabled={!canDisable}
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         {/* Users Management (Owner only) */}
         {isOwner && (

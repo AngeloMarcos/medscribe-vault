@@ -8,10 +8,20 @@ const corsHeaders = {
 
 interface CreateTenantRequest {
   name: string;
-  type: 'clinica_geral' | 'consultorio_medico' | 'consultorio_odonto' | 'policlinica' | 'hospital';
+  type: 'clinica_geral' | 'consultorio_medico' | 'consultorio_odonto' | 'policlinica' | 'hospital' | 'ubs';
   logo_url?: string;
   primary_color?: string;
 }
+
+// Templates de módulos por tipo de estabelecimento
+const MODULE_TEMPLATES: Record<string, string[]> = {
+  clinica_geral: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'enfermagem', 'agendamento', 'relatorios', 'administracao'],
+  consultorio_medico: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'agendamento', 'relatorios', 'administracao'],
+  consultorio_odonto: ['dashboard', 'odontologia', 'pacientes', 'agendamento', 'relatorios', 'administracao'],
+  policlinica: ['dashboard', 'ambulatorio', 'odontologia', 'pacientes', 'prescricao', 'enfermagem', 'farmacia', 'agendamento', 'sisreg', 'relatorios', 'administracao'],
+  hospital: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'enfermagem', 'farmacia', 'agendamento', 'relatorios', 'administracao'],
+  ubs: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'enfermagem', 'agendamento', 'sisreg', 'relatorios', 'administracao'],
+};
 
 function generateSlug(name: string): string {
   return name
@@ -76,7 +86,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Creating tenant for user:', user.id, 'with name:', body.name);
+    console.log('Creating tenant for user:', user.id, 'with name:', body.name, 'type:', body.type);
 
     // Check if user already has a tenant
     const { data: existingTenantUser, error: checkError } = await supabaseAdmin
@@ -171,10 +181,34 @@ serve(async (req) => {
 
     console.log('Tenant user created successfully');
 
+    // Create initial modules based on establishment type
+    const initialModules = MODULE_TEMPLATES[body.type] || MODULE_TEMPLATES.clinica_geral;
+    const now = new Date().toISOString();
+    
+    const moduleInserts = initialModules.map(moduleKey => ({
+      tenant_id: newTenant.id,
+      module_key: moduleKey,
+      is_enabled: true,
+      enabled_at: now,
+      config: {},
+    }));
+
+    const { error: modulesError } = await supabaseAdmin
+      .from('tenant_modules')
+      .insert(moduleInserts);
+
+    if (modulesError) {
+      console.error('Error creating initial modules:', modulesError);
+      // Continue anyway - modules can be added later
+    } else {
+      console.log('Initial modules created:', initialModules.length);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         tenant: newTenant,
+        modules: initialModules,
         message: 'Estabelecimento criado com sucesso!'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
