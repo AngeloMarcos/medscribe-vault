@@ -545,6 +545,7 @@ export default function TenantSettings() {
               </CardContent>
             </Card>
           </TabsContent>
+        )}
 
         {/* Users Management (Owner only) */}
         {isOwner && (
