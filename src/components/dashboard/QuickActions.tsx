@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   UserRound, 
-  Clock, 
   FileText, 
   Bell,
   ChevronRight,
@@ -37,24 +36,28 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
           label: "Aguardando",
           className: "bg-warning/15 text-warning border-warning/30",
           dotColor: "bg-warning",
+          pulse: true,
         };
       case "em_atendimento":
         return {
           label: "Em atendimento",
           className: "bg-info/15 text-info border-info/30",
           dotColor: "bg-info",
+          pulse: false,
         };
       case "finalizado":
         return {
           label: "Concluído",
           className: "bg-success/15 text-success border-success/30",
           dotColor: "bg-success",
+          pulse: false,
         };
       default:
         return {
           label: "Agendado",
           className: "bg-muted text-muted-foreground border-border",
           dotColor: "bg-muted-foreground",
+          pulse: false,
         };
     }
   };
@@ -73,11 +76,12 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
 
   return (
     <div className="space-y-2">
-      {consultas.map((consulta) => {
+      {consultas.map((consulta, index) => {
         const statusConfig = getStatusConfig(consulta.status);
         const waitTime = consulta.status === "aguardando" 
           ? getWaitTime(consulta.hora_chegada) 
           : null;
+        const animationDelay = index * 80;
 
         return (
           <div
@@ -85,14 +89,26 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
             className={cn(
               "group relative flex items-center gap-3 p-4 rounded-xl",
               "bg-muted/30 hover:bg-muted/50 transition-all duration-200",
-              "border border-transparent hover:border-border"
+              "border border-transparent hover:border-border",
+              "hover:shadow-md hover:translate-x-1",
+              "opacity-0 animate-slide-up"
             )}
+            style={{ animationDelay: `${animationDelay}ms` }}
           >
-            {/* Status dot */}
-            <div className={cn("w-2 h-2 rounded-full shrink-0", statusConfig.dotColor)} />
+            {/* Status dot with optional pulse */}
+            <div className="relative">
+              <div className={cn("w-2 h-2 rounded-full shrink-0", statusConfig.dotColor)} />
+              {statusConfig.pulse && (
+                <div className={cn(
+                  "absolute inset-0 w-2 h-2 rounded-full animate-ping",
+                  statusConfig.dotColor,
+                  "opacity-75"
+                )} />
+              )}
+            </div>
             
-            {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+            {/* Avatar with hover effect */}
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
               <UserRound className="h-5 w-5 text-secondary" />
             </div>
             
@@ -104,7 +120,10 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
                 </p>
                 <Badge
                   variant="outline"
-                  className={cn("text-[10px] px-1.5 py-0 font-medium border shrink-0", statusConfig.className)}
+                  className={cn(
+                    "text-[10px] px-1.5 py-0 font-medium border shrink-0 transition-all duration-200",
+                    statusConfig.className
+                  )}
                 >
                   {statusConfig.label}
                 </Badge>
@@ -129,13 +148,13 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
               </div>
             </div>
             
-            {/* Quick actions */}
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Quick actions with smooth reveal */}
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
               {consulta.status === "aguardando" && onChamarPaciente && (
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="h-8 px-3 text-xs"
+                  className="h-8 px-3 text-xs shadow-sm"
                   onClick={() => onChamarPaciente(consulta.id)}
                 >
                   <Bell className="h-3 w-3 mr-1" />
@@ -155,7 +174,7 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
             </div>
             
             {/* Chevron for navigation */}
-            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-2 group-hover:translate-x-0" />
           </div>
         );
       })}

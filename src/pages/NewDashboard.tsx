@@ -4,7 +4,6 @@ import {
   CalendarHeart,
   Clock,
   UserCheck,
-  Activity,
   AlertTriangle,
   Users,
   TrendingUp,
@@ -24,6 +23,8 @@ import { DayProgressBar } from "@/components/dashboard/DayProgressBar";
 import { HourlyChart } from "@/components/dashboard/HourlyChart";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { AnimatedNumber } from "@/components/dashboard/AnimatedNumber";
+import { cn } from "@/lib/utils";
 
 export default function NewDashboard() {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -84,20 +85,20 @@ export default function NewDashboard() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      {/* Header with fade-in animation */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 opacity-0 animate-fade-in">
         <div>
           <h1 className="text-page-title">Painel Geral</h1>
           <p className="text-caption capitalize mt-1">Acompanhe os atendimentos do dia • {today}</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" asChild className="shadow-sm">
+          <Button variant="outline" asChild className="shadow-sm hover:shadow-md transition-shadow">
             <Link to="/relatorios">
               <BarChart3 className="h-4 w-4 mr-2" />
               Relatórios
             </Link>
           </Button>
-          <Button asChild className="shadow-sm">
+          <Button asChild className="shadow-sm hover:shadow-md transition-shadow">
             <Link to="/marcar-consulta">
               <CalendarHeart className="h-4 w-4 mr-2" />
               Nova Consulta
@@ -115,7 +116,7 @@ export default function NewDashboard() {
         isLoading={isLoading}
       />
 
-      {/* Stats Cards with Trends */}
+      {/* Stats Cards with Trends - Staggered animation via index prop */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <StatCardWithTrend
           title="Pacientes Hoje"
@@ -124,6 +125,7 @@ export default function NewDashboard() {
           trend={trendData?.total}
           description="Total agendado"
           isLoading={isLoading || isLoadingTrend}
+          index={0}
         />
         <StatCardWithTrend
           title="Aguardando"
@@ -133,6 +135,7 @@ export default function NewDashboard() {
           description="Na sala de espera"
           isLoading={isLoading || isLoadingTrend}
           colorVariant="warning"
+          index={1}
         />
         <StatCardWithTrend
           title="Atendidos"
@@ -142,6 +145,7 @@ export default function NewDashboard() {
           description="Consultas finalizadas"
           isLoading={isLoading || isLoadingTrend}
           colorVariant="success"
+          index={2}
         />
         <StatCardWithTrend
           title="Tempo de Espera"
@@ -150,16 +154,17 @@ export default function NewDashboard() {
           description={`${waitTimeData?.count || 0} pacientes atendidos`}
           isLoading={isLoading || isLoadingWaitTime}
           colorVariant="info"
+          index={3}
         />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Upcoming Appointments */}
-        <Card className="bg-card lg:col-span-2 border border-border shadow-sm rounded-2xl">
+        <Card className="bg-card lg:col-span-2 border border-border shadow-sm rounded-2xl opacity-0 animate-slide-up" style={{ animationDelay: "200ms" }}>
           <CardHeader className="flex flex-row items-center justify-between pb-4 px-6 pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-secondary/10">
+              <div className="p-2 rounded-lg bg-secondary/10 transition-transform hover:scale-105">
                 <Stethoscope className="h-5 w-5 text-secondary" />
               </div>
               <div>
@@ -167,7 +172,7 @@ export default function NewDashboard() {
                 <CardDescription className="text-caption mt-0.5">Pacientes agendados para hoje</CardDescription>
               </div>
             </div>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="hover:shadow-sm transition-shadow">
               <Link to="/lista-pacientes">Ver todos</Link>
             </Button>
           </CardHeader>
@@ -175,13 +180,15 @@ export default function NewDashboard() {
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                  <div key={i} className="h-16 w-full rounded-xl bg-muted relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-muted-foreground/5 to-transparent animate-shimmer" />
+                  </div>
                 ))}
               </div>
             ) : upcomingConsultas.length > 0 ? (
               <QuickActions consultas={upcomingConsultas} />
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-12 opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
                   <CalendarHeart className="h-8 w-8 text-muted-foreground/50" />
                 </div>
@@ -194,10 +201,10 @@ export default function NewDashboard() {
         {/* Quick Stats & Alerts */}
         <div className="space-y-6">
           {/* Resumo do Dia */}
-          <Card className="bg-card border border-border shadow-sm rounded-2xl">
+          <Card className="bg-card border border-border shadow-sm rounded-2xl opacity-0 animate-slide-up" style={{ animationDelay: "300ms" }}>
             <CardHeader className="pb-4 px-6 pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-secondary/10">
+                <div className="p-2 rounded-lg bg-secondary/10 transition-transform hover:scale-105">
                   <TrendingUp className="h-5 w-5 text-secondary" />
                 </div>
                 <div>
@@ -207,45 +214,49 @@ export default function NewDashboard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3 px-6 pb-6">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
-                <div className="flex items-center gap-3">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-body text-muted-foreground">Cadastrados</span>
+              {[
+                { icon: Users, label: "Cadastrados", value: patientsCount, isLoading: isLoadingPatients, delay: 100 },
+                { label: "Ausentes", value: ausentesCount, highlight: ausentesCount > 0 ? 'text-destructive' : '', delay: 200 },
+                { label: "Pendentes", value: pendentesCount, highlight: pendentesCount > 0 ? 'text-warning' : '', delay: 300 },
+              ].map((item, index) => (
+                <div 
+                  key={item.label}
+                  className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${400 + item.delay}ms` }}
+                >
+                  <div className="flex items-center gap-3">
+                    {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
+                    <span className="text-body text-muted-foreground">{item.label}</span>
+                  </div>
+                  {item.isLoading ? (
+                    <Skeleton className="h-5 w-12" />
+                  ) : (
+                    <span className={cn("font-semibold", item.highlight)}>
+                      <AnimatedNumber value={item.value || 0} />
+                    </span>
+                  )}
                 </div>
-                {isLoadingPatients ? <Skeleton className="h-5 w-12" /> : <span className="font-semibold">{patientsCount}</span>}
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
-                <span className="text-body text-muted-foreground">Ausentes</span>
-                {isLoading ? <Skeleton className="h-5 w-10" /> : (
-                  <span className={`font-semibold ${ausentesCount > 0 ? 'text-destructive' : ''}`}>{ausentesCount}</span>
-                )}
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
-                <span className="text-body text-muted-foreground">Pendentes</span>
-                {isLoading ? <Skeleton className="h-5 w-10" /> : (
-                  <span className={`font-semibold ${pendentesCount > 0 ? 'text-warning' : ''}`}>{pendentesCount}</span>
-                )}
-              </div>
+              ))}
             </CardContent>
           </Card>
 
-          {/* Alertas */}
+          {/* Alertas with pulse animation */}
           {(ausentesCount > 0 || pendentesCount > 0) && (
-            <Card className="bg-card border border-border border-l-4 border-l-warning shadow-sm rounded-2xl">
+            <Card className="bg-card border border-border border-l-4 border-l-warning shadow-sm rounded-2xl opacity-0 animate-scale-in" style={{ animationDelay: "400ms" }}>
               <CardHeader className="pb-3 px-6 pt-5">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-warning" />
+                  <AlertTriangle className="h-5 w-5 text-warning animate-pulse-soft" />
                   <CardTitle className="text-card-title">Atenção</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 px-6 pb-5">
                 {ausentesCount > 0 && (
-                  <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                  <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 opacity-0 animate-fade-in" style={{ animationDelay: "500ms" }}>
                     <p className="text-sm text-destructive font-medium">{ausentesCount} paciente{ausentesCount > 1 ? 's' : ''} ausente{ausentesCount > 1 ? 's' : ''}</p>
                   </div>
                 )}
                 {pendentesCount > 0 && (
-                  <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
+                  <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
                     <p className="text-sm text-warning font-medium">{pendentesCount} consulta{pendentesCount > 1 ? 's' : ''} pendente{pendentesCount > 1 ? 's' : ''}</p>
                   </div>
                 )}
@@ -255,18 +266,26 @@ export default function NewDashboard() {
         </div>
       </div>
 
-      {/* Charts Section */}
+      {/* Charts Section with staggered animations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <HourlyChart data={hourlyStats || []} isLoading={isLoadingHourly} />
-        <WeeklyChart />
+        <div className="opacity-0 animate-slide-up" style={{ animationDelay: "400ms" }}>
+          <HourlyChart data={hourlyStats || []} isLoading={isLoadingHourly} />
+        </div>
+        <div className="opacity-0 animate-slide-up" style={{ animationDelay: "500ms" }}>
+          <WeeklyChart />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <EspecialidadeChart />
-        <AttendanceGauge />
+        <div className="opacity-0 animate-slide-up" style={{ animationDelay: "600ms" }}>
+          <EspecialidadeChart />
+        </div>
+        <div className="opacity-0 animate-slide-up" style={{ animationDelay: "700ms" }}>
+          <AttendanceGauge />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1">
+      <div className="grid grid-cols-1 opacity-0 animate-slide-up" style={{ animationDelay: "800ms" }}>
         <TopCidsChart />
       </div>
     </div>
