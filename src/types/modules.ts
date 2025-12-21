@@ -25,6 +25,7 @@ export interface ModuleConfig {
   dependencies?: ModuleKey[];
   defaultEnabled: boolean;
   category: 'clinical' | 'administrative' | 'core';
+  canDisable: boolean; // Se false, módulo é obrigatório
 }
 
 // Registro de módulo ativo de um tenant

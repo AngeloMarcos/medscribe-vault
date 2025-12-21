@@ -14,6 +14,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/'],
     defaultEnabled: true,
     category: 'core',
+    canDisable: false, // Obrigatório
   },
   {
     key: 'ambulatorio',
@@ -23,6 +24,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/marcar-consulta', '/lista-pacientes', '/atendimento', '/estornar-consulta'],
     defaultEnabled: true,
     category: 'clinical',
+    canDisable: true,
   },
   {
     key: 'odontologia',
@@ -32,6 +34,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/odonto/agendar', '/odonto/pacientes', '/odonto/odontograma', '/odonto/tratamento'],
     defaultEnabled: false,
     category: 'clinical',
+    canDisable: true,
   },
   {
     key: 'pacientes',
@@ -41,6 +44,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/patients', '/patient'],
     defaultEnabled: true,
     category: 'core',
+    canDisable: false, // Obrigatório
   },
   {
     key: 'prescricao',
@@ -50,6 +54,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/prescription'],
     defaultEnabled: true,
     category: 'clinical',
+    canDisable: true,
   },
   {
     key: 'enfermagem',
@@ -59,6 +64,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/nursing'],
     defaultEnabled: true,
     category: 'clinical',
+    canDisable: true,
   },
   {
     key: 'farmacia',
@@ -68,6 +74,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/pharmacy'],
     defaultEnabled: false,
     category: 'clinical',
+    canDisable: true,
   },
   {
     key: 'agendamento',
@@ -77,6 +84,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/appointments'],
     defaultEnabled: true,
     category: 'administrative',
+    canDisable: true,
   },
   {
     key: 'sisreg',
@@ -86,6 +94,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/sisreg'],
     defaultEnabled: false,
     category: 'administrative',
+    canDisable: true,
   },
   {
     key: 'relatorios',
@@ -95,6 +104,7 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/reports'],
     defaultEnabled: true,
     category: 'administrative',
+    canDisable: true,
   },
   {
     key: 'administracao',
@@ -104,8 +114,19 @@ export const AVAILABLE_MODULES: ModuleConfig[] = [
     routes: ['/usuarios', '/admin'],
     defaultEnabled: true,
     category: 'administrative',
+    canDisable: false, // Obrigatório
   },
 ];
+
+// Templates de módulos por tipo de estabelecimento
+export const MODULE_TEMPLATES: Record<string, ModuleKey[]> = {
+  clinica_geral: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'enfermagem', 'agendamento', 'relatorios', 'administracao'],
+  consultorio_medico: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'agendamento', 'relatorios', 'administracao'],
+  consultorio_odonto: ['dashboard', 'odontologia', 'pacientes', 'agendamento', 'relatorios', 'administracao'],
+  policlinica: ['dashboard', 'ambulatorio', 'odontologia', 'pacientes', 'prescricao', 'enfermagem', 'farmacia', 'agendamento', 'sisreg', 'relatorios', 'administracao'],
+  hospital: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'enfermagem', 'farmacia', 'agendamento', 'relatorios', 'administracao'],
+  ubs: ['dashboard', 'ambulatorio', 'pacientes', 'prescricao', 'enfermagem', 'agendamento', 'sisreg', 'relatorios', 'administracao'],
+};
 
 // Templates por tipo de estabelecimento
 export const ESTABLISHMENT_TEMPLATES: EstablishmentTemplate[] = [
