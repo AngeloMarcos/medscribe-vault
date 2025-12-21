@@ -18,6 +18,7 @@ import { ReferralDialog } from "@/components/atendimento/ReferralDialog";
 import { ReferralList } from "@/components/atendimento/ReferralList";
 import { useToast } from "@/hooks/use-toast";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTenant } from "@/hooks/useTenant";
 import { format, differenceInYears, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { atendimentoSchema, vitalsSchema } from "@/lib/validationSchemas";
@@ -43,6 +44,7 @@ export default function Atendimento() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { tenant } = useTenant();
   const { isMobile, isTablet } = useResponsive();
   const showDrawer = isMobile || isTablet;
   
@@ -173,6 +175,7 @@ export default function Atendimento() {
     try {
       const { error } = await supabase.from("vitals").insert({
         patient_id: consulta.patients.id,
+        tenant_id: tenant?.id,
         ...vitals,
       });
 
@@ -208,6 +211,7 @@ export default function Atendimento() {
       consulta_id: id,
       paciente_id: consulta.patients.id,
       profissional_id: consulta.profissional_id,
+      tenant_id: tenant?.id,
       anamnese: anamnese.slice(0, 10000),
       evolucao: evolucao.slice(0, 10000),
       prescricao: prescricao.slice(0, 10000),

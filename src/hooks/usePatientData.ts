@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInYears } from "date-fns";
+import { useTenant } from "@/hooks/useTenant";
 
 interface PatientBasicData {
   id: string;
@@ -66,17 +67,24 @@ export function calculateAge(birthDate: string | null): number | null {
 }
 
 export function usePatientData(patientId: string | undefined) {
+  const { tenant } = useTenant();
+
   // Query for basic patient data
   const patientQuery = useQuery({
-    queryKey: ['patient', patientId],
+    queryKey: ['patient', patientId, tenant?.id],
     queryFn: async () => {
       if (!patientId) throw new Error('Patient ID is required');
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('patients')
         .select('*')
-        .eq('id', patientId)
-        .maybeSingle();
+        .eq('id', patientId);
+      
+      if (tenant?.id) {
+        query = query.eq('tenant_id', tenant.id);
+      }
+      
+      const { data, error } = await query.maybeSingle();
       
       if (error) throw error;
       return data as PatientBasicData | null;
@@ -86,18 +94,23 @@ export function usePatientData(patientId: string | undefined) {
 
   // Query for active consultation (em_atendimento status)
   const consultaQuery = useQuery({
-    queryKey: ['patient-consulta', patientId],
+    queryKey: ['patient-consulta', patientId, tenant?.id],
     queryFn: async () => {
       if (!patientId) return null;
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('consultas')
         .select('id, numero_consulta, data_consulta, hora_inicio, status, profissional_id, sala_id')
         .eq('paciente_id', patientId)
         .eq('status', 'em_atendimento')
         .order('data_consulta', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+      
+      if (tenant?.id) {
+        query = query.eq('tenant_id', tenant.id);
+      }
+      
+      const { data, error } = await query.maybeSingle();
       
       if (error) throw error;
       return data as ActiveConsulta | null;
@@ -107,18 +120,23 @@ export function usePatientData(patientId: string | undefined) {
 
   // Query for active prescription
   const prescriptionQuery = useQuery({
-    queryKey: ['patient-prescription', patientId],
+    queryKey: ['patient-prescription', patientId, tenant?.id],
     queryFn: async () => {
       if (!patientId) return null;
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('prescriptions')
         .select('id, prescription_date, validity_start, validity_end, is_pediatric, expected_discharge_date, status')
         .eq('patient_id', patientId)
         .in('status', ['pending', 'confirmed'])
         .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+      
+      if (tenant?.id) {
+        query = query.eq('tenant_id', tenant.id);
+      }
+      
+      const { data, error } = await query.maybeSingle();
       
       if (error) throw error;
       return data as ActivePrescription | null;
@@ -128,23 +146,26 @@ export function usePatientData(patientId: string | undefined) {
 
   // Query for allergies from prescription items
   const allergiesQuery = useQuery({
-    queryKey: ['patient-allergies', patientId],
+    queryKey: ['patient-allergies', patientId, tenant?.id],
     queryFn: async () => {
       if (!patientId) return [];
       
-      // First get the active prescription
-      const { data: prescription } = await supabase
+      let prescriptionQuery = supabase
         .from('prescriptions')
         .select('id')
         .eq('patient_id', patientId)
         .in('status', ['pending', 'confirmed'])
         .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+      
+      if (tenant?.id) {
+        prescriptionQuery = prescriptionQuery.eq('tenant_id', tenant.id);
+      }
+      
+      const { data: prescription } = await prescriptionQuery.maybeSingle();
       
       if (!prescription) return [];
       
-      // Then get allergy items
       const { data, error } = await supabase
         .from('prescription_items')
         .select('id, description')
@@ -160,17 +181,22 @@ export function usePatientData(patientId: string | undefined) {
 
   // Query for latest vitals
   const vitalsQuery = useQuery({
-    queryKey: ['patient-vitals', patientId],
+    queryKey: ['patient-vitals', patientId, tenant?.id],
     queryFn: async () => {
       if (!patientId) return null;
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('vitals')
         .select('*')
         .eq('patient_id', patientId)
         .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+      
+      if (tenant?.id) {
+        query = query.eq('tenant_id', tenant.id);
+      }
+      
+      const { data, error } = await query.maybeSingle();
       
       if (error) throw error;
       return data as VitalsData | null;
@@ -217,7 +243,6 @@ export function usePatientData(patientId: string | undefined) {
     isLoading,
     error,
     refetch: refetchAll,
-    // Individual query states for granular control
     queries: {
       patient: patientQuery,
       consulta: consultaQuery,
