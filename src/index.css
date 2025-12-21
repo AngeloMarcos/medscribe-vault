@@ -54,6 +54,13 @@
     --info: 174 100% 29%;
     --info-foreground: 0 0% 100%;
     
+    /* Status Colors for Dashboard */
+    --status-waiting: 38 92% 50%;
+    --status-in-progress: 199 89% 48%;
+    --status-done: 142 76% 36%;
+    --status-absent: 0 84% 50%;
+    --status-scheduled: 220 13% 65%;
+    
     /* Border & Input */
     --border: 175 30% 88%;
     --input: 175 30% 88%;

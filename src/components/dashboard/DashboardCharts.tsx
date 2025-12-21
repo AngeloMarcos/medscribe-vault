@@ -12,11 +12,11 @@ import {
   Pie,
   Cell,
   Legend,
-  LineChart,
-  Line,
+  ReferenceLine,
 } from "recharts";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { TrendingUp, PieChartIcon, Activity, FileText } from "lucide-react";
+import { TrendingUp, PieChartIcon, Activity, FileText, Target } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const COLORS = ['#00A896', '#02C39A', '#05668D', '#028090', '#00F5D4', '#F0A500', '#9B5DE5', '#00BBF9'];
 
@@ -37,53 +37,102 @@ export function WeeklyChart() {
     );
   }
 
+  // Calculate average for reference line
+  const avg = weeklyStats && weeklyStats.length > 0
+    ? Math.round(weeklyStats.reduce((sum, d) => sum + d.total, 0) / weeklyStats.length)
+    : 0;
+
   return (
     <Card className="bg-card border border-border shadow-sm rounded-2xl">
       <CardHeader className="pb-4 px-6 pt-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
-            <TrendingUp className="h-5 w-5 text-secondary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-secondary/10">
+              <TrendingUp className="h-5 w-5 text-secondary" />
+            </div>
+            <div>
+              <CardTitle className="text-card-title">Atendimentos da Semana</CardTitle>
+              <CardDescription className="text-caption mt-0.5">Últimos 7 dias</CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-card-title">Atendimentos da Semana</CardTitle>
-            <CardDescription className="text-caption mt-0.5">Últimos 7 dias</CardDescription>
-          </div>
+          {avg > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-xs">
+              <Target className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Média:</span>
+              <span className="font-semibold text-foreground">{avg}</span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="px-6 pb-6">
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={weeklyStats || []}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+          <BarChart data={weeklyStats || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <defs>
+              <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1}/>
+                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.6}/>
+              </linearGradient>
+              <linearGradient id="finalizadosGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={1}/>
+                <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.6}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
             <XAxis 
               dataKey="date" 
               tick={{ fontSize: 12 }}
               className="text-muted-foreground"
+              tickLine={false}
+              axisLine={false}
             />
             <YAxis 
               tick={{ fontSize: 12 }}
               className="text-muted-foreground"
+              tickLine={false}
+              axisLine={false}
+              allowDecimals={false}
             />
             <Tooltip 
               contentStyle={{ 
                 backgroundColor: 'hsl(var(--card))', 
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px',
+                fontSize: '12px',
               }}
             />
+            {avg > 0 && (
+              <ReferenceLine 
+                y={avg} 
+                stroke="hsl(var(--muted-foreground))" 
+                strokeDasharray="5 5" 
+                strokeOpacity={0.5}
+              />
+            )}
             <Bar 
               dataKey="total" 
               name="Total" 
-              fill="hsl(var(--primary))" 
-              radius={[4, 4, 0, 0]}
+              fill="url(#totalGradient)" 
+              radius={[6, 6, 0, 0]}
             />
             <Bar 
               dataKey="finalizados" 
               name="Finalizados" 
-              fill="hsl(var(--success))" 
-              radius={[4, 4, 0, 0]}
+              fill="url(#finalizadosGradient)" 
+              radius={[6, 6, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-primary" />
+            <span className="text-xs text-muted-foreground">Total</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-success" />
+            <span className="text-xs text-muted-foreground">Finalizados</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -107,12 +156,13 @@ export function EspecialidadeChart() {
   }
 
   const data = especialidadeStats?.slice(0, 6) || [];
+  const total = data.reduce((sum, d) => sum + d.total, 0);
 
   return (
     <Card className="bg-card border border-border shadow-sm rounded-2xl">
       <CardHeader className="pb-4 px-6 pt-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
+          <div className="p-2 rounded-lg bg-secondary/10">
             <PieChartIcon className="h-5 w-5 text-secondary" />
           </div>
           <div>
@@ -123,36 +173,65 @@ export function EspecialidadeChart() {
       </CardHeader>
       <CardContent className="px-6 pb-6">
         {data.length > 0 ? (
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={2}
-                dataKey="total"
-                nameKey="nome"
-                label={({ nome, percent }) => `${nome} (${(percent * 100).toFixed(0)}%)`}
-                labelLine={false}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.cor || COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={3}
+                  dataKey="total"
+                  nameKey="nome"
+                  stroke="none"
+                >
+                  {data.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.cor || COLORS[index % COLORS.length]} 
+                    />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value: number, name: string) => [
+                    `${value} (${Math.round((value / total) * 100)}%)`,
+                    name
+                  ]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Center label */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+              <p className="text-3xl font-bold text-foreground">{total}</p>
+              <p className="text-xs text-muted-foreground">consultas</p>
+            </div>
+          </div>
         ) : (
-          <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+          <div className="h-[220px] flex items-center justify-center text-muted-foreground">
             Nenhum dado disponível
+          </div>
+        )}
+        {/* Custom Legend */}
+        {data.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {data.slice(0, 4).map((item, index) => (
+              <div key={item.nome} className="flex items-center gap-2">
+                <div 
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: item.cor || COLORS[index % COLORS.length] }}
+                />
+                <span className="text-xs text-muted-foreground truncate">{item.nome}</span>
+                <span className="text-xs font-medium text-foreground ml-auto">{item.total}</span>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
@@ -170,60 +249,100 @@ export function AttendanceGauge() {
           <Skeleton className="h-6 w-48" />
         </CardHeader>
         <CardContent className="px-6 pb-6">
-          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-40 w-full" />
         </CardContent>
       </Card>
     );
   }
 
   const rate = attendanceRate?.taxa || 0;
+  const goal = 85; // Meta de 85%
+  
   const getColor = (taxa: number) => {
     if (taxa >= 80) return 'text-success';
     if (taxa >= 50) return 'text-warning';
     return 'text-destructive';
   };
+  
   const getBgColor = (taxa: number) => {
     if (taxa >= 80) return 'bg-success';
     if (taxa >= 50) return 'bg-warning';
     return 'bg-destructive';
   };
+  
+  const isAboveGoal = rate >= goal;
 
   return (
     <Card className="bg-card border border-border shadow-sm rounded-2xl">
       <CardHeader className="pb-4 px-6 pt-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
-            <Activity className="h-5 w-5 text-secondary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-secondary/10">
+              <Activity className="h-5 w-5 text-secondary" />
+            </div>
+            <div>
+              <CardTitle className="text-card-title">Taxa de Comparecimento</CardTitle>
+              <CardDescription className="text-caption mt-0.5">Mês atual</CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-card-title">Taxa de Comparecimento</CardTitle>
-            <CardDescription className="text-caption mt-0.5">Mês atual</CardDescription>
+          <div className={cn(
+            "px-2 py-1 rounded-full text-xs font-medium",
+            isAboveGoal ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
+          )}>
+            Meta: {goal}% {isAboveGoal ? "✓" : ""}
           </div>
         </div>
       </CardHeader>
       <CardContent className="px-6 pb-6">
         <div className="flex flex-col items-center gap-4">
-          <div className={`text-5xl font-bold ${getColor(rate)}`}>
-            {rate}%
-          </div>
-          <div className="w-full bg-muted rounded-full h-3">
+          {/* Circular gauge visualization */}
+          <div className="relative w-40 h-20 overflow-hidden">
+            {/* Background arc */}
+            <div className="absolute bottom-0 left-0 right-0 h-40 w-40 rounded-full border-[12px] border-muted" 
+                 style={{ clipPath: 'polygon(0 50%, 100% 50%, 100% 100%, 0 100%)' }} />
+            {/* Progress arc */}
             <div 
-              className={`h-3 rounded-full transition-all duration-500 ${getBgColor(rate)}`}
-              style={{ width: `${rate}%` }}
+              className={cn("absolute bottom-0 left-0 right-0 h-40 w-40 rounded-full border-[12px] transition-all duration-700", getBgColor(rate))}
+              style={{ 
+                clipPath: 'polygon(0 50%, 100% 50%, 100% 100%, 0 100%)',
+                transform: `rotate(${(rate / 100) * 180 - 180}deg)`,
+                transformOrigin: 'center bottom'
+              }} 
             />
+            {/* Center value */}
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-center">
+              <span className={cn("text-4xl font-bold", getColor(rate))}>{rate}%</span>
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 w-full text-center text-sm">
-            <div>
-              <p className="text-muted-foreground">Total</p>
-              <p className="font-semibold">{attendanceRate?.total || 0}</p>
+          
+          {/* Progress bar alternative (simpler) */}
+          <div className="w-full space-y-2 mt-2">
+            <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+              <div 
+                className={cn("absolute top-0 left-0 h-full transition-all duration-700 rounded-full", getBgColor(rate))}
+                style={{ width: `${rate}%` }}
+              />
+              {/* Goal marker */}
+              <div 
+                className="absolute top-0 w-1 h-full bg-foreground/50 z-10"
+                style={{ left: `${goal}%` }}
+              />
             </div>
-            <div>
-              <p className="text-muted-foreground">Finalizados</p>
-              <p className="font-semibold text-success">{attendanceRate?.finalizados || 0}</p>
+          </div>
+          
+          {/* Stats grid */}
+          <div className="grid grid-cols-3 gap-4 w-full text-center pt-2">
+            <div className="p-3 rounded-lg bg-muted/50">
+              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-lg font-bold text-foreground">{attendanceRate?.total || 0}</p>
             </div>
-            <div>
-              <p className="text-muted-foreground">Ausentes</p>
-              <p className="font-semibold text-destructive">{attendanceRate?.ausentes || 0}</p>
+            <div className="p-3 rounded-lg bg-success/10">
+              <p className="text-xs text-muted-foreground">Finalizados</p>
+              <p className="text-lg font-bold text-success">{attendanceRate?.finalizados || 0}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-destructive/10">
+              <p className="text-xs text-muted-foreground">Ausentes</p>
+              <p className="text-lg font-bold text-destructive">{attendanceRate?.ausentes || 0}</p>
             </div>
           </div>
         </div>
@@ -248,11 +367,13 @@ export function TopCidsChart() {
     );
   }
 
+  const maxTotal = cidStats && cidStats.length > 0 ? Math.max(...cidStats.map(c => c.total)) : 1;
+
   return (
     <Card className="bg-card border border-border shadow-sm rounded-2xl">
       <CardHeader className="pb-4 px-6 pt-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
+          <div className="p-2 rounded-lg bg-secondary/10">
             <FileText className="h-5 w-5 text-secondary" />
           </div>
           <div>
@@ -265,16 +386,28 @@ export function TopCidsChart() {
         {cidStats && cidStats.length > 0 ? (
           <div className="space-y-3">
             {cidStats.map((cid, index) => (
-              <div key={cid.codigo} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
-                  {index + 1}
+              <div key={cid.codigo} className="group">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
+                    index < 3 ? "bg-secondary text-secondary-foreground" : "bg-muted text-muted-foreground"
+                  )}>
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-foreground">{cid.codigo}</p>
+                      <span className="text-sm font-bold text-secondary">{cid.total}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{cid.descricao}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{cid.codigo}</p>
-                  <p className="text-xs text-muted-foreground truncate">{cid.descricao}</p>
-                </div>
-                <div className="text-sm font-semibold text-primary">
-                  {cid.total}
+                {/* Progress bar */}
+                <div className="ml-9 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-secondary/60 rounded-full transition-all duration-500 group-hover:bg-secondary"
+                    style={{ width: `${(cid.total / maxTotal) * 100}%` }}
+                  />
                 </div>
               </div>
             ))}
