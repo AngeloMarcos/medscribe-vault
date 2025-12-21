@@ -26,6 +26,7 @@ import {
   Grid3X3,
   FileText,
   MonitorPlay,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ const menuItems: MenuItem[] = [
       { name: "Usuários", href: "/usuarios", icon: UserRound },
       { name: "Permissões", href: "/permissoes", icon: KeyRound },
       { name: "Auditoria", href: "/auditoria", icon: FileText },
+      { name: "Configurações Tenant", href: "/tenant/settings", icon: Building2 },
     ],
   },
 ];

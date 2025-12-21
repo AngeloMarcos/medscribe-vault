@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
 import { appointmentSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AddAppointmentDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ const AddAppointmentDialog = ({
 }: AddAppointmentDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { tenant } = useTenant();
   const [formData, setFormData] = useState({
     patient_id: "",
     date_time: "",
@@ -47,12 +49,17 @@ const AddAppointmentDialog = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data: patients } = useQuery({
-    queryKey: ["patients"],
+    queryKey: ["patients", tenant?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("patients").select("id, name");
+      let query = supabase.from("patients").select("id, name");
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!tenant,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +81,10 @@ const AddAppointmentDialog = ({
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("appointments").insert([formData]);
+      const { error } = await supabase.from("appointments").insert([{
+        ...formData,
+        tenant_id: tenant?.id || null,
+      }]);
       if (error) throw error;
 
       toast({
