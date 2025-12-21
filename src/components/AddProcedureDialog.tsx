@@ -15,6 +15,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { procedureSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AddProcedureDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ const AddProcedureDialog = ({
 }: AddProcedureDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { tenant } = useTenant();
   const [formData, setFormData] = useState({
     date_time: "",
     description: "",
@@ -62,6 +64,7 @@ const AddProcedureDialog = ({
         {
           patient_id: patientId,
           ...formData,
+          tenant_id: tenant?.id || null,
         },
       ]);
       if (error) throw error;

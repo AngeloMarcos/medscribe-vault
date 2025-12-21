@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { reportSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AddReportDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ const AddReportDialog = ({
 }: AddReportDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { tenant } = useTenant();
   const [formData, setFormData] = useState({
     type: "atestado",
     text: "",
@@ -66,6 +68,7 @@ const AddReportDialog = ({
         {
           patient_id: patientId,
           ...formData,
+          tenant_id: tenant?.id || null,
         },
       ]);
       if (error) throw error;

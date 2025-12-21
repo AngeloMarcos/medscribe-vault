@@ -35,6 +35,9 @@ import NotFound from "./pages/NotFound";
 import Enfermagem from "./pages/Enfermagem";
 import PainelChamador from "./pages/PainelChamador";
 import Relatorios from "./pages/Relatorios";
+import TenantSettings from "./pages/admin/TenantSettings";
+import AtendimentoOdonto from "./pages/AtendimentoOdonto";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -150,6 +153,12 @@ const App = () => {
                         </ProtectedRoute>
                       }
                     />
+
+                    {/* Tenant Settings */}
+                    <Route path="tenant/settings" element={<TenantSettings />} />
+                    
+                    {/* Odonto Atendimento */}
+                    <Route path="odonto/atendimento/:id" element={<AtendimentoOdonto />} />
 
                     <Route path="perfil" element={<MyProfile />} />
                   </Route>

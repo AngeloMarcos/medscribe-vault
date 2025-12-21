@@ -8,21 +8,30 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import AddPatientDialog from "@/components/AddPatientDialog";
+import { useTenant } from "@/hooks/useTenant";
 
 const Patients = () => {
   const [search, setSearch] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { tenant } = useTenant();
 
   const { data: patients, isLoading, refetch } = useQuery({
-    queryKey: ["patients"],
+    queryKey: ["patients", tenant?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("patients")
         .select("*")
         .order("created_at", { ascending: false });
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!tenant,
   });
 
   const filteredPatients = patients?.filter(

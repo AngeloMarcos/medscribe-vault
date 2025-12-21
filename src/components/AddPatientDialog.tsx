@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { patientSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AddPatientDialogProps {
   open: boolean;
@@ -24,6 +25,7 @@ interface AddPatientDialogProps {
 const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { tenant } = useTenant();
   const [formData, setFormData] = useState({
     name: "",
     cpf: "",
@@ -53,7 +55,10 @@ const AddPatientDialog = ({ open, onOpenChange, onSuccess }: AddPatientDialogPro
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("patients").insert([formData]);
+      const { error } = await supabase.from("patients").insert([{
+        ...formData,
+        tenant_id: tenant?.id || null,
+      }]);
       if (error) throw error;
 
       toast({

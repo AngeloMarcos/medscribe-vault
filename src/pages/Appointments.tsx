@@ -6,20 +6,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AddAppointmentDialog from "@/components/AddAppointmentDialog";
+import { useTenant } from "@/hooks/useTenant";
 
 const Appointments = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { tenant } = useTenant();
 
   const { data: appointments, refetch } = useQuery({
-    queryKey: ["all-appointments"],
+    queryKey: ["all-appointments", tenant?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("appointments")
         .select("*, patients(name)")
         .order("date_time", { ascending: true });
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!tenant,
   });
 
   const getStatusBadge = (status: string) => {

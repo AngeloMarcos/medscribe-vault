@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { examRequestSchema } from "@/lib/validationSchemas";
 import { getUserFriendlyError } from "@/lib/errorHandler";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AddExamRequestDialogProps {
   open: boolean;
@@ -30,6 +31,7 @@ const AddExamRequestDialog = ({
 }: AddExamRequestDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { tenant } = useTenant();
   const [formData, setFormData] = useState({
     exams_list: "",
     justification: "",
@@ -59,6 +61,7 @@ const AddExamRequestDialog = ({
         {
           patient_id: patientId,
           ...formData,
+          tenant_id: tenant?.id || null,
         },
       ]);
       if (error) throw error;
