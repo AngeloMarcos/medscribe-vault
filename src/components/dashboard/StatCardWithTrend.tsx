@@ -16,6 +16,7 @@ interface StatCardWithTrendProps {
   isLoading?: boolean;
   colorVariant?: "default" | "success" | "warning" | "destructive" | "info";
   index?: number;
+  suffix?: string;
 }
 
 const colorVariants = {
@@ -65,9 +66,10 @@ export function StatCardWithTrend({
   isLoading = false,
   colorVariant = "default",
   index = 0,
+  suffix = "",
 }: StatCardWithTrendProps) {
   const colors = colorVariants[colorVariant];
-  const animationDelay = index * 100;
+  const animationDelay = index * 80;
 
   const getTrendIcon = () => {
     if (!trend) return null;
@@ -87,15 +89,15 @@ export function StatCardWithTrend({
 
   if (isLoading) {
     return (
-      <Card className="relative overflow-hidden bg-card border border-border rounded-2xl">
-        <CardContent className="p-5 lg:p-6">
+      <Card className="relative overflow-hidden bg-card border border-border rounded-xl sm:rounded-2xl">
+        <CardContent className="p-3 sm:p-4 lg:p-5">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <Skeleton className="h-4 w-24 mb-3" />
-              <Skeleton className="h-10 w-20" />
-              <Skeleton className="h-3 w-32 mt-2" />
+              <Skeleton className="h-3 sm:h-4 w-16 sm:w-24 mb-2 sm:mb-3" />
+              <Skeleton className="h-7 sm:h-10 w-12 sm:w-20" />
+              <Skeleton className="h-2.5 sm:h-3 w-20 sm:w-32 mt-1.5 sm:mt-2 hidden sm:block" />
             </div>
-            <Skeleton className="h-11 w-11 rounded-xl" />
+            <Skeleton className="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl" />
           </div>
         </CardContent>
       </Card>
@@ -105,33 +107,33 @@ export function StatCardWithTrend({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden bg-card border border-border rounded-2xl group",
+        "relative overflow-hidden bg-card border border-border rounded-xl sm:rounded-2xl group",
         "hover:border-secondary/40 hover:shadow-lg transition-all duration-300",
-        "opacity-0 animate-bounce-in",
+        "opacity-0 animate-bounce-in touch-active",
         colors.glow
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      <CardContent className="p-5 lg:p-6">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-3 sm:p-4 lg:p-5">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-caption text-muted-foreground truncate">{title}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{title}</p>
             
-            <div className="flex items-end gap-2 mt-2">
-              <span className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
-                <AnimatedNumber value={value} />
+            <div className="flex items-end gap-1 sm:gap-2 mt-1 sm:mt-2">
+              <span className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
+                <AnimatedNumber value={value} suffix={suffix} />
               </span>
               
               {trend && TrendIcon && (
                 <div 
                   className={cn(
-                    "flex items-center gap-0.5 pb-1 opacity-0 animate-fade-in",
+                    "hidden sm:flex items-center gap-0.5 pb-1 opacity-0 animate-fade-in",
                     getTrendColor()
                   )}
                   style={{ animationDelay: `${animationDelay + 300}ms` }}
                 >
-                  <TrendIcon className="h-4 w-4" />
-                  <span className="text-sm font-medium">
+                  <TrendIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm font-medium">
                     {trend.value > 0 ? "+" : ""}{trend.value}%
                   </span>
                 </div>
@@ -139,24 +141,24 @@ export function StatCardWithTrend({
             </div>
             
             {description && (
-              <p className="text-helper mt-1.5 truncate">{description}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 sm:mt-1.5 truncate hidden sm:block">{description}</p>
             )}
           </div>
           
           <div 
             className={cn(
-              "p-3 rounded-xl transition-all duration-300",
+              "p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-300 shrink-0",
               colors.iconBg,
-              "group-hover:scale-110 group-hover:animate-float"
+              "group-hover:scale-110"
             )}
           >
-            <Icon className={cn("h-5 w-5", colors.iconColor)} />
+            <Icon className={cn("h-4 w-4 sm:h-5 sm:w-5", colors.iconColor)} />
           </div>
         </div>
       </CardContent>
       
       {/* Decorative gradient line at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-secondary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-secondary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </Card>
   );
 }
