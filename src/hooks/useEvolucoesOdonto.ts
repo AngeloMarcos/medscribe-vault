@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useTenant } from '@/hooks/useTenant';
 
 // Types
 export interface ProcedimentoRealizado {
@@ -99,6 +100,7 @@ export function useEvolucoesOdontoByAgendamento(agendamentoId: string | null) {
 // Create evolução
 export function useCreateEvolucaoOdonto() {
   const queryClient = useQueryClient();
+  const { tenant } = useTenant();
 
   return useMutation({
     mutationFn: async (input: CreateEvolucaoInput) => {
@@ -107,6 +109,7 @@ export function useCreateEvolucaoOdonto() {
         .from('evolucoes_odonto')
         .insert({
           ...rest,
+          tenant_id: tenant?.id,
           procedimentos_realizados: JSON.parse(JSON.stringify(procedimentos_realizados || [])),
         })
         .select()

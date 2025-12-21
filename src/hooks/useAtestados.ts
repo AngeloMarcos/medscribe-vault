@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 
 export interface Atestado {
   id: string;
@@ -23,7 +24,6 @@ export interface CreateAtestadoData {
   consulta_id?: string;
   paciente_id: string;
   profissional_id?: string;
-  tenant_id?: string;
   data_inicio: string;
   data_fim: string;
   dias_afastamento: number;
@@ -33,8 +33,10 @@ export interface CreateAtestadoData {
 }
 
 export function useAtestados(pacienteId?: string, consultaId?: string) {
+  const { tenant } = useTenant();
+  
   return useQuery({
-    queryKey: ["atestados", pacienteId, consultaId],
+    queryKey: ["atestados", pacienteId, consultaId, tenant?.id],
     queryFn: async () => {
       let query = supabase
         .from("atestados")
@@ -46,6 +48,9 @@ export function useAtestados(pacienteId?: string, consultaId?: string) {
       }
       if (consultaId) {
         query = query.eq("consulta_id", consultaId);
+      }
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
       }
 
       const { data, error } = await query;
@@ -60,12 +65,13 @@ export function useAtestados(pacienteId?: string, consultaId?: string) {
 export function useCreateAtestado() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { tenant } = useTenant();
 
   return useMutation({
     mutationFn: async (data: CreateAtestadoData) => {
       const { data: atestado, error } = await supabase
         .from("atestados")
-        .insert(data)
+        .insert({ ...data, tenant_id: tenant?.id })
         .select()
         .single();
 

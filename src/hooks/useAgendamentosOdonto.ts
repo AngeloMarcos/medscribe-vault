@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useTenant } from '@/hooks/useTenant';
 
 // Types
 export interface AgendamentoOdonto {
@@ -153,15 +154,16 @@ export function useAgendamentosOdontoByPatient(patientId: string | null) {
 // Create agendamento
 export function useCreateAgendamentoOdonto() {
   const queryClient = useQueryClient();
+  const { tenant } = useTenant();
 
   return useMutation({
     mutationFn: async (input: CreateAgendamentoInput) => {
       const { procedimentos_ids, ...agendamentoData } = input;
 
-      // Create agendamento
+      // Create agendamento with tenant_id
       const { data: agendamento, error: agendamentoError } = await supabase
         .from('agendamentos_odonto')
-        .insert(agendamentoData)
+        .insert({ ...agendamentoData, tenant_id: tenant?.id })
         .select()
         .single();
 

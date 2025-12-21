@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { NursingQueueItem, NursingSector, QueuePriority, QueueStatus } from '@/types/nursing';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/hooks/useTenant';
 import { toast } from 'sonner';
 
 interface UseNursingQueueOptions {
@@ -14,6 +15,7 @@ interface UseNursingQueueOptions {
 export function useNursingQueue(options: UseNursingQueueOptions = {}) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { tenant } = useTenant();
   const [realtimeEnabled, setRealtimeEnabled] = useState(true);
 
   // Fetch queue items
@@ -102,6 +104,7 @@ export function useNursingQueue(options: UseNursingQueueOptions = {}) {
           referred_from: item.referred_from || null,
           notes: item.notes || null,
           status: 'waiting',
+          tenant_id: tenant?.id,
         })
         .select()
         .single();

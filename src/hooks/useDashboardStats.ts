@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, format } from "date-fns";
+import { useTenant } from "@/hooks/useTenant";
 
 export interface DailyStats {
   date: string;
@@ -34,10 +35,11 @@ export interface ProfissionalStats {
 export function useDashboardStats() {
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
+  const { tenant } = useTenant();
   
   // Stats dos últimos 7 dias
   const { data: weeklyStats, isLoading: isLoadingWeekly } = useQuery({
-    queryKey: ["dashboard-weekly-stats"],
+    queryKey: ["dashboard-weekly-stats", tenant?.id],
     queryFn: async () => {
       const days: DailyStats[] = [];
       
@@ -45,10 +47,16 @@ export function useDashboardStats() {
         const date = subDays(today, i);
         const dateStr = format(date, 'yyyy-MM-dd');
         
-        const { data, error } = await supabase
+        let query = supabase
           .from("consultas")
           .select("id, status, faltou_paciente")
           .eq("data_consulta", dateStr);
+        
+        if (tenant?.id) {
+          query = query.eq("tenant_id", tenant.id);
+        }
+        
+        const { data, error } = await query;
         
         if (error) throw error;
         
@@ -62,16 +70,17 @@ export function useDashboardStats() {
       
       return days;
     },
+    enabled: !!tenant?.id,
   });
 
   // Stats por especialidade (mês atual)
   const { data: especialidadeStats, isLoading: isLoadingEspecialidade } = useQuery({
-    queryKey: ["dashboard-especialidade-stats"],
+    queryKey: ["dashboard-especialidade-stats", tenant?.id],
     queryFn: async () => {
       const startMonth = format(startOfMonth(today), 'yyyy-MM-dd');
       const endMonth = format(endOfMonth(today), 'yyyy-MM-dd');
       
-      const { data: consultas, error } = await supabase
+      let query = supabase
         .from("consultas")
         .select(`
           id,
@@ -79,6 +88,12 @@ export function useDashboardStats() {
         `)
         .gte("data_consulta", startMonth)
         .lte("data_consulta", endMonth);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data: consultas, error } = await query;
       
       if (error) throw error;
       
@@ -96,21 +111,28 @@ export function useDashboardStats() {
       
       return Object.values(grouped).sort((a, b) => b.total - a.total);
     },
+    enabled: !!tenant?.id,
   });
 
   // Top 10 CIDs (mês atual)
   const { data: cidStats, isLoading: isLoadingCids } = useQuery({
-    queryKey: ["dashboard-cid-stats"],
+    queryKey: ["dashboard-cid-stats", tenant?.id],
     queryFn: async () => {
       const startMonth = format(startOfMonth(today), 'yyyy-MM-dd');
       const endMonth = format(endOfMonth(today), 'yyyy-MM-dd');
       
-      const { data: atendimentos, error } = await supabase
+      let query = supabase
         .from("atendimentos")
         .select("cid_principal")
         .not("cid_principal", "is", null)
         .gte("created_at", startMonth)
         .lte("created_at", endMonth);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data: atendimentos, error } = await query;
       
       if (error) throw error;
       
@@ -141,20 +163,27 @@ export function useDashboardStats() {
         .sort((a, b) => b.total - a.total)
         .slice(0, 10);
     },
+    enabled: !!tenant?.id,
   });
 
   // Taxa de comparecimento geral
   const { data: attendanceRate, isLoading: isLoadingAttendance } = useQuery({
-    queryKey: ["dashboard-attendance-rate"],
+    queryKey: ["dashboard-attendance-rate", tenant?.id],
     queryFn: async () => {
       const startMonth = format(startOfMonth(today), 'yyyy-MM-dd');
       const endMonth = format(endOfMonth(today), 'yyyy-MM-dd');
       
-      const { data, error } = await supabase
+      let query = supabase
         .from("consultas")
         .select("id, faltou_paciente, status")
         .gte("data_consulta", startMonth)
         .lte("data_consulta", endMonth);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       
@@ -169,6 +198,7 @@ export function useDashboardStats() {
         taxa: total > 0 ? Math.round(((total - ausentes) / total) * 100) : 0,
       };
     },
+    enabled: !!tenant?.id,
   });
 
   return {
@@ -181,11 +211,13 @@ export function useDashboardStats() {
 }
 
 export function useReportStats(startDate: string, endDate: string) {
+  const { tenant } = useTenant();
+  
   // Produção por profissional
   const { data: profissionalStats, isLoading } = useQuery({
-    queryKey: ["report-profissional-stats", startDate, endDate],
+    queryKey: ["report-profissional-stats", startDate, endDate, tenant?.id],
     queryFn: async () => {
-      const { data: consultas, error } = await supabase
+      let query = supabase
         .from("consultas")
         .select(`
           id,
@@ -195,6 +227,12 @@ export function useReportStats(startDate: string, endDate: string) {
         `)
         .gte("data_consulta", startDate)
         .lte("data_consulta", endDate);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data: consultas, error } = await query;
       
       if (error) throw error;
       
@@ -229,18 +267,24 @@ export function useReportStats(startDate: string, endDate: string) {
       
       return Object.values(grouped).sort((a, b) => b.total_consultas - a.total_consultas);
     },
-    enabled: !!startDate && !!endDate,
+    enabled: !!startDate && !!endDate && !!tenant?.id,
   });
 
   // Stats gerais do período
   const { data: periodStats } = useQuery({
-    queryKey: ["report-period-stats", startDate, endDate],
+    queryKey: ["report-period-stats", startDate, endDate, tenant?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("consultas")
         .select("id, status, faltou_paciente")
         .gte("data_consulta", startDate)
         .lte("data_consulta", endDate);
+      
+      if (tenant?.id) {
+        query = query.eq("tenant_id", tenant.id);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       
@@ -251,7 +295,7 @@ export function useReportStats(startDate: string, endDate: string) {
         cancelados: data?.filter(c => c.status === 'cancelado').length || 0,
       };
     },
-    enabled: !!startDate && !!endDate,
+    enabled: !!startDate && !!endDate && !!tenant?.id,
   });
 
   return {
