@@ -37,6 +37,7 @@ import PainelChamador from "./pages/PainelChamador";
 import Relatorios from "./pages/Relatorios";
 import TenantSettings from "./pages/admin/TenantSettings";
 import AtendimentoOdonto from "./pages/AtendimentoOdonto";
+import TenantOnboarding from "./pages/TenantOnboarding";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,16 @@ const App = () => {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/auth" element={<Auth />} />
+                  
+                  {/* Onboarding route - requires auth but no tenant */}
+                  <Route 
+                    path="/onboarding" 
+                    element={
+                      <ProtectedRoute>
+                        <TenantOnboarding />
+                      </ProtectedRoute>
+                    } 
+                  />
 
                   {/* Protected routes */}
                   <Route

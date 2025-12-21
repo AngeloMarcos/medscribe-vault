@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
-import { Building2, Loader2 } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { Building2, Loader2, Plus, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useTenant } from '@/hooks/useTenant';
@@ -25,6 +25,7 @@ function LoadingTenant() {
 
 function NoTenantAssigned() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-background">
@@ -37,11 +38,35 @@ function NoTenantAssigned() {
             <h2 className="text-xl font-semibold text-foreground">Sem Clínica Associada</h2>
             <p className="text-muted-foreground">
               Você ainda não está associado a nenhuma clínica ou estabelecimento de saúde.
-              Entre em contato com o administrador para solicitar acesso.
             </p>
-            <div className="flex gap-2 mt-4">
-              <Button variant="outline" onClick={() => logout()}>
-                Sair
+            
+            <div className="w-full space-y-3 pt-4">
+              <Button 
+                className="w-full" 
+                onClick={() => navigate('/onboarding')}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Criar Meu Estabelecimento
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 text-muted-foreground text-sm">
+                <Clock className="h-4 w-4" />
+                <span>Aguardando convite de um administrador</span>
+              </div>
+            </div>
+            
+            <div className="pt-2">
+              <Button variant="ghost" size="sm" onClick={() => logout()}>
+                Sair da conta
               </Button>
             </div>
           </div>
