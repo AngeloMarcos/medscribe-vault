@@ -58,26 +58,25 @@ export function DayProgressBar({
 
   if (isLoading) {
     return (
-      <div className="w-full p-4 rounded-xl bg-card border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
-          <div className="h-4 bg-muted rounded w-20 animate-pulse" />
+      <div className="w-full p-3 sm:p-4 rounded-lg sm:rounded-xl bg-card border border-border">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <div className="h-3 sm:h-4 bg-muted rounded w-24 sm:w-1/3 animate-pulse" />
+          <div className="h-3 sm:h-4 bg-muted rounded w-16 sm:w-20 animate-pulse" />
         </div>
-        <div className="h-3 bg-muted rounded-full w-full relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-muted-foreground/10 to-transparent animate-shimmer" />
-        </div>
+        <div className="h-2.5 sm:h-3 bg-muted rounded-full w-full skeleton-shimmer" />
       </div>
     );
   }
 
   return (
-    <div className="w-full p-4 lg:p-5 rounded-xl bg-card border border-border shadow-sm opacity-0 animate-slide-up">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <span className="text-label font-medium">Progresso do dia</span>
+    <div className="w-full p-3 sm:p-4 lg:p-5 rounded-lg sm:rounded-xl bg-card border border-border shadow-sm opacity-0 animate-slide-up">
+      {/* Header - Responsivo */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2 sm:mb-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <span className="text-xs sm:text-sm font-medium">Progresso do dia</span>
           <span 
             className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full transition-all duration-300",
+              "text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full transition-all duration-300",
               status.color,
               "opacity-0 animate-scale-in"
             )}
@@ -86,12 +85,13 @@ export function DayProgressBar({
             {status.label}
           </span>
         </div>
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
           <span className="text-muted-foreground">
             <span className="font-semibold text-foreground">
               <AnimatedNumber value={completed} />
             </span>
-            <span className="text-helper">/{totalScheduled} atendidos</span>
+            <span className="text-muted-foreground">/{totalScheduled}</span>
+            <span className="hidden sm:inline text-muted-foreground"> atendidos</span>
           </span>
           <span className="font-bold text-secondary">
             <AnimatedNumber value={progress} suffix="%" />
@@ -100,7 +100,7 @@ export function DayProgressBar({
       </div>
       
       {/* Main progress bar */}
-      <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+      <div className="relative h-2 sm:h-3 bg-muted rounded-full overflow-hidden">
         {/* Time progress indicator (background) */}
         <div 
           className="absolute top-0 left-0 h-full bg-border/50 transition-all duration-1000 ease-out"
@@ -125,24 +125,28 @@ export function DayProgressBar({
           className="absolute top-0 w-0.5 h-full bg-foreground/50 transition-all duration-500"
           style={{ left: `${timeProgress}%` }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-foreground/70 animate-pulse-soft" />
+          <div className="absolute -top-0.5 sm:-top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-foreground/70 animate-pulse-soft" />
         </div>
       </div>
       
-      {/* Status indicators with staggered animation */}
-      <div className="flex items-center gap-4 mt-3 text-xs">
+      {/* Status indicators - Responsivo com flex-wrap */}
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2 sm:mt-3 text-[10px] sm:text-xs">
         {[
-          { color: "bg-success", label: "Atendidos", value: completed, delay: 100 },
-          { color: "bg-info", label: "Em atendimento", value: inProgress, delay: 200 },
-          { color: "bg-warning", label: "Aguardando", value: waiting, delay: 300 },
+          { color: "bg-success", label: "Atendidos", mobileLabel: "Atend.", value: completed, delay: 100 },
+          { color: "bg-info", label: "Em atendimento", mobileLabel: "Em atend.", value: inProgress, delay: 200 },
+          { color: "bg-warning", label: "Aguardando", mobileLabel: "Aguard.", value: waiting, delay: 300 },
         ].map((item) => (
           <div 
             key={item.label}
-            className="flex items-center gap-1.5 opacity-0 animate-fade-in"
+            className="flex items-center gap-1 sm:gap-1.5 opacity-0 animate-fade-in"
             style={{ animationDelay: `${item.delay}ms` }}
           >
-            <div className={cn("w-2 h-2 rounded-full", item.color)} />
-            <span className="text-muted-foreground">{item.label}: {item.value}</span>
+            <div className={cn("w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full", item.color)} />
+            <span className="text-muted-foreground">
+              <span className="sm:hidden">{item.mobileLabel}</span>
+              <span className="hidden sm:inline">{item.label}</span>
+              : {item.value}
+            </span>
           </div>
         ))}
       </div>
