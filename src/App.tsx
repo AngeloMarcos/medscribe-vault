@@ -38,7 +38,7 @@ import Relatorios from "./pages/Relatorios";
 import TenantSettings from "./pages/admin/TenantSettings";
 import AtendimentoOdonto from "./pages/AtendimentoOdonto";
 import TenantOnboarding from "./pages/TenantOnboarding";
-
+import GradesAgendamento from "./pages/GradesAgendamento";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -82,7 +82,7 @@ const App = () => {
                     <Route path="lista-pacientes" element={<ListaPacientes />} />
                     <Route path="marcar-consulta" element={<MarcarConsulta />} />
                     <Route path="appointments" element={<Appointments />} />
-                    <Route path="grades" element={<UnderConstruction title="Grades de Agendamento" />} />
+                    <Route path="grades" element={<GradesAgendamento />} />
 
                     {/* Odontologia Routes */}
                     <Route path="odonto/agendar" element={<AgendarOdonto />} />
