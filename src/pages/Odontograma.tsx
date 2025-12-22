@@ -189,9 +189,9 @@ const Odontograma: React.FC = () => {
             </SelectTrigger>
             <SelectContent>
               {patientsLoading ? (
-                <SelectItem value="" disabled>Carregando...</SelectItem>
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">Carregando...</div>
               ) : patients.length === 0 ? (
-                <SelectItem value="" disabled>Nenhum paciente</SelectItem>
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">Nenhum paciente cadastrado</div>
               ) : (
                 patients.map(p => (
                   <SelectItem key={p.id} value={p.id}>
