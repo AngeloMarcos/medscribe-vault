@@ -13,6 +13,7 @@ import { MainLayout } from "./components/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { UnderConstruction } from "./components/UnderConstruction";
+import Cadastros from "./pages/Cadastros";
 import NewDashboard from "./pages/NewDashboard";
 import MyProfile from "./pages/MyProfile";
 import Patients from "./pages/Patients";
@@ -134,7 +135,7 @@ const App = () => {
                     <Route path="estornar" element={<EstornarConsulta />} />
                     <Route path="atualizar" element={<UnderConstruction title="Atualizar Consulta" />} />
                     <Route path="atendimento/:id" element={<Atendimento />} />
-                    <Route path="cadastros" element={<UnderConstruction title="Cadastros" />} />
+                    <Route path="cadastros" element={<Cadastros />} />
                     <Route path="pesquisas" element={<UnderConstruction title="Pesquisas" />} />
                     <Route path="diaria" element={<UnderConstruction title="Diária" />} />
                     <Route path="relatorios" element={<Relatorios />} />
