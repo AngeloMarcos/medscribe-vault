@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, User, Settings, Users, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SignedAvatarImage } from "@/components/SignedAvatarImage";
 import {
   DropdownMenu,
   DropdownMenuContent,
