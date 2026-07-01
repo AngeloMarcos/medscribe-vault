@@ -78,7 +78,7 @@ export default function NewDashboard() {
   const totalConsultas = consultas?.length || 0;
   const aguardandoCount = consultas?.filter((c) => c.status === "aguardando").length || 0;
   const emAtendimentoCount = consultas?.filter((c) => c.status === "em_atendimento").length || 0;
-  const finalizadosCount = consultas?.filter((c) => c.status === "finalizado").length || 0;
+  const finalizadosCount = consultas?.filter((c) => c.status === "atendido").length || 0;
   const ausentesCount = consultas?.filter((c) => c.faltou_paciente).length || 0;
   const pendentesCount = consultas?.filter((c) => c.status === "pendente").length || 0;
 
