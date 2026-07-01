@@ -689,7 +689,7 @@ export default function AdminUserManagement() {
                   <TableRow key={user.id}>
                     <TableCell>
                       <Avatar className="h-9 w-9">
-                        <AvatarImage src={user.avatar_url || undefined} />
+                        <SignedAvatarImage reference={user.avatar_url} />
                         <AvatarFallback className="bg-primary/10 text-primary text-xs">
                           {getInitials(user.full_name)}
                         </AvatarFallback>
