@@ -77,9 +77,7 @@ export function UserProfile() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center gap-2 px-3 hover:bg-muted/50 transition-colors">
           <Avatar className="w-8 h-8">
-            {profile?.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
-            ) : null}
+            <SignedAvatarImage reference={profile?.avatar_url} alt={profile?.full_name} />
             <AvatarFallback className="bg-gradient-to-br from-[#015D67] to-[#038C8C] text-white font-semibold text-xs">
               {getInitials(profile?.full_name || "U")}
             </AvatarFallback>
