@@ -144,9 +144,7 @@ export function ModuleInsights() {
                 <CardDescription className="text-xs">Planos e produção</CardDescription>
               </div>
             </div>
-            <Badge variant="outline" asChild className="text-[10px] cursor-pointer">
-              <Link to="/plano-tratamento-odonto">Ver</Link>
-            </Badge>
+            <Link to="/plano-tratamento-odonto"><Badge variant="outline" className="text-[10px] cursor-pointer hover:bg-muted">Ver</Badge></Link>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -169,9 +167,7 @@ export function ModuleInsights() {
                 <CardDescription className="text-xs">Fila ativa</CardDescription>
               </div>
             </div>
-            <Badge variant="outline" asChild className="text-[10px] cursor-pointer">
-              <Link to="/enfermagem">Ver</Link>
-            </Badge>
+            <Link to="/enfermagem"><Badge variant="outline" className="text-[10px] cursor-pointer hover:bg-muted">Ver</Badge></Link>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
