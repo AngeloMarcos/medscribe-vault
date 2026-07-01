@@ -87,7 +87,7 @@ export function useCreateProfissional() {
 export function useUpdateProfissional() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...data }: Partial<Profissional> & { id: string }) => {
+    mutationFn: async ({ id, especialidade: _e, ...data }: Partial<Profissional> & { id: string }) => {
       const { error } = await supabase.from('profissionais').update(data).eq('id', id);
       if (error) throw error;
     },
@@ -237,7 +237,7 @@ export function useCreateEquipe() {
 export function useUpdateEquipe() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...data }: Partial<Equipe> & { id: string }) => {
+    mutationFn: async ({ id, especialidade: _e, ...data }: Partial<Equipe> & { id: string }) => {
       const { error } = await supabase.from('equipes').update(data).eq('id', id);
       if (error) throw error;
     },

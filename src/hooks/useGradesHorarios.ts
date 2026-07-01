@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface GradeHorario {
@@ -134,7 +135,7 @@ export function useUpdateGrade() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<GradeFormData> }) => {
-      const updateData: Record<string, unknown> = {};
+      const updateData: Database['public']['Tables']['grades_horarios']['Update'] = {};
       
       if (data.profissional_id) updateData.profissional_id = data.profissional_id;
       if (data.especialidade_id) updateData.especialidade_id = data.especialidade_id;
