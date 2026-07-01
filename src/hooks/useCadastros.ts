@@ -6,14 +6,15 @@ import { toast } from 'sonner';
 export interface Profissional {
   id: string;
   nome: string;
-  cpf: string;
+  cpf?: string | null;
   registro_profissional: string;
   tipo_registro: string;
-  telefone: string | null;
-  email: string | null;
+  telefone?: string | null;
+  email?: string | null;
   especialidade_id: string | null;
   equipe_id: string | null;
   ativo: boolean;
+  user_id?: string | null;
   especialidade?: { nome: string } | null;
 }
 
@@ -72,7 +73,7 @@ export function useProfissionais() {
 export function useCreateProfissional() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<Profissional, 'id' | 'especialidade'>) => {
+    mutationFn: async (data: Omit<Profissional, 'id' | 'especialidade'> & { cpf: string }) => {
       const { error } = await supabase.from('profissionais').insert(data);
       if (error) throw error;
     },

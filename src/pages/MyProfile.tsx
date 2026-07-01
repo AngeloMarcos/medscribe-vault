@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SignedAvatarImage } from "@/components/SignedAvatarImage";
 import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
@@ -166,18 +167,15 @@ export default function MyProfile() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
-
+      // Bucket is private – store the storage path; UI resolves via signed URL.
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: fileName })
         .eq("id", profile.id);
 
       if (updateError) throw updateError;
 
-      setProfile((prev) => prev ? { ...prev, avatar_url: publicUrl } : null);
+      setProfile((prev) => prev ? { ...prev, avatar_url: fileName } : null);
       toast.success("Foto atualizada com sucesso!");
     } catch (error) {
       console.error("Error uploading avatar:", error);
@@ -273,7 +271,7 @@ export default function MyProfile() {
         <Card className="lg:col-span-1">
           <CardContent className="pt-6 flex flex-col items-center space-y-4">
             <Avatar className="w-32 h-32">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+              <SignedAvatarImage reference={profile?.avatar_url} alt={profile?.full_name} />
               <AvatarFallback className="bg-gradient-to-br from-[#015D67] to-[#038C8C] text-white text-4xl font-semibold">
                 {getInitials(profile?.full_name || "U")}
               </AvatarFallback>

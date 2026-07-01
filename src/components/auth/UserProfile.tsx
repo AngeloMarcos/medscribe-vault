@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, User, Settings, Users, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SignedAvatarImage } from "@/components/SignedAvatarImage";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,9 +77,7 @@ export function UserProfile() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center gap-2 px-3 hover:bg-muted/50 transition-colors">
           <Avatar className="w-8 h-8">
-            {profile?.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
-            ) : null}
+            <SignedAvatarImage reference={profile?.avatar_url} alt={profile?.full_name} />
             <AvatarFallback className="bg-gradient-to-br from-[#015D67] to-[#038C8C] text-white font-semibold text-xs">
               {getInitials(profile?.full_name || "U")}
             </AvatarFallback>
@@ -100,9 +99,7 @@ export function UserProfile() {
         <div className="px-3 py-3 space-y-2">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
-              {profile?.avatar_url ? (
-                <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
-              ) : null}
+              <SignedAvatarImage reference={profile?.avatar_url} alt={profile?.full_name} />
               <AvatarFallback className="bg-gradient-to-br from-[#015D67] to-[#038C8C] text-white font-semibold">
                 {getInitials(profile?.full_name || "U")}
               </AvatarFallback>
