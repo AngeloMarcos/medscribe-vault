@@ -139,14 +139,14 @@ export default function Relatorios() {
           <tbody>
             ${profissionalStats?.map(p => `
               <tr>
-                <td>${p.nome}</td>
-                <td>${p.especialidade}</td>
-                <td>${p.total_consultas}</td>
-                <td>${p.finalizados}</td>
-                <td>${p.ausentes}</td>
+                <td>${escapeHtml(p.nome)}</td>
+                <td>${escapeHtml(p.especialidade)}</td>
+                <td>${escapeHtml(p.total_consultas)}</td>
+                <td>${escapeHtml(p.finalizados)}</td>
+                <td>${escapeHtml(p.ausentes)}</td>
                 <td>
                   <span class="badge ${p.taxa_comparecimento >= 80 ? 'badge-success' : p.taxa_comparecimento >= 50 ? 'badge-warning' : 'badge-danger'}">
-                    ${p.taxa_comparecimento}%
+                    ${escapeHtml(p.taxa_comparecimento)}%
                   </span>
                 </td>
               </tr>
