@@ -447,7 +447,7 @@ export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ chil
     } finally {
       setIsLoading(false);
     }
-  }, [prescription, items, deletedItemIds]);
+  }, [prescription, items, deletedItemIds, tenant?.id]);
 
   // Confirm prescription
   const confirmPrescription = useCallback(async () => {
