@@ -73,7 +73,7 @@ export function useProfissionais() {
 export function useCreateProfissional() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<Profissional, 'id' | 'especialidade'>) => {
+    mutationFn: async (data: Omit<Profissional, 'id' | 'especialidade'> & { cpf: string }) => {
       const { error } = await supabase.from('profissionais').insert(data);
       if (error) throw error;
     },
