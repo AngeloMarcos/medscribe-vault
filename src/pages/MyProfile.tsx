@@ -167,18 +167,15 @@ export default function MyProfile() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
-
+      // Bucket is private – store the storage path; UI resolves via signed URL.
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: fileName })
         .eq("id", profile.id);
 
       if (updateError) throw updateError;
 
-      setProfile((prev) => prev ? { ...prev, avatar_url: publicUrl } : null);
+      setProfile((prev) => prev ? { ...prev, avatar_url: fileName } : null);
       toast.success("Foto atualizada com sucesso!");
     } catch (error) {
       console.error("Error uploading avatar:", error);
