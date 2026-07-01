@@ -67,6 +67,14 @@ export default function Relatorios() {
     }
   };
 
+  const escapeHtml = (v: unknown): string =>
+    String(v ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
   const exportToPDF = () => {
     // Criar conteúdo para impressão
     const printWindow = window.open('', '_blank');
