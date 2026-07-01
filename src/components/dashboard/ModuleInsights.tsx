@@ -122,9 +122,7 @@ export function ModuleInsights() {
                 <CardDescription className="text-xs">Este mês</CardDescription>
               </div>
             </div>
-            <Badge variant="outline" asChild className="text-[10px] cursor-pointer">
-              <Link to="/lista-pacientes">Ver</Link>
-            </Badge>
+            <Link to="/lista-pacientes"><Badge variant="outline" className="text-[10px] cursor-pointer hover:bg-muted">Ver</Badge></Link>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
