@@ -47,7 +47,7 @@ export function QuickActions({ consultas, onChamarPaciente }: QuickActionsProps)
           dotColor: "bg-info",
           pulse: false,
         };
-      case "finalizado":
+      case "atendido":
         return {
           label: "Concluído",
           shortLabel: "OK",

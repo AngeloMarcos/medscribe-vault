@@ -23,6 +23,7 @@ import { StatCardWithTrend } from "@/components/dashboard/StatCardWithTrend";
 import { DayProgressBar } from "@/components/dashboard/DayProgressBar";
 import { HourlyChart } from "@/components/dashboard/HourlyChart";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { ModuleInsights } from "@/components/dashboard/ModuleInsights";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { AnimatedNumber } from "@/components/dashboard/AnimatedNumber";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -78,7 +79,7 @@ export default function NewDashboard() {
   const totalConsultas = consultas?.length || 0;
   const aguardandoCount = consultas?.filter((c) => c.status === "aguardando").length || 0;
   const emAtendimentoCount = consultas?.filter((c) => c.status === "em_atendimento").length || 0;
-  const finalizadosCount = consultas?.filter((c) => c.status === "finalizado").length || 0;
+  const finalizadosCount = consultas?.filter((c) => c.status === "atendido").length || 0;
   const ausentesCount = consultas?.filter((c) => c.faltou_paciente).length || 0;
   const pendentesCount = consultas?.filter((c) => c.status === "pendente").length || 0;
 
@@ -284,6 +285,11 @@ export default function NewDashboard() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Insights por módulo */}
+      <div className="opacity-0 animate-slide-up" style={{ animationDelay: "350ms" }}>
+        <ModuleInsights />
       </div>
 
       {/* Charts Section - Stacked em mobile, 2 colunas em tablet+ */}

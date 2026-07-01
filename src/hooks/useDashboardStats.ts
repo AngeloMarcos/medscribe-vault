@@ -75,7 +75,7 @@ export function useDashboardStats() {
         days.push({
           date: format(date, 'dd/MM'),
           total: data?.length || 0,
-          finalizados: data?.filter(c => c.status === 'finalizado').length || 0,
+          finalizados: data?.filter(c => c.status === 'atendido').length || 0,
           ausentes: data?.filter(c => c.faltou_paciente).length || 0,
         });
       }
@@ -117,8 +117,8 @@ export function useDashboardStats() {
       const todayTotal = todayData?.length || 0;
       const yesterdayTotal = yesterdayData?.length || 0;
       
-      const todayFinalizados = todayData?.filter(c => c.status === 'finalizado').length || 0;
-      const yesterdayFinalizados = yesterdayData?.filter(c => c.status === 'finalizado').length || 0;
+      const todayFinalizados = todayData?.filter(c => c.status === 'atendido').length || 0;
+      const yesterdayFinalizados = yesterdayData?.filter(c => c.status === 'atendido').length || 0;
       
       const todayAguardando = todayData?.filter(c => c.status === 'aguardando').length || 0;
       const yesterdayAguardando = yesterdayData?.filter(c => c.status === 'aguardando').length || 0;
@@ -223,7 +223,7 @@ export function useDashboardStats() {
           const hourKey = `${hour}:00`;
           if (hours[hourKey]) {
             hours[hourKey].agendados++;
-            if (c.status === 'finalizado') {
+            if (c.status === 'atendido') {
               hours[hourKey].atendidos++;
             }
           }
@@ -352,7 +352,7 @@ export function useDashboardStats() {
       
       const total = data?.length || 0;
       const ausentes = data?.filter(c => c.faltou_paciente).length || 0;
-      const finalizados = data?.filter(c => c.status === 'finalizado').length || 0;
+      const finalizados = data?.filter(c => c.status === 'atendido').length || 0;
       
       return {
         total,
@@ -422,7 +422,7 @@ export function useReportStats(startDate: string, endDate: string) {
             };
           }
           grouped[prof.id].total_consultas++;
-          if (c.status === 'finalizado') grouped[prof.id].finalizados++;
+          if (c.status === 'atendido') grouped[prof.id].finalizados++;
           if (c.faltou_paciente) grouped[prof.id].ausentes++;
         }
       });
@@ -459,7 +459,7 @@ export function useReportStats(startDate: string, endDate: string) {
       
       return {
         total: data?.length || 0,
-        finalizados: data?.filter(c => c.status === 'finalizado').length || 0,
+        finalizados: data?.filter(c => c.status === 'atendido').length || 0,
         ausentes: data?.filter(c => c.faltou_paciente).length || 0,
         cancelados: data?.filter(c => c.status === 'cancelado').length || 0,
       };
