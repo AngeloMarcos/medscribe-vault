@@ -2733,6 +2733,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_profissional_full: {
+        Args: { _id: string }
+        Returns: {
+          ativo: boolean
+          cpf: string
+          created_at: string
+          email: string
+          equipe_id: string
+          especialidade_id: string
+          id: string
+          nome: string
+          registro_profissional: string
+          telefone: string
+          tipo_registro: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_user_effective_permissions: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: string[]
