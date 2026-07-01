@@ -76,6 +76,7 @@ interface PrescriptionProviderProps {
 }
 
 export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ children }) => {
+  const { tenant } = useTenant();
   const [prescription, setPrescriptionState] = useState<Prescription | null>(null);
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
