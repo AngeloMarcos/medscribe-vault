@@ -76,6 +76,7 @@ interface PrescriptionProviderProps {
 }
 
 export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ children }) => {
+  const { tenant } = useTenant();
   const [prescription, setPrescriptionState] = useState<Prescription | null>(null);
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -333,6 +334,10 @@ export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ chil
       toast.error("Prescrição não inicializada");
       return;
     }
+    if (!tenant?.id) {
+      toast.error("Clínica não carregada. Tente novamente.");
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -372,6 +377,7 @@ export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ chil
             validity_start: prescription.validity_start,
             validity_end: prescription.validity_end,
             status: 'pending',
+            tenant_id: tenant.id,
           });
 
         if (insertError) throw insertError;
@@ -425,6 +431,7 @@ export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ chil
               is_high_risk: item.is_high_risk,
               observation: item.observation,
               item_details: item.item_details as unknown as Record<string, never>,
+              tenant_id: tenant.id,
             }]);
 
           if (insertItemError) throw insertItemError;
@@ -440,7 +447,7 @@ export const PrescriptionProvider: React.FC<PrescriptionProviderProps> = ({ chil
     } finally {
       setIsLoading(false);
     }
-  }, [prescription, items, deletedItemIds]);
+  }, [prescription, items, deletedItemIds, tenant?.id]);
 
   // Confirm prescription
   const confirmPrescription = useCallback(async () => {

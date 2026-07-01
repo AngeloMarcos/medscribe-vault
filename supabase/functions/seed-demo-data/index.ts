@@ -197,14 +197,53 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // ---- AUTH: require a valid JWT ----
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const callerId = userData.user.id;
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { tenant_id, modules, clear_existing } = await req.json();
 
-    if (!tenant_id) {
-      throw new Error('tenant_id is required');
+    if (!tenant_id || typeof tenant_id !== 'string') {
+      return new Response(JSON.stringify({ error: 'tenant_id is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    // ---- AUTHZ: caller must be super admin or owner of the tenant ----
+    const [{ data: isAdmin }, { data: isOwner }] = await Promise.all([
+      supabase.rpc('has_admin_access', { _user_id: callerId }),
+      supabase.rpc('is_tenant_owner', { _user_id: callerId, _tenant_id: tenant_id }),
+    ]);
+    if (!isAdmin && !isOwner) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
 
     console.log(`Starting seed for tenant: ${tenant_id}`);
     console.log(`Modules requested: ${modules?.join(', ') || 'all'}`);
