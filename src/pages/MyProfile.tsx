@@ -274,7 +274,7 @@ export default function MyProfile() {
         <Card className="lg:col-span-1">
           <CardContent className="pt-6 flex flex-col items-center space-y-4">
             <Avatar className="w-32 h-32">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+              <SignedAvatarImage reference={profile?.avatar_url} alt={profile?.full_name} />
               <AvatarFallback className="bg-gradient-to-br from-[#015D67] to-[#038C8C] text-white text-4xl font-semibold">
                 {getInitials(profile?.full_name || "U")}
               </AvatarFallback>
