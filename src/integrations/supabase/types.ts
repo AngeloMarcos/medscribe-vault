@@ -65,7 +65,7 @@ export type Database = {
           paciente_id: string
           profissional_id: string | null
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string | null
         }
         Insert: {
@@ -82,7 +82,7 @@ export type Database = {
           paciente_id: string
           profissional_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string | null
         }
         Update: {
@@ -99,7 +99,7 @@ export type Database = {
           paciente_id?: string
           profissional_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -240,7 +240,7 @@ export type Database = {
           profissional_id: string | null
           relatorio: string | null
           retorno_previsto: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string | null
         }
         Insert: {
@@ -263,7 +263,7 @@ export type Database = {
           profissional_id?: string | null
           relatorio?: string | null
           retorno_previsto?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string | null
         }
         Update: {
@@ -286,7 +286,7 @@ export type Database = {
           profissional_id?: string | null
           relatorio?: string | null
           retorno_previsto?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -335,7 +335,7 @@ export type Database = {
           observacoes: string | null
           paciente_id: string
           profissional_id: string | null
-          tenant_id: string | null
+          tenant_id: string
         }
         Insert: {
           cid_codigo?: string | null
@@ -351,7 +351,7 @@ export type Database = {
           observacoes?: string | null
           paciente_id: string
           profissional_id?: string | null
-          tenant_id?: string | null
+          tenant_id: string
         }
         Update: {
           cid_codigo?: string | null
@@ -367,7 +367,7 @@ export type Database = {
           observacoes?: string | null
           paciente_id?: string
           profissional_id?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -446,7 +446,7 @@ export type Database = {
           profissional_id: string | null
           sala_id: string | null
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           tipo_consulta: string | null
           updated_at: string | null
           zona_id: string | null
@@ -472,7 +472,7 @@ export type Database = {
           profissional_id?: string | null
           sala_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           tipo_consulta?: string | null
           updated_at?: string | null
           zona_id?: string | null
@@ -498,7 +498,7 @@ export type Database = {
           profissional_id?: string | null
           sala_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           tipo_consulta?: string | null
           updated_at?: string | null
           zona_id?: string | null
@@ -577,7 +577,7 @@ export type Database = {
           profissional_destino: string | null
           profissional_id: string | null
           status: string
-          tenant_id: string | null
+          tenant_id: string
           tipo: string
           transporte: string | null
           unidade_destino: string | null
@@ -598,7 +598,7 @@ export type Database = {
           profissional_destino?: string | null
           profissional_id?: string | null
           status?: string
-          tenant_id?: string | null
+          tenant_id: string
           tipo: string
           transporte?: string | null
           unidade_destino?: string | null
@@ -619,7 +619,7 @@ export type Database = {
           profissional_destino?: string | null
           profissional_id?: string | null
           status?: string
-          tenant_id?: string | null
+          tenant_id?: string
           tipo?: string
           transporte?: string | null
           unidade_destino?: string | null
@@ -730,7 +730,7 @@ export type Database = {
           id: string
           motivo: string
           status_anterior: string | null
-          tenant_id: string | null
+          tenant_id: string
           usuario_id: string | null
         }
         Insert: {
@@ -740,7 +740,7 @@ export type Database = {
           id?: string
           motivo: string
           status_anterior?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           usuario_id?: string | null
         }
         Update: {
@@ -750,7 +750,7 @@ export type Database = {
           id?: string
           motivo?: string
           status_anterior?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           usuario_id?: string | null
         }
         Relationships: [
@@ -780,7 +780,7 @@ export type Database = {
           procedimentos_realizados: Json | null
           profissional_id: string | null
           queixa_principal: string | null
-          tenant_id: string | null
+          tenant_id: string
         }
         Insert: {
           agendamento_id?: string | null
@@ -791,7 +791,7 @@ export type Database = {
           procedimentos_realizados?: Json | null
           profissional_id?: string | null
           queixa_principal?: string | null
-          tenant_id?: string | null
+          tenant_id: string
         }
         Update: {
           agendamento_id?: string | null
@@ -802,7 +802,7 @@ export type Database = {
           procedimentos_realizados?: Json | null
           profissional_id?: string | null
           queixa_principal?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -1205,7 +1205,7 @@ export type Database = {
           prescription_item_id: string
           scheduled_time: string
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string | null
         }
         Insert: {
@@ -1218,7 +1218,7 @@ export type Database = {
           prescription_item_id: string
           scheduled_time: string
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string | null
         }
         Update: {
@@ -1231,7 +1231,7 @@ export type Database = {
           prescription_item_id?: string
           scheduled_time?: string
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -1268,7 +1268,7 @@ export type Database = {
           is_critical: boolean | null
           note_type: string | null
           patient_id: string
-          tenant_id: string | null
+          tenant_id: string
         }
         Insert: {
           consulta_id?: string | null
@@ -1279,7 +1279,7 @@ export type Database = {
           is_critical?: boolean | null
           note_type?: string | null
           patient_id: string
-          tenant_id?: string | null
+          tenant_id: string
         }
         Update: {
           consulta_id?: string | null
@@ -1290,7 +1290,7 @@ export type Database = {
           is_critical?: boolean | null
           note_type?: string | null
           patient_id?: string
-          tenant_id?: string | null
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -1330,7 +1330,7 @@ export type Database = {
           sector: string
           started_at: string | null
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
         }
         Insert: {
           attended_by?: string | null
@@ -1345,7 +1345,7 @@ export type Database = {
           sector: string
           started_at?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
         }
         Update: {
           attended_by?: string | null
@@ -1360,7 +1360,7 @@ export type Database = {
           sector?: string
           started_at?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -1399,7 +1399,7 @@ export type Database = {
           patient_id: string
           profissional_id: string | null
           superficie: string | null
-          tenant_id: string | null
+          tenant_id: string
         }
         Insert: {
           acao: string
@@ -1413,7 +1413,7 @@ export type Database = {
           patient_id: string
           profissional_id?: string | null
           superficie?: string | null
-          tenant_id?: string | null
+          tenant_id: string
         }
         Update: {
           acao?: string
@@ -1427,7 +1427,7 @@ export type Database = {
           patient_id?: string
           profissional_id?: string | null
           superficie?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -1638,7 +1638,7 @@ export type Database = {
           prescription_id: string
           sequence_order: number
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string | null
         }
         Insert: {
@@ -1652,7 +1652,7 @@ export type Database = {
           prescription_id: string
           sequence_order?: number
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string | null
         }
         Update: {
@@ -1666,7 +1666,7 @@ export type Database = {
           prescription_id?: string
           sequence_order?: number
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -1697,7 +1697,7 @@ export type Database = {
           patient_id: string
           prescription_date: string
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string | null
           validity_end: string
           validity_start: string
@@ -1712,7 +1712,7 @@ export type Database = {
           patient_id: string
           prescription_date?: string
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string | null
           validity_end?: string
           validity_start?: string
@@ -1727,7 +1727,7 @@ export type Database = {
           patient_id?: string
           prescription_date?: string
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string | null
           validity_end?: string
           validity_start?: string
@@ -2119,7 +2119,7 @@ export type Database = {
           paciente_id: string
           profissional_id: string | null
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           tipo: string | null
         }
         Insert: {
@@ -2130,7 +2130,7 @@ export type Database = {
           paciente_id: string
           profissional_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           tipo?: string | null
         }
         Update: {
@@ -2141,7 +2141,7 @@ export type Database = {
           paciente_id?: string
           profissional_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           tipo?: string | null
         }
         Relationships: [
@@ -2315,7 +2315,7 @@ export type Database = {
           paciente_id: string
           profissional_id: string | null
           status: string | null
-          tenant_id: string | null
+          tenant_id: string
           urgencia: string | null
         }
         Insert: {
@@ -2328,7 +2328,7 @@ export type Database = {
           paciente_id: string
           profissional_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           urgencia?: string | null
         }
         Update: {
@@ -2341,7 +2341,7 @@ export type Database = {
           paciente_id?: string
           profissional_id?: string | null
           status?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           urgencia?: string | null
         }
         Relationships: [
